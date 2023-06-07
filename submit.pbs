@@ -7,13 +7,13 @@
 ########################
  
 ### Set the name of the job, where jobname is a unique name for your job
-#PBS -N proj_T
+#PBS -N test_run
  
 ### Select the shell you would like the script to execute within
 #PBS -S /bin/bash
  
 ### Inform the scheduler of the expected runtime, where walltime=DD:HH:MM:SS
-#PBS -l walltime=00:12:00:00
+#PBS -l walltime=00:00:05:00
  
 ### Inform the scheduler of the number of CPU cores for your job.
 ### This example will allocate four cores on a single node.
@@ -24,8 +24,8 @@
 #PBS -l mem=16gb
  
 ### Set the destination for your program's output.
-#PBS -o logs/proj_T.out
-#PBS -e logs/proj_T.err
+#PBS -o logs/${PBS_JOBNAME}.o${PBS_JOBID}.log
+#PBS -e logs/${PBS_JOBNAME}.e${PBS_JOBID}.err
  
 ### Change working directory to the one it was submitted from
 cd $PBS_O_WORKDIR

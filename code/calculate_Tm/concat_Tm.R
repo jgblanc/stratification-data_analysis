@@ -18,6 +18,7 @@ for (j in 1:length(chrs)) {
     chrs[j] <- as.numeric(args[2+j])
 }
 chrs <- sort(chrs)
+print(chrs)
 
 # Add Tm for each chromosome to each other
 df <- fread(paste0(Tm_prefix, "_", chrs[1], ".txt"))
@@ -29,8 +30,8 @@ for (i in 2:length(chrs)) {
 
 }
 
-#df$latitude <- scale(df$latitude)
-#df$longitude <- scale(df$longitude)
+df$latitude <- scale(df$latitude) * 50
+df$longitude <- scale(df$longitude) * 50 
 
 # Save output
 fwrite(df, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
