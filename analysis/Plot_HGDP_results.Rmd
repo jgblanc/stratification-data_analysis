@@ -35,6 +35,8 @@ ggplot(data = df_melt, aes(x = longitude, y = value)) + geom_point(aes(color = p
 
 ```{r}
 ggplot(data = df, aes(x = longitude, y = latitude, col = population)) + geom_point()
+plot(df$lat, df$latitude)
+plot(df$long, df$longitude)
 ```
 
 
@@ -42,15 +44,21 @@ ggplot(data = df, aes(x = longitude, y = latitude, col = population)) + geom_poi
 betas_uc <- fread("../output/transfer/ukb_imp_all_v3.Height.betas")
 betas_lat <- fread("../output/transfer/ukb_imp_all_v3.Height-Lat.betas")
 betas_PC <- fread("../output/transfer/ukb_imp_all_v3.Height-PCs.betas")
+betas_long <- fread("../output/transfer/ukb_imp_all_v3.Height-Long.betas")
 
 blocks <- betas_PC$block
 
 b_lat <-  subset(betas_lat, betas_lat$block %in% blocks)
-b_uc <- subset(betas_uc, betas_uc$ block %in% blocks)
+b_uc <- subset(betas_uc, betas_uc$block %in% blocks)
+b_long <- subset(betas_long, betas_long$block %in% blocks)
 
 plot(betas_PC$BETA_Strat, b_lat$BETA_Strat)
 plot(betas_PC$BETA_Strat, b_uc$BETA_Strat)
 plot(b_uc$BETA_Strat, b_lat$BETA_Strat)
+
+plot(b_lat$BETA_Strat, b_long$BETA_Strat)
+plot(betas_PC$BETA_Strat, b_long$BETA_Strat)
+plot(b_uc$BETA_Strat, b_long$BETA_Strat)
 ```
 
 

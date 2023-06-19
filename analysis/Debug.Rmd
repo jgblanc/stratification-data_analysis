@@ -14,6 +14,24 @@ library(pgenlibr)
 
 # Debug Pipeline 
 
+```{r}
+covars <- fread("~/Downloads/covars.txt.gz")
+plot(covars$latitude, covars$PC1)
+plot(covars$longitude, covars$PC1)
+
+plot(scale(covars$latitude) * 50, covars$PC2)
+plot(covars$longitude, covars$PC2)
+```
+
+```{r}
+mod <- lm(covars$latitude ~ covars$PC1)
+summary(mod)
+
+var(covars$PC40)
+var(scale(covars$latitude) * 50)
+```
+
+
 ## Check PCs 
 
 ```{r}

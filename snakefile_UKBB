@@ -1,0 +1,38 @@
+# Snakefile to run HGDP (full data) / UKBB  data analysis
+CHR =[]
+for i in range(22, 23):
+  CHR.append(str(i))
+ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
+
+rule all:
+    input:
+        expand("{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3", root=ROOT, chr=CHR, dataset = DATASET, pval=PVAL)
+
+
+## UKBB Genotype data processing
+
+rule UKBB_freq:
+    input:
+        bgen="/gpfs/data/pierce-lab/uk-biobank-genotypes/ukb_imp_chr{chr}_v3.bgen",
+        sample="/gpfs/data/berg-lab/data/ukbb/ukb22828_c22_b0_v3_s487192.sample"
+    output:
+        psam="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam",
+	      pvar="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar",
+	      pgen="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen"
+    params:
+        prefix="{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3"
+    shell:
+        """
+	      plink2 --bgen {input.bgen} ref-first \
+	      --sample {input.sample} \
+	      --keep {input.pheno_ID} \
+	      --rm-dup exclude-all \
+	      --snps-only \
+	      --max-alleles 2 \
+	      --set-all-var-ids @:# \
+	      --freq 'zs'
+	      --threads 20 \
+	      --memory 38000 \
+	      --out {params.prefix}
+	      """
+
