@@ -55,12 +55,3 @@ rule UKBB_freq:
         --out {params.prefix_out}
         """
 
-rule UKBB_snps:
-    input:
-        freq="{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3.afreq"
-    output:
-        snps="{root}/data/ukbb/variants/ukb_{chr}.snps"
-    shell:
-        """
-        cut -f1,2,3,4  {input.freq} > {output}
-        """

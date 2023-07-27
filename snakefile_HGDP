@@ -1,0 +1,113 @@
+# Snakefile to run HGDP (full data) / UKBB  data analysis
+DATASET=["EUR"]
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
+ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
+
+def get_params(x):
+  out = x.split("_")[1]
+  return out
+
+rule all:
+    input:
+        expand("{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam", root=ROOT, chr=CHR, dataset = DATASET, pval=PVAL)
+
+
+
+## HGDP genotype data processing
+
+rule get_EUR_sample_list:
+    input:
+        "{root}/data/hgdp/hgdp_wgs.20190516.metadata.txt"
+    output:
+        "{root}/data/hgdp/hgdp_wgs.20190516.EUR_samples.txt"
+    shell:
+        """
+        Rscript code/genotypes/get_EUR_samples.R {input} {output}
+        """
+
+rule HGDP_make_plink2_EUR:
+    input:
+        psam="/gpfs/data/berg-lab/data/HGDP/plink2-files-hg19/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="/gpfs/data/berg-lab/data/HGDP/plink2-files-hg19/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="/gpfs/data/berg-lab/data/HGDP/plink2-files-hg19/hgdp_wgs.20190516.full.chr{chr}.pgen",
+        samples="{root}/data/hgdp/hgdp_wgs.20190516.EUR_samples.txt"
+    output:
+        psam="{root}/data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="{root}/data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="{root}/data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}.pgen"
+    params:
+        prefix_out="{root}/data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}",
+	      prefix_in="/gpfs/data/berg-lab/data/HGDP/plink2-files-hg19/hgdp_wgs.20190516.full.chr{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --maf 0.01 \
+        --keep {input.samples} \
+        --rm-dup exclude-all \
+        --snps-only \
+        --max-alleles 2 \
+        --make-pgen \
+        --set-all-var-ids @:# \
+        --threads 8 \
+        --memory 38000 \l
+        --out {params.prefix_out}
+        """
+
+rule HGDP_freq:
+    input:
+        psam="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+    output:
+        freq="{root}/data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq"
+    params:
+        prefix_in="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="{root}/data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --freq \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
+        """
+
+## Get overlapping set of final SNPS
+
+# Right now set for 1%
+rule get_overlapping_snps:
+    input:
+        freq_hgdp="{root}/data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq",
+	      freq_ukbb="{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3.afreq"
+    output:
+        "{root}/data/hgdp/variants/{dataset}/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/genotypes/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
+        """
+
+## Recode HGDP with UKBB ref/alt alleles and save to new directory
+
+rule HGDP_recode:
+    input:
+        psam="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
+      	snp_list="{root}/data/hgdp/variants/{dataset}/overlappingSNPs_chr{chr}.txt"
+    output:
+        psam="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+    params:
+        prefix_in="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --extract {input.snp_list} \
+	      --ref-allele {input.snp_list} \
+	      --make-pgen \
+        --out {params.prefix_out}
+        """
