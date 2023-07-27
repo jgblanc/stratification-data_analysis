@@ -23,7 +23,7 @@ eur <- pops %>% filter(region == "EUROPE")
 
 # Get list of subpops and save list of sample IDs
 subpops <- unique(eur$population)
-for (i in length(subpops)) {
+for (i in 1:length(subpops)) {
 
   # Filter IDs
   df <- eur %>% filter(population == subpops[i]) %>% select(sample)
@@ -32,6 +32,7 @@ for (i in length(subpops)) {
 
   # Write output
   outfile <- paste0(outpre, subpops[i], ".txt")
+  print(outfile)
   fwrite(df, outfile,row.names = F, col.names = T, quote = F, sep = "\t")
 
 }

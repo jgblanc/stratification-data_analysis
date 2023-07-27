@@ -119,7 +119,7 @@ rule get_EUR_subpop_list:
     input:
         "{root}/data/hgdp/hgdp_wgs.20190516.metadata.txt"
     output:
-        expand("{root}/data/hgdp/popIDs/{dataset}/{subpops}.txt", subpops=SUBPOPS)
+        expand("{{root}}/data/hgdp/popIDs/{{dataset}}/{subpops}.txt", subpops=SUBPOPS)
     params:
         prefix_out="{root}/data/hgdp/popIDs/{dataset}/"
     shell:
