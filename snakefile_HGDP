@@ -1,5 +1,6 @@
 # Snakefile to run HGDP (full data) / UKBB  data analysis
 DATASET=["EUR"]
+SUBPOPS=["French", "Sardinian", "Orcadian", "Russian", "BergamoItalian", "Tuscan", "Basque", "Adygei"]
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
@@ -11,7 +12,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam", root=ROOT, chr=CHR, dataset = DATASET)
+        expand("{root}/data/hgdp/popIDs/{dataset}/{subpops}.txt", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS)
 
 
 
@@ -24,7 +25,7 @@ rule get_EUR_sample_list:
         "{root}/data/hgdp/hgdp_wgs.20190516.EUR_samples.txt"
     shell:
         """
-        Rscript code/genotypes/get_EUR_samples.R {input} {output}
+        Rscript code/hgdp/get_EUR_samples.R {input} {output}
         """
 
 rule HGDP_make_plink2_EUR:
@@ -110,4 +111,18 @@ rule HGDP_recode:
 	      --ref-allele {input.snp_list} \
 	      --make-pgen \
         --out {params.prefix_out}
+        """
+
+## Get list of all population IDs
+
+rule get_EUR_subpop_list:
+    input:
+        "{root}/data/hgdp/hgdp_wgs.20190516.metadata.txt"
+    output:
+        expand("{root}/data/hgdp/popIDs/{dataset}/{subpops}.txt", subpops=SUBPOPS)
+    params:
+        prefix_out="{root}/data/hgdp/popIDs/{dataset}/"
+    shell:
+        """
+        Rscript code/hgdp/get_EUR_subpop_samples.R {input} {params.prefix_out}
         """
