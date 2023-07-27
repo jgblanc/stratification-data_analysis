@@ -18,24 +18,24 @@ rule UKBB_begen_to_plink2:
         sample="/gpfs/data/berg-lab/data/ukbb/ukb22828_c22_b0_v3_s487192.sample"
     output:
         psam="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam",
-	pvar="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar",
-	pgen="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen"
+	      pvar="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar",
+	      pgen="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen"
     params:
         prefix="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
     shell:
         """
-	plink2 --bgen {input.bgen} ref-first \
-	--sample {input.sample} \
-	--maf 0.01 \
-	--rm-dup exclude-all \
-	--snps-only \
-	--max-alleles 2 \
-	--make-pgen \
-	--set-all-var-ids @:# \
-	--threads 20 \
-	--memory 38000 \
-	--out {params.prefix}
-	"""
+	      plink2 --bgen {input.bgen} ref-first \
+	      --sample {input.sample} \
+	      --maf 0.01 \
+	      --rm-dup exclude-all \
+	      --snps-only \
+	      --max-alleles 2 \
+	      --make-pgen \
+	      --set-all-var-ids @:# \
+	      --threads 20 \
+	      --memory 38000 \
+	      --out {params.prefix}
+	      """
 
 rule UKBB_freq:
     input:
@@ -46,7 +46,7 @@ rule UKBB_freq:
         freq="{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3.afreq"
     params:
         prefix_out="{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3",
-	prefix_in="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
+	      prefix_in="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
     shell:
         """
         plink2 --pfile {params.prefix_in} --freq \
