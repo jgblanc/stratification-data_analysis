@@ -6,7 +6,7 @@ ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 
 rule all:
     input:
-        expand("{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3.afreq", chr=CHR, root=ROOT)
+        expand("{root}/data/ukbb/variants/ukb_{chr}.snps", chr=CHR, root=ROOT)
 
 
 ## UKBB Genotype data processing
@@ -53,4 +53,14 @@ rule UKBB_freq:
         --threads 8 \
         --memory 38000 \
         --out {params.prefix_out}
+        """
+
+rule UKBB_snps:
+    input:
+        freq="{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3.afreq"
+    output:
+        snps="{root}/data/ukbb/variants/ukb_{chr}.snps"
+    shell:
+        """
+        cut -f1,2,3,4  {input.freq} > {output}
         """
