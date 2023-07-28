@@ -18,13 +18,13 @@ outfile = args[5]
 
 # Read in GWAS individuals
 gwasID <- fread(paste0(gwas_prefix, ".psam"))
-head(gwasID)
 colnames(gwasID) <- c("FID", "IID",  "Sex")
 
 # Read in and format r
 r <- fread(r_file)
 r <- r %>% dplyr::select("ID", "ALT", "r")
-colnames(r) <- colnames("ID", "A1", "BETA")
+colnames(r) <- c("ID", "A1", "BETA")
+print(head(r))
 
 # Save r to use as scoring weights
 fwrite(r, paste0(out_prefix, "xt_temp.glm.linear"), sep = "\t")

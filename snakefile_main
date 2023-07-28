@@ -18,7 +18,7 @@ rule compute_FGr_chr:
     input:
         r="{root}/data/{dataset}/r/{subdataset}/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt
+        overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt"
     output:
         "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}_{chr}.txt"
     params:
