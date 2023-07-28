@@ -8,29 +8,26 @@ SUBDATASET = ["EUR"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 
-#rule all:
-#    input:
-#        expand("{root}/data/ukbb-hgdp/pga_test/{dataset}/{pval}/Qx.txt", root=ROOT, chr=CHR, dataset = DATASET, pval=PVAL)
-
+rule all:
+    input:
+        expand("{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}_{chr}.txt", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS)
 
 ## Compute FGr
 
-#rule compute_FGr_chr:
-#    input:
-#        r="{root}/data/{dataset}/r/{subdataset}/{constrasts}_chr{chr}.rvec",
-#        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
-#        overlap_snps="{root}/data/ukbb-hgdp/variants/{dataset}/snps_chr{chr}.txt"
-#    output:
-#        "{root}/data/ukbb-hgdp/calculate_Tm/{dataset}/Tm_{chr}.txt"
-#    params:
-#        tp_prefix = "{root}/data/ukbb-hgdp/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
-#        gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3",
-#        tvec_prefix = "{root}/data/ukbb-hgdp/calculate_Tm/{dataset}/Tvec",
-#        out_prefix = "{root}/data/ukbb-hgdp/calculate_Tm/{dataset}/"
-#    shell:
-#        """
-#        Rscript code/calculate_Tm/project_Tvec_chr.R {params.tp_prefix} {params.gp_prefix} {params.tvec_prefix} {params.out_prefix} {input.overlap_snps} {output}
-#        """
+rule compute_FGr_chr:
+    input:
+        r="{root}/data/{dataset}/r/{subdataset}/{contrasts}_chr{chr}.rvec",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
+        overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt
+    output:
+        "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}_{chr}.txt"
+    params:
+        gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3",
+        out_prefix = "{root}/output/calculate_FGr/{dataset}/{subdataset}/"
+    shell:
+        """
+        Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output}
+        """
 
 # Add together individal chromosomes
 #rule concat_chr_Tm:
