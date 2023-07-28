@@ -11,7 +11,7 @@ suppressWarnings(suppressMessages({
   library(tidyr)
 }))
 
-spnum = args[1]
+spnum = as.numeric(args[1])
 print(spnum)
 
 for (i in 2:(spnum+1)) {
