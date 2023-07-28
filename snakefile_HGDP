@@ -13,7 +13,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("{root}/data/hgdp/r/{dataset}/Tuscan-Sardinian_chr{chr}.rvec", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS)
+        expand("{root}/data/hgdp/r/{dataset}/Tuscan-Basque_chr{chr}.rvec", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS)
 
 
 
@@ -157,7 +157,7 @@ rule get_all_r:
     output:
         "{root}/data/hgdp/r/{dataset}/Tuscan-Sardinian_chr{chr}.rvec"
     params:
-        spnum = SPNUM
+        spnum = SPNUM,
         prefix_out = "{root}/data/hgdp/r/{dataset}/"
     shell:
         """

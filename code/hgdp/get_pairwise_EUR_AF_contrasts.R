@@ -29,23 +29,24 @@ for (i in 1:nrow(pw_comb)) {
 
   # Compute r
   r <- df1$ALT_FREQS - df1$ALT_FREQS
+  print(head(r))
 
   # Set up output dataframe
   out <- df1[,1:4]
   out$r <- r
 
   # Get subpop names
-  nm1 <- strsplit(strsplit(args[id1+1], "/")[[1]][5], "_")[[1]][1]
-  nm2 <- strsplit(strsplit(args[id2+1], "/")[[1]][5], "_")[[1]][1]
+  nm1 <- strsplit(strsplit(args[id1+1], "/")[[1]][11], "_")[[1]][1]
+  nm2 <- strsplit(strsplit(args[id2+1], "/")[[1]][11], "_")[[1]][1]
 
   # Get chromosome number
-  chr <- strsplit(strsplit(strsplit(x, "/")[[1]][5], "_")[[1]][2], ".afreq")[[1]][1]
+  chr <- strsplit(strsplit(strsplit(args[id1+1], "/")[[1]][11], "_")[[1]][2], ".afreq")[[1]][1]
 
 
   # Save output
   outfile <- paste0(out_pre, nm1, "-", nm2, "_", chr, ".rvec")
   print(outfile)
-  fwrite(df, outfile,row.names = F, col.names = T, quote = F, sep = "\t")
+  fwrite(out, outfile,row.names = F, col.names = T, quote = F, sep = "\t")
 
 }
 
