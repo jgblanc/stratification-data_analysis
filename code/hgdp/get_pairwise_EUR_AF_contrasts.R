@@ -30,7 +30,7 @@ for (i in 1:nrow(pw_comb)) {
   df2 <- fread(args[id2+1])
 
   # Compute r
-  r <- df1$ALT_FREQS - df1$ALT_FREQS
+  r <- df1$ALT_FREQS - df2$ALT_FREQS
   print(head(r))
 
   # Set up output dataframe
