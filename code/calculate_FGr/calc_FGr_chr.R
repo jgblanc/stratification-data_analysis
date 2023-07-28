@@ -27,18 +27,18 @@ colnames(r) <- c("ID", "A1", "BETA")
 print(head(r))
 
 # Save r to use as scoring weights
-fwrite(r, paste0(out_prefix, "xt_temp.glm.linear"), sep = "\t")
+fwrite(r, paste0(out_prefix, ".xt_temp.glm.linear"), sep = "\t")
 
 # Compute Gr
 cmd_b <- paste("sh code/calculate_FGr/GWAS_score.sh",
                gwas_prefix,
-               paste0(out_prefix, "xt_temp.glm.linear"),
-               paste0(out_prefix,"gxt_tmp" ), snps_file, sep = " ")
+               paste0(out_prefix, ".xt_temp.glm.linear"),
+               paste0(out_prefix,".gxt_tmp"), snps_file, sep = " ")
 print(cmd_b)
 system(cmd_b)
 
 # Read in FGr
-FGr = fread(paste0(out_prefix, "gxt_tmp.sscore"))
+FGr = fread(paste0(out_prefix, ".gxt_tmp.sscore"))
 FGr = as.matrix(FGr$BETA_SUM)
 
 # Format output
@@ -46,3 +46,6 @@ gwasID$FGr <- FGr
 
 # Save output
 fwrite(gwasID, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
+
+# Remove tmp files
+cmd <- paste("rm", paste0(out_prefix, ".xt_temp.glm.linear"),  paste0(out_prefix,".gxt_tmp" ), sep = " ")
