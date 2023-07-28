@@ -1,6 +1,7 @@
 # Snakefile to run HGDP (full data) / UKBB  data analysis
 DATASET=["EUR"]
 SUBPOPS=["French", "Sardinian", "Orcadian", "Russian", "BergamoItalian", "Tuscan", "Basque", "Adygei"]
+SPNUM = 8s
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
