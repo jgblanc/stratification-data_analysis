@@ -158,7 +158,8 @@ rule get_all_r:
         "{root}/data/hgdp/r/{dataset}/Tuscan-Sardinian_chr{chr}.rvec"
     params:
         spnum = SPNUM
+        prefix_out = "{root}/data/hgdp/r/{dataset}/"
     shell:
         """
-        Rscript code/hgdp/get_pairwise_EUR_AF_contrasts.R {params.spnum} {input}
+        Rscript code/hgdp/get_pairwise_EUR_AF_contrasts.R {params.spnum} {input} {params.prefix_out}
         """
