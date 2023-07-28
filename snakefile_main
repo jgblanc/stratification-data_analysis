@@ -3,11 +3,10 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
-CONSTRASTS = ["Orcadian-Basque"]
 DATASET = ["hgdp"]
 SUBDATASET = ["EUR"]
-TMP = [f.split(".")[0] for f in os.listdir("data/data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
-print(TMP)
+TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
+CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 
 #rule all:
 #    input:
