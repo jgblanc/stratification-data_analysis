@@ -134,12 +134,12 @@ rule get_subpop_AF:
     input:
         psam="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
         pvar="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
-        pgen="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+        pgen="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
         IDs="{root}/data/hgdp/popIDs/{dataset}/{subpops}.txt"
     output:
         "{root}/data/hgdp/popAF/{dataset}/{subpops}_chr{chr}.afreq"
     params:
-        prefix_in="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
+        prefix_in="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
         prefix_out="{root}/data/hgdp/popAF/{dataset}/{subpops}_chr{chr}"
     shell:
         """
