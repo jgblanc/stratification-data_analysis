@@ -12,7 +12,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("{root}/data/hgdp/popIDs/{dataset}/{subpops}.txt", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS)
+        expand("{root}/data/hgdp/popAF/{dataset}/{subpops}_chr{chr}.afreq", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS)
 
 
 
@@ -126,3 +126,25 @@ rule get_EUR_subpop_list:
         """
         Rscript code/hgdp/get_EUR_subpop_samples.R {input} {params.prefix_out}
         """
+
+## Get population specifc allele frequencies
+
+rule get_subpop_AF:
+    input:
+        psam="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+        IDs="{root}/data/hgdp/popIDs/{dataset}/{subpops}.txt"
+    output:
+        "{root}/data/hgdp/popAF/{dataset}/{subpops}_chr{chr}.afreq"
+    params:
+        prefix_in="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
+        prefix_out="{root}/data/hgdp/popAF/{dataset}/{subpops}_chr{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --keep {input.IDs} \
+        --freq \
+        --out {params.prefix_out}
+        """
+
