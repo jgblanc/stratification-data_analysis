@@ -12,7 +12,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("{root}/data/hgdp/popAF/{dataset}/{subpops}_chr{chr}.afreq", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS)
+        expand("{root}/data/hgdp/r/{dataset}/Tuscan-Sardinian_chr{chr}.rvec", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS)
 
 
 
@@ -133,12 +133,12 @@ rule get_subpop_AF:
     input:
         psam="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
         pvar="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
-        pgen="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
+        pgen="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
         IDs="{root}/data/hgdp/popIDs/{dataset}/{subpops}.txt"
     output:
         "{root}/data/hgdp/popAF/{dataset}/{subpops}_chr{chr}.afreq"
     params:
-        prefix_in="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_in="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
         prefix_out="{root}/data/hgdp/popAF/{dataset}/{subpops}_chr{chr}"
     shell:
         """
@@ -148,3 +148,14 @@ rule get_subpop_AF:
         --out {params.prefix_out}
         """
 
+## Get all AF contrasts
+
+rule get_all_r:
+    input:
+        expand("{{root}}/data/hgdp/popAF/{{dataset}}/{subpops}_chr{{chr}}.afreq", subpops=SUBPOPS)
+    output:
+        "{root}/data/hgdp/r/{dataset}/Tuscan-Sardinian_chr{chr}.rvec"
+    shell:
+        """
+        Rscript code/hgdp/get_pairwise_EUR_AF_contrasts.R {input}
+        """
