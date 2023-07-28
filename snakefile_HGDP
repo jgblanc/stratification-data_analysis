@@ -1,7 +1,7 @@
 # Snakefile to run HGDP (full data) / UKBB  data analysis
 DATASET=["EUR"]
 SUBPOPS=["French", "Sardinian", "Orcadian", "Russian", "BergamoItalian", "Tuscan", "Basque", "Adygei"]
-SPNUM = 8s
+SPNUM = len(SUBPOPS)
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
@@ -156,7 +156,9 @@ rule get_all_r:
         expand("{{root}}/data/hgdp/popAF/{{dataset}}/{subpops}_chr{{chr}}.afreq", subpops=SUBPOPS)
     output:
         "{root}/data/hgdp/r/{dataset}/Tuscan-Sardinian_chr{chr}.rvec"
+    params:
+        spnum = SPNUM
     shell:
         """
-        Rscript code/hgdp/get_pairwise_EUR_AF_contrasts.R {input}
+        Rscript code/hgdp/get_pairwise_EUR_AF_contrasts.R {params.spnum} {input}
         """

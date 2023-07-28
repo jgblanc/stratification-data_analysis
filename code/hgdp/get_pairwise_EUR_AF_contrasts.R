@@ -3,7 +3,7 @@
 
 args=commandArgs(TRUE)
 
-if(length(args)<1){stop("Rscript get_pairwise_EUR_AF_contrasts.R <input>")}
+if(length(args)<1){stop("Rscript get_pairwise_EUR_AF_contrasts.R <number of inputs> <input files>")}
 
 suppressWarnings(suppressMessages({
   library(data.table)
@@ -11,9 +11,14 @@ suppressWarnings(suppressMessages({
   library(tidyr)
 }))
 
-infiles = args[1]
-print(infiles)
+spnum = args[1]
+print(spnum)
 
+for (i in 2:(spnum+1)) {
+
+  print(args[i])
+
+}
 
 
 
