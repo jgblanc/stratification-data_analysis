@@ -7,5 +7,5 @@ overlap_snps=$4
 plink2 \
   --pfile $pfile_path \
   --extract $overlap_snps \
-  --score $beta_path header-read variance-standardize cols=dosagesum,scoresums \
+  --score $beta_path center header-read cols=dosagesum,scoresums \
   --out $outfile

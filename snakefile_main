@@ -1,12 +1,13 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 DATASET = ["hgdp"]
 SUBDATASET = ["EUR"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
-CONTRASTS = [s.rstrip("_chr9") for s in TMP]
+#CONTRASTS = [s.rstrip("_chr9") for s in TMP]
+CONTRASTS = ["French-Sardinian"]
 
 rule all:
     input:

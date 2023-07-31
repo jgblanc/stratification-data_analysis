@@ -19,12 +19,29 @@ outfile = args[5]
 # Read in GWAS individuals
 gwasID <- fread(paste0(gwas_prefix, ".psam"))
 colnames(gwasID) <- c("FID", "IID",  "Sex")
+m <- nrow(gwasID)
 
 # Read in and format r
 r <- fread(r_file)
 r <- r %>% dplyr::select("ID", "ALT", "r")
 colnames(r) <- c("ID", "A1", "BETA")
 print(head(r))
+
+# Compute GWAS genotype counts
+outfile_count <- paste0(out_prefix, "G_count")
+cmd_count <- paste("sh code/calculate_FGr/compute_GWAScount.sh", gwas_prefix, outfile_count, sep = " ")
+system(cmd_count)
+
+# Calculate variance of GWAS panel genotypes from counts
+count_plink <- fread(paste0(out_prefix, "G_count.gcount"))
+nOBS <- (count_plink$HOM_REF_CT + count_plink$HET_REF_ALT_CTS + count_plink$TWO_ALT_GENO_CTS)
+counts <- (count_plink$HOM_REF_CT * 0) + (count_plink$HET_REF_ALT_CTS * 1) + (count_plink$TWO_ALT_GENO_CTS * 2)
+mean_gc <- counts / nOBS
+length_mc_genos <- (count_plink$HOM_REF_CT * (-1 * mean_gc)^2) + (count_plink$HET_REF_ALT_CTS * (1 - mean_gc)^2) +  (count_plink$TWO_ALT_GENO_CTS * (2 - mean_gc)^2)
+length_mc_genos <- length_mc_genos * (1/(m-1))
+
+#  Re-write .linear file with correct betas
+r$BETA <- r$BETA * (1/length_mc_genos)
 
 # Save r to use as scoring weights
 fwrite(r, paste0(out_prefix, ".xt_temp.glm.linear"), sep = "\t")
@@ -48,5 +65,5 @@ gwasID$FGr <- FGr
 fwrite(gwasID, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Remove tmp files
-cmd <- paste("rm", paste0(out_prefix, ".xt_temp.glm.linear*"),  paste0(out_prefix,".gxt_tmp*" ), sep = " ")
+cmd <- paste("rm", paste0(out_prefix, ".xt_temp.glm.linear*"),  paste0(out_prefix,".gxt_tmp*" ), paste0(out_prefix,"G_count*" ), sep = " ")
 system(cmd)
