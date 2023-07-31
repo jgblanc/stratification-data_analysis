@@ -7,7 +7,7 @@
 ########################
  
 ### Set the name of the job, where jobname is a unique name for your job
-#PBS -N test_run
+#PBS -N computFGr
  
 ### Select the shell you would like the script to execute within
 #PBS -S /bin/bash
@@ -21,7 +21,7 @@
  
 ### Inform the scheduler of the amount of memory you expect to use.
 ### Use units of 'b', 'kb', 'mb', or 'gb'
-#PBS -l mem=8gb
+#PBS -l mem=2gb
  
 ### Set the destination for your program's output.
 #PBS -o logs/${PBS_JOBNAME}.o${PBS_JOBID}.log

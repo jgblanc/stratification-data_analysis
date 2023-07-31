@@ -48,4 +48,5 @@ gwasID$FGr <- FGr
 fwrite(gwasID, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Remove tmp files
-cmd <- paste("rm", paste0(out_prefix, ".xt_temp.glm.linear"),  paste0(out_prefix,".gxt_tmp" ), sep = " ")
+cmd <- paste("rm", paste0(out_prefix, ".xt_temp.glm.linear*"),  paste0(out_prefix,".gxt_tmp*" ), sep = " ")
+system(cmd)
