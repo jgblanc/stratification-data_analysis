@@ -29,7 +29,8 @@ print(head(r))
 
 # Compute GWAS genotype counts
 outfile_count <- paste0(out_prefix, "G_count")
-cmd_count <- paste("sh code/calculate_FGr/compute_GWAScount.sh", gwas_prefix, outfile_count, sep = " ")
+cmd_count <- paste("sh code/calculate_FGr/compute_GWAS_count.sh", gwas_prefix, outfile_count, snps_file, sep = " ")
+print(cmd_count)
 system(cmd_count)
 
 # Calculate variance of GWAS panel genotypes from counts

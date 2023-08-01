@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =["22"]
-#for i in range(1, 23):
-#  CHR.append(str(i))
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
 ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 DATASET = ["hgdp"]
 SUBDATASET = ["EUR"]
@@ -22,6 +22,9 @@ rule compute_FGr_chr:
         overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt"
     output:
         "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}_{chr}.txt"
+    resources:
+        mem_mb=2000,
+	walltime="00:03:00:00"
     params:
         gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3",
         out_prefix = "{root}/output/calculate_FGr/{dataset}/{subdataset}/{contrasts}_{chr}"
