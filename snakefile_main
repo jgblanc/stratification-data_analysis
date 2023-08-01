@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =[22]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 DATASET = ["hgdp"]
 SUBDATASET = ["EUR"]
@@ -9,9 +9,16 @@ TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_c
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 CONTRASTS = ["French-Sardinian"]
 
+
+def get_chr_num(x):
+  out = int(x)
+  return out
+
+
 rule all:
     input:
-        expand("{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}_{chr}.txt", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS)
+        expand("{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS)
+
 
 ## Compute FGr
 
@@ -33,17 +40,18 @@ rule compute_FGr_chr:
         Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output}
         """
 
-# Add together individal chromosomes
-#rule concat_chr_Tm:
-#    input:
-#        expand("{root}/data/ukbb-hgdp/calculate_Tm/{dataset}/Tm_{chr}.txt", chr = CHR, root=ROOT, dataset = DATASET)
-#    output:
-#        "{root}/data/ukbb-hgdp/calculate_Tm/{dataset}/TGWAS.txt"
-#    params:
-#        chromosomes = CHR
-#    shell:
-#        """
-#        Rscript code/calculate_Tm/concat_Tm.R {wildcards.root}/data/ukbb-hgdp/calculate_Tm/{wildcards.dataset}/Tm {output} #{params.chromosomes}
-#        """
+# Add together individal chromosomes LOCO
+rule concat_chr_Tm:
+    input:
+        expand("{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}_{chr}.txt, chr = CHR, root=ROOT, dataset = DATASET, contrasts=CONSTRASTS, subdataset=SUBDATASET)
+    output:
+        "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
+    params:
+        chrNum = lambda wildcards: get_chr_num(wildcards.rep)
+        prefix_in = "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}"
+    shell:
+        """
+        Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
+        """
 
 
