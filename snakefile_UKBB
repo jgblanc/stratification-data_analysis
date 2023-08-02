@@ -61,7 +61,7 @@ rule list_all_Chr:
     input:
         psam=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam", chr=CHR),
         pvar=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar", chr=CHR),
-        pgen=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen", chr=CHR")
+        pgen=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen", chr=CHR)
     output:
         "{root}/data/ukbb/chr_list.txt"
     params:
