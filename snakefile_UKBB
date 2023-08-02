@@ -6,7 +6,7 @@ ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 
 rule all:
     input:
-        expand("{root}/data/ukbb/variants/ukb_{chr}.snps", chr=CHR, root=ROOT)
+        expand("{root}/data/ukbb/chr_list.txt", chr=CHR, root=ROOT)
 
 
 ## UKBB Genotype data processing
@@ -53,5 +53,21 @@ rule UKBB_freq:
         --threads 8 \
         --memory 38000 \
         --out {params.prefix_out}
+        """
+
+## Prep files for fastGWA
+
+rule list_all_Chr:
+    input:
+        psam=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam", chr=CHR),
+        pvar=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar", chr=CHR),
+        pgen=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen", chr=CHR")
+    output:
+        "{root}/data/ukbb/chr_list.txt"
+    params:
+	      prefix_in="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr"
+    shell:
+        """
+        sh code/genotypes/list_chr.sh {params.prefix_in} {output}
         """
 
