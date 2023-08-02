@@ -55,5 +55,18 @@ rule concat_chr_Tm:
         Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
         """
 
+## Run GWAS
 
+rule make_sparse_grm:
+    input:
+        chrList = "{root}/data/ukbb/chr_list.txt",
+    output:
+        "{root}/output/Run_GWAS/{dataset}/{subdataset}/sp_grm.grm.id",
+        "{root}/output/Run_GWAS/{dataset}/{subdataset}/sp_grm.grm.sp"
+    params:
+        prefix_out = "{root}/output/Run_GWAS/{dataset}/{subdataset}/sp_grm"
+    shell:
+        """
+        ./bin/gcta64 --mpfile {input} --make-grm --sparse-cutoff 0.05 --thread-num 10 --out {params.prefix_out}
+        """
 

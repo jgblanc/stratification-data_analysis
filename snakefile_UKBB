@@ -1,12 +1,12 @@
 # Snakefile to run HGDP (full data) / UKBB  data analysis
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 
 rule all:
     input:
-        expand("{root}/data/ukbb/chr_list.txt", chr=CHR, root=ROOT)
+        expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam", chr=CHR, root=ROOT)
 
 
 ## UKBB Genotype data processing
@@ -26,7 +26,10 @@ rule UKBB_begen_to_plink2:
         """
 	      plink2 --bgen {input.bgen} ref-first \
 	      --sample {input.sample} \
-	      --maf 0.01 \
+	      --mind 0.1 \
+        --geno 0.01 \
+        --maf 0.01 \
+        --hwe 1e-15 \
 	      --rm-dup exclude-all \
 	      --snps-only \
 	      --max-alleles 2 \
@@ -56,6 +59,26 @@ rule UKBB_freq:
         """
 
 ## Prep files for fastGWA
+
+rule get_GRM_pruned_snps:
+    input:
+        psam="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam",
+	      pvar="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar",
+	      pgen="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen"
+    output:
+        snplist="/scratch/jgblanc/ukbb/plink2-files-grm/ukb_imp_chr{chr}_v3.snplist"
+    params:
+        prefix_out="/scratch/jgblanc/ukbb/plink2-files-grm/ukb_imp_chr{chr}_v3",
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
+    shell:
+        """
+	      plink2 --pfile {params.prefix_in}
+	      --write-snplist \
+        --indep-pairwise 1000 100 0.9 \
+	      --threads 20 \
+	      --memory 38000 \
+	      --out {params.prefix}
+	      """
 
 rule list_all_Chr:
     input:
