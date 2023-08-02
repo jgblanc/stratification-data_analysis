@@ -12,4 +12,5 @@ analysis/site_libs
 logs/*
 data/*
 output/*
+bin/*
 .snakemake/*
