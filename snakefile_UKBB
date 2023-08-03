@@ -27,9 +27,8 @@ rule UKBB_begen_to_plink2:
 	      plink2 --bgen {input.bgen} ref-first \
 	      --sample {input.sample} \
 	      --mind 0.1 \
-        --geno 0.01 \
+        --geno 0.1 \
         --maf 0.01 \
-        --hwe 1e-15 \
 	      --rm-dup exclude-all \
 	      --snps-only \
 	      --max-alleles 2 \

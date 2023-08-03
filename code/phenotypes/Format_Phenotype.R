@@ -14,7 +14,7 @@ out_file = args[2]
 
 # Read in phenotypes
 df <- fread(pheno_file)
-#df <-fread("~/stratification-data_analysis/standing_height_50.txt")
+#df <-fread("~/Downloads/ethnic_grouping_22006.txt")
 
 # Select ID and initial visit heights and rename columns
 df <- df %>% select(`50-0.0`, `50-1.0`)
