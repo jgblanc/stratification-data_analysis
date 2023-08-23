@@ -18,10 +18,13 @@ rule make_sparse_grm_parts:
         "scratch/jgblanc/ukbb/grm/sp_grm.grm.id"
     params:
         prefix_out = "/scratch/jgblanc/ukbb/grm/sp_grm",
-        nparts = 100
-    shell:
+        nparts = 250
+    run:
         """
-	      sh code/run_gwas/make_sparse_grm_parts.sh {input.chrList} {input.snpList} {params.nparts} {params.prefix_out}
+	      for i in {1..250}
+	      do
+	        echo $i
+	      done
         """
 
 
