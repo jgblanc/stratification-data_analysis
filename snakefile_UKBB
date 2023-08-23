@@ -6,7 +6,7 @@ ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam", chr=CHR, root=ROOT)
+        expand("{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3.afreq", chr=CHR, root=ROOT)
 
 
 ## UKBB Genotype data processing
