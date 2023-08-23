@@ -17,7 +17,7 @@ rule make_sparse_grm_parts:
     output:
         "scratch/jgblanc/ukbb/grm/sp_grm.grm.id"
     params:
-        prefix_out = "scratch/jgblanc/ukbb/grm/sp_grm",
+        prefix_out = "/scratch/jgblanc/ukbb/grm/sp_grm",
         nparts = 100
     shell:
         """
