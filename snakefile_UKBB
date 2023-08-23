@@ -9,6 +9,23 @@ rule all:
         expand("scratch/jgblanc/ukbb/grm/sp_grm.grm.id", chr=CHR)
 
 
+
+rule make_sparse_grm_parts:
+    input:
+        chrList = "data/ukbb/chr_list.txt",
+        snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/all_snp.prune.in"
+    output:
+        "scratch/jgblanc/ukbb/grm/sp_grm.grm.id"
+    params:
+        prefix_out = "scratch/jgblanc/ukbb/grm/sp_grm",
+        nparts = 100
+    shell:
+        """
+	      sh code/run_gwas/make_sparse_grm_parts.sh {input.chrList} {input.snpList} {params.nparts} {params.prefix_out}
+        """
+
+
+
 ## UKBB Genotype data processing
 
 # Get frequency of all variants above 1%
@@ -105,22 +122,6 @@ rule concat_prune_in:
         cat {input} > {output}
         """
 
-rule make_sparse_grm_parts:
-    input:
-        chrList = "data/ukbb/chr_list.txt",
-        snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/all_snp.prune.in"
-    output:
-        "scratch/jgblanc/ukbb/grm/sp_grm.grm.id"
-    params:
-        prefix_out = "scratch/jgblanc/ukbb/grm/sp_grm",
-        nparts = 100
-    shell:
-        """
-	for i in {1..{{param.parts}}}
-        do
-          echo $i
-          ./bin/gcta64 --mpfile {input.chrList} --extract {input.snpList} --make-grm-part {params.nparts} $i --thread-num 10 --out {params.prefix_out}
-        done
-        """
+
 
 
