@@ -105,18 +105,22 @@ rule concat_prune_in:
         cat {input} > {output}
         """
 
-rule make_sparse_grm:
+rule make_sparse_grm_parts:
     input:
         chrList = "data/ukbb/chr_list.txt",
         snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/all_snp.prune.in"
     output:
-        "scratch/jgblanc/ukbb/grm/sp_grm.grm.id",
-        "scratch/jgblanc/ukbb/grm/sp_grm.grm.sp"
+        "scratch/jgblanc/ukbb/grm/sp_grm.grm.id"
     params:
         prefix_out = "scratch/jgblanc/ukbb/grm/sp_grm"
+        nparts = 100
     shell:
         """
-        ./bin/gcta64 --mpfile {input.chrList} --extract {input.snpList} --make-grm --sparse-cutoff 0.05 --thread-num 10 --out {params.prefix_out}
+        for i in {1..{{param.parts}}}
+        do
+          echo $i
+          ./bin/gcta64 --mpfile {input.chrList} --extract {input.snpList} --make-grm-part {params.nparts} $i --thread-num 10 --out {params.prefix_out}
+        done
         """
 
 
