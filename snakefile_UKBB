@@ -2,11 +2,11 @@
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
+#ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 
 rule all:
     input:
-        expand("scratch/jgblanc/ukbb/grm/sp_grm.grm.id", chr=CHR, root=ROOT)
+        expand("scratch/jgblanc/ukbb/grm/sp_grm.grm.id", chr=CHR)
 
 
 ## UKBB Genotype data processing
@@ -87,7 +87,7 @@ rule list_all_Chr:
         pvar=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar", chr=CHR),
         pgen=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen", chr=CHR)
     output:
-        "{root}/data/ukbb/chr_list.txt"
+        "data/ukbb/chr_list.txt"
     params:
 	      prefix_in="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr"
     shell:
@@ -107,7 +107,7 @@ rule concat_prune_in:
 
 rule make_sparse_grm:
     input:
-        chrList = "{root}/data/ukbb/chr_list.txt",
+        chrList = "data/ukbb/chr_list.txt",
         snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/all_snp.prune.in"
     output:
         "scratch/jgblanc/ukbb/grm/sp_grm.grm.id",
