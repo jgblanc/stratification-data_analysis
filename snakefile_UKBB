@@ -6,7 +6,7 @@ ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/plink2-files-grm/ukb_imp_chr{chr}_v3.prune.in", chr=CHR, root=ROOT)
+        expand("scratch/jgblanc/ukbb/grm/sp_grm.grm.id", chr=CHR, root=ROOT)
 
 
 ## UKBB Genotype data processing
@@ -94,4 +94,29 @@ rule list_all_Chr:
         """
         sh code/genotypes/list_chr.sh {params.prefix_in} {output}
         """
+
+rule concat_prune_in:
+    input:
+        expand("/scratch/jgblanc/ukbb/plink2-files-grm/ukb_imp_chr{chr}_v3.prune.in", chr=CHR)
+    output:
+        "/scratch/jgblanc/ukbb/plink2-files-grm/all_snp.prune.in"
+    shell:
+        """
+        cat {input} > {output}
+        """
+
+rule make_sparse_grm:
+    input:
+        chrList = "{root}/data/ukbb/chr_list.txt",
+        snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/all_snp.prune.in"
+    output:
+        "scratch/jgblanc/ukbb/grm/sp_grm.grm.id",
+        "scratch/jgblanc/ukbb/grm/sp_grm.grm.sp"
+    params:
+        prefix_out = "scratch/jgblanc/ukbb/grm/sp_grm"
+    shell:
+        """
+        ./bin/gcta64 --mpfile {input.chrList} --extract {input.snpList} --make-grm --sparse-cutoff 0.05 --thread-num 10 --out {params.prefix_out}
+        """
+
 
