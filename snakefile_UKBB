@@ -6,7 +6,7 @@ for i in range(1, 23):
 
 rule all:
     input:
-        expand("scratch/jgblanc/ukbb/grm/sp_grm.grm.id", chr=CHR)
+        expand("/scratch/jgblanc/ukbb/grm/sp_grm.part_250_001.grm.id", chr=CHR)
 
 
 
@@ -15,15 +15,15 @@ rule make_sparse_grm_parts:
         chrList = "data/ukbb/chr_list.txt",
         snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/all_snp.prune.in"
     output:
-        "scratch/jgblanc/ukbb/grm/sp_grm.grm.id"
+        "/scratch/jgblanc/ukbb/grm/sp_grm.part_250_001.grm.id"
     params:
         prefix_out = "/scratch/jgblanc/ukbb/grm/sp_grm",
         nparts = 250
-    run:
+    shell:
         """
-	      for i in {1..250}
+	      for i in $( seq 1 {params.nparts} )
 	      do
-	        echo $i
+	        sh code/run_gwas/make_sparse_grm_parts.sh {input.chrList} {input.snpList} {params.nparts} $i {params.prefix_out}
 	      done
         """
 
