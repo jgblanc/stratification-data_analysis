@@ -3,11 +3,20 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 #ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
+nPART=250
+PARTS = []
+for i in range(1, nPART):
+  if i < 10:
+    PARTS.append("0" + "0" + str(i))
+  elif i < 100:
+    PARTS.append("0" + str(i))
+  else:
+    PARTS.append(str(i))
+print(PARTS)
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/grm/sp_grm.part_250_001.grm.id", chr=CHR)
-
+        expand("/scratch/jgblanc/ukbb/grm/sp_grm.part_{npart}_{parts}.grm.id", npart=nPART, parts=PARTS)
 
 
 rule make_sparse_grm_parts:
@@ -15,16 +24,12 @@ rule make_sparse_grm_parts:
         chrList = "data/ukbb/chr_list.txt",
         snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/all_snp.prune.in"
     output:
-        "/scratch/jgblanc/ukbb/grm/sp_grm.part_250_001.grm.id"
+        "/scratch/jgblanc/ukbb/grm/sp_grm.part_{npart}_{parts}.grm.id"
     params:
-        prefix_out = "/scratch/jgblanc/ukbb/grm/sp_grm",
-        nparts = 250
+        prefix_out = "/scratch/jgblanc/ukbb/grm/sp_grm"
     shell:
         """
-	      for i in $( seq 1 {params.nparts} )
-	      do
-	        sh code/run_gwas/make_sparse_grm_parts.sh {input.chrList} {input.snpList} {params.nparts} $i {params.prefix_out}
-	      done
+	      sh code/run_gwas/make_sparse_grm_parts.sh {input.chrList} {input.snpList} {wildcards.npart} {wildcards.parts} {params.prefix_out}
         """
 
 
