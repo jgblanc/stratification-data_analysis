@@ -5,18 +5,18 @@ for i in range(1, 23):
 #ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 nPART=250
 PARTS = []
-for i in range(1, nPART):
+for i in range(1, nPART+1):
   if i < 10:
     PARTS.append("0" + "0" + str(i))
   elif i < 100:
     PARTS.append("0" + str(i))
   else:
     PARTS.append(str(i))
-print(PARTS)
+#print(PARTS)
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/grm/sp_grm.part_{npart}_{parts}.grm.id", npart=nPART, parts=PARTS)
+        expand("/scratch/jgblanc/ukbb/grm/sp_grm.part_{npart}_{parts}.grm.bin", npart=nPART, parts=PARTS)
 
 
 rule make_sparse_grm_parts:
@@ -24,7 +24,11 @@ rule make_sparse_grm_parts:
         chrList = "data/ukbb/chr_list.txt",
         snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/all_snp.prune.in"
     output:
-        "/scratch/jgblanc/ukbb/grm/sp_grm.part_{npart}_{parts}.grm.id"
+        "/scratch/jgblanc/ukbb/grm/sp_grm.part_{npart}_{parts}.grm.bin"
+    threads: 20
+    resources:
+        mem_mb=7000,
+        walltime="00:03:00:00"
     params:
         prefix_out = "/scratch/jgblanc/ukbb/grm/sp_grm"
     shell:
