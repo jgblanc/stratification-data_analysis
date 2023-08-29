@@ -16,7 +16,7 @@ for i in range(1, nPART+1):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/grm/sp_grm.grm.bin", npart=nPART, parts=PARTS)
+        expand("/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id", npart=nPART, parts=PARTS)
 
 
 ## UKBB Genotype data processing
@@ -157,8 +157,7 @@ rule compute_sparse_GRM:
         Nbin="/scratch/jgblanc/ukbb/grm/sp_grm.grm.N.bin",
         id="/scratch/jgblanc/ukbb/grm/sp_grm.grm.id"
     output:
-        bin="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.bin",
-        Nbin="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.N.bin",
+        sp="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.sp",
         id="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id"
     params:
         prefix_in = "/scratch/jgblanc/ukbb/grm/sp_grm",
@@ -166,8 +165,8 @@ rule compute_sparse_GRM:
     shell:
         """
 	      ./bin/gcta64 --grm {params.prefix_in} --make-bK-sparse 0.05 --out {params.prefix_out}
-	      rm {input.bin}
-	      rm {input.Nbin}
-	      rm {input.id}
+	      #rm {input.bin}
+	      #rm {input.Nbin}
+	      #rm {input.id}
         """
 
