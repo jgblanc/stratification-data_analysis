@@ -17,7 +17,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("{root}/output/run_GWAS/covars/fixed.txt", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS)
+        expand("{root}/output/run_gwas/covars/fixed.txt", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS)
 
 
 ## Compute FGr
@@ -63,23 +63,23 @@ rule assemble_fixed_covars:
         age="{root}/data/phenotypes/age_at_recruitment_21022.txt",
         batch="{root}/data/phenotypes/genotype_measurement_batch_22000.txt"
     output:
-        "{root}/output/run_GWAS/covars/fixed.txt"
+        "{root}/output/run_gwas/covars/fixed.txt"
     shell:
         """
-        Rscript code/run_GWAS/assemble_fixed_covar.R {input.sex} {input.age} {input.batch} {output}
+        Rscript code/run_gwas/assemble_fixed_covar.R {input.sex} {input.age} {input.batch} {output}
         """
 
 
 rule run_fastGWA:
     input:
-        phenotype="{root}/data/phenotypes/StandingHeight_50.txt"
+        phenotype="{root}/data/phenotypes/StandingHeight_50.txt",
         sp="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.sp",
         id="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id",
         covar="{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt"
     output:
-        "{root}/output/run_GWAS/{dataset}/{subdataset}/raw/{contrasts}_{chr}.fastGWA",
+        "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}.fastGWA",
     params:
         prefix_out = "{root}/output/run_GWAS/{dataset}/{subdataset}/raw/{contrasts}_{chr}",
         prefix_grm = "/scratch/jgblanc/ukbb/grm/sparseGRM",

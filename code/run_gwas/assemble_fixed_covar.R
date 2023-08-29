@@ -16,11 +16,14 @@ outfile = args[4]
 
 # Read in phenotypes
 dfSex <- fread(sex)
+head(dfSex)
 dfAge <- fread(age)
+head(dfAge)
 dfBatch <- fread(batch)
+head(dfBatch)
 
 # Join files
-df <- inner_join(dfSex, dfAge, dfBatch)
+df <- inner_join(dfSex, dfAge, dfBatch, by = c("#FID", "IID"))
 
 # Save file
 fwrite(df, outfile,col.names=T,row.names=F,quote=F,sep="\t")
