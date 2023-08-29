@@ -57,3 +57,17 @@ rule concat_chr_Tm:
 
 ## Run GWAS
 
+rule run_fastGWA:
+    input:
+        phenotype="",
+
+    output:
+        #"{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
+    params:
+        #chrNum = lambda wildcards: get_chr_num(wildcards.chr),
+        #prefix_in = "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}"
+    shell:
+        """
+        #Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
+        """
+
