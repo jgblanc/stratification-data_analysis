@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=SparseGRM
-#SBATCH --output=logs/SparseGRM.out
-#SBATCH --error=logs/SparseGRM.err
-#SBATCH --time=00:10:00
+#SBATCH --job-name=main
+#SBATCH --output=logs/main.out
+#SBATCH --error=logs/main.err
+#SBATCH --time=24:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=28
+#SBATCH --ntasks-per-node=1
 #SBATCH --mem-per-cpu=2000
-#SBATCH --partition=tier3q
+#SBATCH --partition=tier1q
 
 module load gcc/11.3.0
 module load openblas/0.3.20
@@ -16,5 +16,7 @@ module load R
 
 echo "SLURM_JOBID="$SLURM_JOBID
 cat snakefile_UKBB
-snakemake --cores all --rerun-incomplete -s snakefile_UKBB    
+snakemake --profile cluster-setup/ -s snakefile_UKBB
+
+#snakemake --cores all --rerun-incomplete -s snakefile_UKBB    
 #snakemake -j1 --rerun-incomplete 
