@@ -17,14 +17,18 @@ df <- fread(pheno_file)
 #df <-fread("~/Downloads/ethnic_grouping_22006.txt")
 
 # Select ID and initial visit heights and rename columns
-df <- df %>% select(`50-0.0`, `50-1.0`)
-colnames(df) <- c("IID", "Height")
+df <- df[,1:2]
+colnames(df) <- c("IID", "Pheno")
 
 # Remove individuals with no initial value for height
-df <- df %>% drop_na(Height)
+df <- df %>% drop_na(Pheno)
 df$FID <- df$IID
-df <- df[,c("FID", "IID", "Height")]
-colnames(df) <- c("#FID", "IID", "Height")
+df <- df[,c("FID", "IID", "Pheno")]
+colnames(df) <- c("#FID", "IID", "Pheno")
+
+# Get name of phenotype
+name <- tools::file_path_sans_ext("ABCD.csv")
+colnames(df)[3] <- name
 
 # Save file
 fwrite(df, out_file,col.names=T,row.names=F,quote=F,sep="\t")

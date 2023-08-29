@@ -17,7 +17,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS)
+        expand("{root}/output/run_GWAS/covars/fixed.txt", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS)
 
 
 ## Compute FGr
@@ -57,17 +57,42 @@ rule concat_chr_Tm:
 
 ## Run GWAS
 
-rule run_fastGWA:
+rule assemble_fixed_covars:
     input:
-        phenotype="",
-
+        sex="{root}/data/phenotypes/genetic_sex_22001.txt",
+        age="{root}/data/phenotypes/age_at_recruitment_21022.txt",
+        batch="{root}/data/phenotypes/genotype_measurement_batch_22000.txt"
     output:
-        #"{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
-    params:
-        #chrNum = lambda wildcards: get_chr_num(wildcards.chr),
-        #prefix_in = "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}"
+        "{root}/output/run_GWAS/covars/fixed.txt"
     shell:
         """
-        #Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
+        Rscript code/run_GWAS/assemble_fixed_covar.R {input.sex} {input.age} {input.batch} {output}
+        """
+
+
+rule run_fastGWA:
+    input:
+        phenotype="{root}/data/phenotypes/StandingHeight_50.txt"
+        sp="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.sp",
+        id="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id",
+        covar="{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
+        overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt"
+    output:
+        "{root}/output/run_GWAS/{dataset}/{subdataset}/raw/{contrasts}_{chr}.fastGWA",
+    params:
+        prefix_out = "{root}/output/run_GWAS/{dataset}/{subdataset}/raw/{contrasts}_{chr}",
+        prefix_grm = "/scratch/jgblanc/ukbb/grm/sparseGRM",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
+    threads: 20
+    shell:
+        """
+        ./bin/gcta64  --pheno {input.pheno} \
+        --qcovar {input.covar} \
+        --fastGWA-mlm --h2-limit 2.5 --maf 0 --geno 1 \
+        --grm-sparse {params.prefix_grm} \
+        --pfile {params.prefix_plink} \
+        --threads {threads} \
+        --out {params.prefix_out}
         """
 
