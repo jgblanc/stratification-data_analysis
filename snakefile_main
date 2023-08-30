@@ -18,7 +18,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("{root}/output/run_gwas/covars/fixed.txt", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS)
+        expand("{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC)
 
 
 ## Compute FGr
