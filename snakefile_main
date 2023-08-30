@@ -8,6 +8,7 @@ SUBDATASET = ["EUR"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 CONTRASTS = ["French-Sardinian"]
+PC = [10,40]
 
 
 def get_chr_num(x):
@@ -60,13 +61,26 @@ rule concat_chr_Tm:
 rule assemble_fixed_covars:
     input:
         sex="{root}/data/phenotypes/genetic_sex_22001.txt",
-        age="{root}/data/phenotypes/age_at_recruitment_21022.txt",
         batch="{root}/data/phenotypes/genotype_measurement_batch_22000.txt"
     output:
         "{root}/output/run_gwas/covars/fixed.txt"
     shell:
         """
-        Rscript code/run_gwas/assemble_fixed_covar.R {input.sex} {input.age} {input.batch} {output}
+        Rscript code/run_gwas/assemble_fixed_covar.R {input.sex} {input.batch} {output}
+        """
+
+rule assemble_quant_covars:
+    input:
+        age="{root}/data/phenotypes/age_at_recruitment_21022.txt",
+        covar="{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
+        pcs="{root}/data/phenotypes/genetic_PC_22009.txt"
+    output:
+        "{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
+    params:
+        pcNum = lambda wildcards: get_chr_num(wildcards.pc)
+    shell:
+        """
+        Rscript code/run_gwas/assemble_quant_covar.R {input.age} {input.covar} {input.pcs} {params.pcNum} {output}
         """
 
 
