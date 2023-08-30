@@ -18,7 +18,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC)
+        expand("{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}_PC{pc}.fastGWA", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC)
 
 
 ## Compute FGr
@@ -89,13 +89,13 @@ rule run_fastGWA:
         phenotype="{root}/data/phenotypes/StandingHeight_50.txt",
         sp="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.sp",
         id="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id",
-        covar="{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
+        covar="{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt"
     output:
-        "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}.fastGWA",
+        "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}_PC{pc}.fastGWA",
     params:
-        prefix_out = "{root}/output/run_GWAS/{dataset}/{subdataset}/raw/{contrasts}_{chr}",
+        prefix_out = "{root}/output/run_GWAS/{dataset}/{subdataset}/raw/{contrasts}_{chr}-PC{pc}",
         prefix_grm = "/scratch/jgblanc/ukbb/grm/sparseGRM",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
     threads: 20
