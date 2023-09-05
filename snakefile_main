@@ -86,7 +86,7 @@ rule assemble_quant_covars:
 
 rule run_fastGWA:
     input:
-        pheno="{root}/data/phenotypes/StandingHeight_50.txt",
+        pheno="{root}/data/phenotypes/StandingHeight_Normalized_50.txt",
         sp="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.sp",
         id="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id",
         covar="{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt",
@@ -100,7 +100,7 @@ rule run_fastGWA:
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
-        mem_mb=960000,
+        mem_mb=500000,
         walltime="24:00:00"
     shell:
         """

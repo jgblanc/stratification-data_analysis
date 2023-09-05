@@ -1,0 +1,52 @@
+---
+title: "Sandbox"
+author: "Jennifer Blanc"
+date: "2023-09-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+```
+
+
+## Look at fastGWA chr22
+
+```{r}
+df <- fread("~/Downloads/French-Sardinian_22-PC0.fastGWA.gz")
+
+ggplot(data = df, aes(x=POS, y=-1 * log10(P))) + geom_point()
+```
+## Compare to Neale lab GWAS
+
+```{r}
+dfNL <- fread("~/Downloads/50_raw.gwas.imputed_v3.both_sexes.tsv")
+dfNL <- dfNL[13164583:13791467,]
+
+chr22 <- dfNL %>% separate(variant, c("CHR", "POS", "A1", "A2"), ":") %>% filter(CHR == "22")
+
+toPlot <- chr22 %>% filter(pval < 0.05)
+toPlot$POS <- as.numeric(toPlot$POS)
+ggplot(data = toPlot, aes(x=POS, y=-1 * log10(pval))) + geom_point()
+```
+## Compare overlapping SNPs 
+
+```{r}
+chr22$POS <- as.numeric(chr22$POS) 
+dfOverlap <- inner_join(chr22, df, by = "POS")
+
+plot(dfOverlap$BETA, dfOverlap$beta)
+cor(dfOverlap$BETA, dfOverlap$beta)
+```
+
+```{r}
+dfSig <- dfOverlap %>% filter(pval < 5e-8 | P < 5e-8)
+plot(dfSig$BETA, dfSig$beta)
+abline(v = 0, col = "red")
+abline(h = 0, col = "red")
+cor(dfSig$BETA, dfSig$beta)
+```
+
+

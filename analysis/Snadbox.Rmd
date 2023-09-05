@@ -1,0 +1,28 @@
+---
+title: "Sandbox"
+author: "Jennifer Blanc"
+date: "2023-09-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+```
+
+
+## Look at fastGWA chr22
+
+```{r}
+df <- fread("~/Downloads/French-Sardinian_22-PC0.fastGWA.gz")
+
+ggplot(data = df, aes(x=POS, y=-1 * log10(P))) + geom_point()
+```
+
+```{r}
+dfNL <- fread("~/Downloads/50_raw.gwas.imputed_v3.both_sexes.tsv")
+
+chr22 <- dfNL %>% separate(variant, c("CHR", "POS", "A1", "A1"), ":")
+```
+
