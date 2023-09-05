@@ -1,14 +1,14 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 DATASET = ["hgdp"]
 SUBDATASET = ["EUR"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 CONTRASTS = ["French-Sardinian"]
-PC = [10,40]
+PC = [0]
 
 
 def get_chr_num(x):
@@ -18,7 +18,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}_PC{pc}.fastGWA", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC)
+        expand("{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}-PC{pc}.fastGWA", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC)
 
 
 ## Compute FGr
@@ -86,27 +86,30 @@ rule assemble_quant_covars:
 
 rule run_fastGWA:
     input:
-        phenotype="{root}/data/phenotypes/StandingHeight_50.txt",
+        pheno="{root}/data/phenotypes/StandingHeight_50.txt",
         sp="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.sp",
         id="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id",
         covar="{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt"
     output:
-        "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}_PC{pc}.fastGWA",
+        "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
-        prefix_out = "{root}/output/run_GWAS/{dataset}/{subdataset}/raw/{contrasts}_{chr}-PC{pc}",
+        prefix_out = "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}-PC{pc}",
         prefix_grm = "/scratch/jgblanc/ukbb/grm/sparseGRM",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
-    threads: 20
+    threads: 16
+    resources:
+        mem_mb=960000,
+        walltime="24:00:00"
     shell:
         """
-        ./bin/gcta64  --pheno {input.pheno} \
-        --qcovar {input.covar} \
-        --fastGWA-mlm --h2-limit 2.5 --maf 0 --geno 1 \
-        --grm-sparse {params.prefix_grm} \
-        --pfile {params.prefix_plink} \
-        --threads {threads} \
-        --out {params.prefix_out}
+        gcta  --pheno {input.pheno} \
+	--qcovar {input.covar} \
+	--extract {input.overlap_snps} \
+	--fastGWA-mlm --h2-limit 2.5 --maf 0 --geno 1 \
+	--grm-sparse {params.prefix_grm} --pfile {params.prefix_plink} \
+	--threads {threads} \
+	--out {params.prefix_out}
         """
 

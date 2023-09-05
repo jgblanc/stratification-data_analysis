@@ -27,6 +27,9 @@ print(ncol(dfPc))
 # Join files
 df <- inner_join(dfAge, dfPc, dfFgr, by = c("#FID", "IID"))
 
+# Drop rows with NA
+df <- drop_na(df)
+
 # Save file
 fwrite(df, outfile,col.names=T,row.names=F,quote=F,sep="\t")
 
