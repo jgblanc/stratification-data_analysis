@@ -89,9 +89,10 @@ rule run_fastGWA:
         pheno="{root}/data/phenotypes/StandingHeight_Normalized_50.txt",
         sp="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.sp",
         id="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id",
-        covar="{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt",
+        qcovar="{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt"
+        overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt",
+        covar="{root}/output/run_gwas/covars/fixed.txt"
     output:
         "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
@@ -105,7 +106,8 @@ rule run_fastGWA:
     shell:
         """
         gcta  --pheno {input.pheno} \
-	--qcovar {input.covar} \
+	--qcovar {input.qcovar} \
+	--covar {input.covar} \
 	--extract {input.overlap_snps} \
 	--fastGWA-mlm --h2-limit 2.5 --maf 0 --geno 1 \
 	--grm-sparse {params.prefix_grm} --pfile {params.prefix_plink} \
