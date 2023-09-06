@@ -22,6 +22,10 @@ head(dfBatch)
 # Join files
 df <- inner_join(dfSex, dfBatch, by = c("#FID", "IID"))
 
+# Replace batch with array
+df <- df %>% mutate(genotype_measurement_batch_22000 = replace(genotype_measurement_batch_22000, genotype_measurement_batch_22000 < 0, 0)) %>%
+  mutate(genotype_measurement_batch_22000 = replace(genotype_measurement_batch_22000, genotype_measurement_batch_22000 > 0, 1))
+
 # Save file
 fwrite(df, outfile,col.names=T,row.names=F,quote=F,sep="\t")
 

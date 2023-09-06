@@ -49,4 +49,7 @@ abline(h = 0, col = "red")
 cor(dfSig$BETA, dfSig$beta)
 ```
 
+```{r}
+df <- fread("~/Downloads/genotype_measurement_batch_22000.txt")
+```
 
