@@ -8,7 +8,7 @@ SUBDATASET = ["EUR"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 CONTRASTS = ["French-Sardinian"]
-PC = [0]
+PC = [10]
 
 
 def get_chr_num(x):
