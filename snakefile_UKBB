@@ -15,8 +15,7 @@ for i in range(1, nPART+1):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.psam",chr=CHR),
-        expand("/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3.psam",chr=CHR)
+        expand("data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3.afreq",chr=CHR)
 
 
 ## UKBB Genotype data processing
@@ -87,14 +86,14 @@ rule UKBB_begen_to_plink2_WBS:
 
 rule UKBB_freq:
     input:
-        psam="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam",
-        pvar="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar",
-        pgen="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen"
+        psam="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3.psam",
+        pvar="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3.pvar",
+        pgen="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3.pgen"
     output:
-        freq="{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3.afreq"
+        freq="data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3.afreq"
     params:
-        prefix_out="{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3",
-	      prefix_in="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
+        prefix_out="{root}/data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3",
+	      prefix_in="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3"
     shell:
         """
         plink2 --pfile {params.prefix_in} --freq \
