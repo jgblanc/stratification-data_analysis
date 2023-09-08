@@ -15,7 +15,7 @@ for i in range(1, nPART+1):
 
 rule all:
     input:
-        expand("data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3.afreq",chr=CHR, subset=SUBSET)
+        expand("/scratch/jgblanc/ukbb/plink2-files-grm/{subset}/ukb_imp_chr{chr}_v3.prune.in",chr=CHR, subset=SUBSET)
 
 
 ## UKBB Genotype data processing
@@ -94,7 +94,7 @@ rule UKBB_freq:
     params:
         prefix_out="data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3",
 	      prefix_in="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3"
-    threads: 8      	      
+    threads: 8
     shell:
         """
         plink2 --pfile {params.prefix_in} --freq \
@@ -107,19 +107,20 @@ rule UKBB_freq:
 
 rule get_GRM_pruned_snps:
     input:
-        psam="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam",
-	      pvar="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar",
-	      pgen="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen"
+        psam="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3.psam",
+	      pvar="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3.pvar",
+	      pgen="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3.pgen"
     output:
-        snplist="/scratch/jgblanc/ukbb/plink2-files-grm/ukb_imp_chr{chr}_v3.prune.in"
+        snplist="/scratch/jgblanc/ukbb/plink2-files-grm/{subset}/ukb_imp_chr{chr}_v3.prune.in"
     params:
-        prefix_out="/scratch/jgblanc/ukbb/plink2-files-grm/ukb_imp_chr{chr}_v3",
-        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
+        prefix_out="/scratch/jgblanc/ukbb/plink2-files-grm/{subset}/ukb_imp_chr{chr}_v3",
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3"
+    threads: 16
     shell:
         """
 	      plink2 --pfile {params.prefix_in} \
         --indep-pairwise 1000 100 0.9 \
-	      --threads 20 \
+	      --threads 16 \
 	      --memory 38000 \
 	      --out {params.prefix_out}
 	      """
