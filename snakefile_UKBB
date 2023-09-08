@@ -141,7 +141,7 @@ rule list_all_Chr:
 
 rule concat_prune_in:
     input:
-        expand("/scratch/jgblanc/ukbb/plink2-files-grm/{subset}/ukb_imp_chr{chr}_v3.prune.in", chr=CHR)
+        expand("/scratch/jgblanc/ukbb/plink2-files-grm/{{subset}}/ukb_imp_chr{chr}_v3.prune.in", chr=CHR)
     output:
         "/scratch/jgblanc/ukbb/plink2-files-grm/{subset}/all_snp.prune.in"
     shell:
