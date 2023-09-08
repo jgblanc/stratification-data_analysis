@@ -15,7 +15,7 @@ for i in range(1, nPART+1):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/plink2-files-grm/{subset}/all_snp.prune.in",chr=CHR, subset=SUBSET)
+        expand("/scratch/jgblanc/ukbb/grm/{subset}/sp_grm.grm.bin",chr=CHR, subset=SUBSET)
 
 
 ## UKBB Genotype data processing
@@ -153,15 +153,15 @@ rule concat_prune_in:
 rule make_sparse_grm_parts:
     input:
         chrList = "data/ukbb/chr_list.txt",
-        snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/all_snp.prune.in"
+        snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/{subset}/all_snp.prune.in"
     output:
-        "/scratch/jgblanc/ukbb/grm/sp_grm.part_{npart}_{parts}.grm.bin"
+        "/scratch/jgblanc/ukbb/grm/{subset}/sp_grm.part_{npart}_{parts}.grm.bin"
     threads: 20
     resources:
         mem_mb=7000,
         walltime="00:03:00:00"
     params:
-        prefix_out = "/scratch/jgblanc/ukbb/grm/sp_grm"
+        prefix_out = "/scratch/jgblanc/ukbb/grm/{subset}/sp_grm"
     shell:
         """
 	      sh code/run_gwas/make_sparse_grm_parts.sh {input.chrList} {input.snpList} {wildcards.npart} {wildcards.parts} {params.prefix_out}
@@ -169,34 +169,34 @@ rule make_sparse_grm_parts:
 
 rule concat_sparse_grm_parts:
     input:
-        bin=expand("/scratch/jgblanc/ukbb/grm/sp_grm.part_{npart}_{parts}.grm.bin", npart=nPART, parts=PARTS),
-        Nbin=expand("/scratch/jgblanc/ukbb/grm/sp_grm.part_{npart}_{parts}.grm.N.bin", npart=nPART, parts=PARTS),
-        id=expand("/scratch/jgblanc/ukbb/grm/sp_grm.part_{npart}_{parts}.grm.id", npart=nPART, parts=PARTS)
+        bin=expand("/scratch/jgblanc/ukbb/grm/{{subset}}/sp_grm.part_{npart}_{parts}.grm.bin", npart=nPART, parts=PARTS),
+        Nbin=expand("/scratch/jgblanc/ukbb/grm/{{subset}}/sp_grm.part_{npart}_{parts}.grm.N.bin", npart=nPART, parts=PARTS),
+        id=expand("/scratch/jgblanc/ukbb/grm/{{subset}}/sp_grm.part_{npart}_{parts}.grm.id", npart=nPART, parts=PARTS)
     output:
-        bin="/scratch/jgblanc/ukbb/grm/sp_grm.grm.bin",
-        Nbin="/scratch/jgblanc/ukbb/grm/sp_grm.grm.N.bin",
-        id="/scratch/jgblanc/ukbb/grm/sp_grm.grm.id"
+        bin="/scratch/jgblanc/ukbb/grm/{subset}/sp_grm.grm.bin",
+        Nbin="/scratch/jgblanc/ukbb/grm/{subset}/sp_grm.grm.N.bin",
+        id="/scratch/jgblanc/ukbb/grm/{subset}/sp_grm.grm.id"
     shell:
         """
 	      cat {input.bin} > {output.bin}
 	      cat {input.Nbin} > {output.Nbin}
 	      cat {input.id} > {output.id}
-	      #rm {input.bin}
-	      #rm {input.Nbin}
-	      #rm {input.id}
+	      rm {input.bin}
+	      rm {input.Nbin}
+	      rm {input.id}
         """
 
 rule compute_sparse_GRM:
     input:
-        bin="/scratch/jgblanc/ukbb/grm/sp_grm.grm.bin",
-        Nbin="/scratch/jgblanc/ukbb/grm/sp_grm.grm.N.bin",
-        id="/scratch/jgblanc/ukbb/grm/sp_grm.grm.id"
+        bin="/scratch/jgblanc/ukbb/grm/{susbet}/sp_grm.grm.bin",
+        Nbin="/scratch/jgblanc/ukbb/grm/{susbet}/sp_grm.grm.N.bin",
+        id="/scratch/jgblanc/ukbb/grm/{susbet}/sp_grm.grm.id"
     output:
-        sp="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.sp",
-        id="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id"
+        sp="/scratch/jgblanc/ukbb/grm/{susbet}/sparseGRM.grm.sp",
+        id="/scratch/jgblanc/ukbb/grm/{susbet}/sparseGRM.grm.id"
     params:
-        prefix_in = "/scratch/jgblanc/ukbb/grm/sp_grm",
-        prefix_out = "/scratch/jgblanc/ukbb/grm/sparseGRM"
+        prefix_in = "/scratch/jgblanc/ukbb/grm/{susbet}/sp_grm",
+        prefix_out = "/scratch/jgblanc/ukbb/grm/{susbet}/sparseGRM"
     shell:
         """
 	      ./bin/gcta64 --grm {params.prefix_in} --make-bK-sparse 0.05 --out {params.prefix_out}
