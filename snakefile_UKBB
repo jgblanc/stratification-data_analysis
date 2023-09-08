@@ -1,8 +1,8 @@
 # Snakefile to prep UKBB for analysis
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
-#ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
+SUBSET=["ALL", "WBS"]
 nPART=250
 PARTS = []
 for i in range(1, nPART+1):
@@ -12,26 +12,27 @@ for i in range(1, nPART+1):
     PARTS.append("0" + str(i))
   else:
     PARTS.append(str(i))
-#print(PARTS)
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id", npart=nPART, parts=PARTS)
+        expand("/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.psam",chr=CHR),
+        expand("/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3.psam",chr=CHR)
 
 
 ## UKBB Genotype data processing
 
-# Get frequency of all variants above 1%
+# Get frequency of all variants above 1% for
+
 rule UKBB_begen_to_plink2:
     input:
         bgen="/gpfs/data/pierce-lab/uk-biobank-genotypes/ukb_imp_chr{chr}_v3.bgen",
         sample="/gpfs/data/berg-lab/data/ukbb/ukb22828_c22_b0_v3_s487192.sample"
     output:
-        psam="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam",
-	      pvar="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar",
-	      pgen="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen"
+        psam="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.psam",
+	      pvar="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pvar",
+	      pgen="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen"
     params:
-        prefix="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
+        prefix="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
     resources:
         mem_mb=38000,
 	walltime="00:06:00:00"
@@ -39,6 +40,38 @@ rule UKBB_begen_to_plink2:
         """
 	      plink2 --bgen {input.bgen} ref-first \
 	      --sample {input.sample} \
+	      --mind 0.1 \
+        --geno 0.1 \
+        --maf 0.01 \
+	      --rm-dup exclude-all \
+	      --snps-only \
+	      --max-alleles 2 \
+	      --make-pgen \
+	      --set-all-var-ids @:# \
+	      --threads 20 \
+	      --memory 38000 \
+	      --out {params.prefix}
+	      """
+
+rule UKBB_begen_to_plink2_WBS:
+    input:
+        bgen="/gpfs/data/pierce-lab/uk-biobank-genotypes/ukb_imp_chr{chr}_v3.bgen",
+        sample="/gpfs/data/berg-lab/data/ukbb/ukb22828_c22_b0_v3_s487192.sample",
+        WBS="data/ukbb/WBS.ids"
+    output:
+        psam="/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3.psam",
+	      pvar="/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3.pvar",
+	      pgen="/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3.pgen"
+    params:
+        prefix="/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3"
+    resources:
+        mem_mb=38000,
+	walltime="00:06:00:00"
+    shell:
+        """
+	      plink2 --bgen {input.bgen} ref-first \
+	      --sample {input.sample} \
+	      --keep {input.WBS}
 	      --mind 0.1 \
         --geno 0.1 \
         --maf 0.01 \
