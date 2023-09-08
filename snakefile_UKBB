@@ -1,7 +1,7 @@
 # Snakefile to prep UKBB for analysis
-CHR =["22"]
-#for i in range(1, 23):
-#  CHR.append(str(i))
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
 SUBSET=["ALL", "WBS"]
 nPART=250
 PARTS = []
@@ -71,7 +71,7 @@ rule UKBB_begen_to_plink2_WBS:
         """
 	      plink2 --bgen {input.bgen} ref-first \
 	      --sample {input.sample} \
-	      --keep {input.WBS}
+	      --keep {input.WBS} \
 	      --mind 0.1 \
         --geno 0.1 \
         --maf 0.01 \

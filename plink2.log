@@ -1,11 +1,17 @@
 PLINK v2.00a3.7LM AVX2 Intel (24 Oct 2022)
 Options in effect:
-  --pfile /scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr2_v3
+  --bgen /gpfs/data/pierce-lab/uk-biobank-genotypes/ukb_imp_chr22_v3.bgen ref-first
+  --keep data/ukbb/WBS.ids
+  --sample /gpfs/data/berg-lab/data/ukbb/ukb22828_c22_b0_v3_s487192.sample
 
 Hostname: cri22in002
 Working directory: /gpfs/data/berg-lab/jgblanc/stratification-data_analysis
-Start time: Wed Aug 23 14:07:54 2023
+Start time: Fri Sep  8 11:58:56 2023
 
-Warning: No output requested.  Exiting.
+Random number seed: 1694192336
+257555 MiB RAM detected; reserving 128777 MiB for main workspace.
+Using up to 32 threads (change this with --threads).
+Error: Basic file conversions do not support regular filter or transform
+operations.  Rerun your command with --make-bed/--make-[b]pgen.
 
-End time: Wed Aug 23 14:07:54 2023
+End time: Fri Sep  8 11:58:56 2023
