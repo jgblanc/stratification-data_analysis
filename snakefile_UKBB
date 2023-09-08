@@ -15,7 +15,7 @@ for i in range(1, nPART+1):
 
 rule all:
     input:
-        expand("data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3.afreq",chr=CHR)
+        expand("data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3.afreq",chr=CHR, subset=SUBSET)
 
 
 ## UKBB Genotype data processing
@@ -92,8 +92,9 @@ rule UKBB_freq:
     output:
         freq="data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3.afreq"
     params:
-        prefix_out="{root}/data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3",
+        prefix_out="data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3",
 	      prefix_in="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3"
+    threads: 8      	      
     shell:
         """
         plink2 --pfile {params.prefix_in} --freq \
