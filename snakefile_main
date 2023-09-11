@@ -1,15 +1,15 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 DATASET = ["hgdp"]
 SUBDATASET = ["EUR"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 CONTRASTS = ["French-Sardinian"]
-PC = [10]
-SUBSET=["ALL", "WBS"]
+PC = [0,10]
+GWAS=["ALL", "WBS"]
 
 def get_chr_num(x):
   out = int(x)
@@ -18,7 +18,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}-PC{pc}.fastGWA", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC)
+        expand("{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS)
 
 
 ## Compute FGr
@@ -86,18 +86,18 @@ rule assemble_quant_covars:
 rule run_fastGWA:
     input:
         pheno="{root}/data/phenotypes/StandingHeight_Normalized_50.txt",
-        sp="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.sp",
-        id="/scratch/jgblanc/ukbb/grm/sparseGRM.grm.id",
+        sp="/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM.grm.sp",
+        id="/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM.grm.id",
         qcovar="{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt",
-        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3.pgen",
+        overlap_snps="{root}/data/{dataset}/variants/{subdataset}/{gwas}/overlappingSNPs_chr{chr}.txt",
         covar="{root}/output/run_gwas/covars/fixed.txt"
     output:
-        "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}-PC{pc}.fastGWA",
+        "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{susbet}/{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
-        prefix_out = "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{contrasts}_{chr}-PC{pc}",
-        prefix_grm = "/scratch/jgblanc/ukbb/grm/sparseGRM",
-        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3"
+        prefix_out = "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{contrasts}_{chr}-PC{pc}",
+        prefix_grm = "/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
         mem_mb=500000,
