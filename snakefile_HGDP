@@ -13,7 +13,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("{root}/data/hgdp/r/{dataset}/r_list_{chr}.txt", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS)
+        expand("{root}/data/hgdp/variants/{dataset}/WBS/overlappingSNPs_chr{chr}.txt", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS)
 
 
 
@@ -82,9 +82,20 @@ rule HGDP_freq:
 rule get_overlapping_snps:
     input:
         freq_hgdp="{root}/data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq",
-	      freq_ukbb="{root}/data/ukbb/variants/ukb_imp_chr{chr}_v3.afreq"
+	      freq_ukbb="{root}/data/ukbb/variants/ALL/ukb_imp_chr{chr}_v3.afreq"
     output:
-        "{root}/data/hgdp/variants/{dataset}/overlappingSNPs_chr{chr}.txt"
+        "{root}/data/hgdp/variants/{dataset}/ALL/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/genotypes/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
+        """
+
+rule get_overlapping_snps_WBS:
+    input:
+        freq_hgdp="{root}/data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq",
+	      freq_ukbb="{root}/data/ukbb/variants/WBS/ukb_imp_chr{chr}_v3.afreq"
+    output:
+        "{root}/data/hgdp/variants/{dataset}/WBS/overlappingSNPs_chr{chr}.txt"
     shell:
         """
         Rscript code/genotypes/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
@@ -97,7 +108,7 @@ rule HGDP_recode:
         psam="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
         pvar="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
         pgen="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
-      	snp_list="{root}/data/hgdp/variants/{dataset}/overlappingSNPs_chr{chr}.txt"
+      	snp_list="{root}/data/hgdp/variants/{dataset}/ALL/overlappingSNPs_chr{chr}.txt"
     output:
         psam="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
         pvar="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
