@@ -2,7 +2,7 @@
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-SUBSET=["ALL", "WBS"]
+SUBSET=["WBS"]
 nPART=250
 PARTS = []
 for i in range(1, nPART+1):
@@ -15,7 +15,7 @@ for i in range(1, nPART+1):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/grm/{subset}/sp_grm.grm.bin",chr=CHR, subset=SUBSET)
+        expand("/scratch/jgblanc/ukbb/grm/{subset}/sp_grm.part_{npart}_{parts}.grm.bin",chr=CHR, subset=SUBSET, npart=nPART, parts=PARTS)
 
 
 ## UKBB Genotype data processing
@@ -127,13 +127,13 @@ rule get_GRM_pruned_snps:
 
 rule list_all_Chr:
     input:
-        psam=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.psam", chr=CHR),
-        pvar=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pvar", chr=CHR),
-        pgen=expand("/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen", chr=CHR)
+        psam=expand("/scratch/jgblanc/ukbb/plink2-files/{{subset}}/ukb_imp_chr{chr}_v3.psam", chr=CHR),
+        pvar=expand("/scratch/jgblanc/ukbb/plink2-files/{{subset}}/ukb_imp_chr{chr}_v3.pvar", chr=CHR),
+        pgen=expand("/scratch/jgblanc/ukbb/plink2-files/{{subset}}/ukb_imp_chr{chr}_v3.pgen", chr=CHR)
     output:
-        "data/ukbb/chr_list.txt"
+        "data/ukbb/chr_list_{subset}.txt"
     params:
-	      prefix_in="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr"
+	      prefix_in="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr"
     shell:
         """
         sh code/genotypes/list_chr.sh {params.prefix_in} {output}
@@ -152,11 +152,11 @@ rule concat_prune_in:
 
 rule make_sparse_grm_parts:
     input:
-        chrList = "data/ukbb/chr_list.txt",
+        chrList = "data/ukbb/chr_list_{subset}.txt",
         snpList = "/scratch/jgblanc/ukbb/plink2-files-grm/{subset}/all_snp.prune.in"
     output:
         "/scratch/jgblanc/ukbb/grm/{subset}/sp_grm.part_{npart}_{parts}.grm.bin"
-    threads: 20
+    threads: 16
     resources:
         mem_mb=7000,
         walltime="00:03:00:00"
