@@ -93,7 +93,7 @@ rule run_fastGWA:
         overlap_snps="{root}/data/{dataset}/variants/{subdataset}/{gwas}/overlappingSNPs_chr{chr}.txt",
         covar="{root}/output/run_gwas/covars/fixed.txt"
     output:
-        "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{susbet}/{contrasts}_{chr}-PC{pc}.fastGWA",
+        "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
         prefix_out = "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{contrasts}_{chr}-PC{pc}",
         prefix_grm = "/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM",
