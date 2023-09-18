@@ -18,7 +18,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("{root}/output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS)
+        expand("{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.estimates.tsv", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS)
 
 
 ## Compute FGr
@@ -127,3 +127,27 @@ rule format_summary_stats:
         Rscript code/run_gwas/format_vilma.R {input.ss} {input.snps} {output}
         """
 
+rule run_vilma:
+    input:
+        ss="{root}/output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA",
+        ld="/scratch/jgblanc/wb_high_info/ld_manifest.txt"
+    output:
+        outlog = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.log",
+        cov = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.covariance.pkl",
+        npz = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.npz",
+        estimates = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.estimates.tsv"
+    params:
+        prefix_out = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}"
+    shell:
+        """
+        vilma fit --logfile {output.outlog} \
+	      --sumstats {input.ss} \
+	      --output {params.prefix_out} \
+	      --ld-schema{input.ld} \
+	      -K 81 \
+	      --init-hg 0.3 \
+	      --samplesizes 400e3 \
+	      --names ukbb \
+	      --learn-scaling \
+	      --extract {input.ss}
+        """
