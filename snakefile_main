@@ -8,7 +8,7 @@ SUBDATASET = ["EUR"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 CONTRASTS = ["French-Sardinian"]
-PC = [0,10]
+PC = [10,40]
 GWAS=["WBS"]
 
 def get_chr_num(x):
@@ -81,6 +81,7 @@ rule assemble_quant_covars:
     shell:
         """
         Rscript code/run_gwas/assemble_quant_covar.R {input.age} {input.covar} {input.pcs} {params.pcNum} {output}
+        gzip {input.covar}
         """
 
 rule run_fastGWA:
@@ -112,6 +113,7 @@ rule run_fastGWA:
 	--grm-sparse {params.prefix_grm} --pfile {params.prefix_plink} \
 	--threads {threads} \
 	--out {params.prefix_out}
+	      gzip {input.qcovar}
         """
 
 ## Run Vilma
@@ -150,4 +152,7 @@ rule run_vilma:
 	      --names ukbb \
 	      --learn-scaling \
 	      --extract {input.ss}
+	      gzip {input.ss}
         """
+
+
