@@ -9,16 +9,66 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(data.table)
 library(tidyverse)
+library(ggpubr)
 ```
 
 
 ## Look at fastGWA chr22
 
 ```{r}
-df <- fread("~/Downloads/French-Sardinian_22-PC0.fastGWA.gz")
+ALL0 <- fread("~/Downloads/French-Sardinian_22-PC0-ALL.fastGWA.gz")
+ALL10 <- fread("~/Downloads/French-Sardinian_22-PC10-ALL.fastGWA.gz")
+WBS0 <- fread("~/Downloads/French-Sardinian_22-PC0-WBS.fastGWA.gz")
+WBS10 <- fread("~/Downloads/French-Sardinian_22-PC10-WBS.fastGWA.gz")
 
-ggplot(data = df, aes(x=POS, y=-1 * log10(P))) + geom_point()
+p1 <- ggplot(data = ALL0, aes(x=POS, y=-1 * log10(P))) + geom_point() + ggtitle("ALL - 0")
+p2 <- ggplot(data = ALL10, aes(x=POS, y=-1 * log10(P))) + geom_point() + ggtitle("ALL - 10")
+p3 <- ggplot(data = WBS0, aes(x=POS, y=-1 * log10(P))) + geom_point() + ggtitle("WBS - 0")
+p4 <- ggplot(data = WBS10, aes(x=POS, y=-1 * log10(P))) + geom_point() + ggtitle("WBS - 10")
+
+sv <- ggarrange(p1,p2,p3,p4, nrow =4)
+ggsave("~/Desktop/compare.png",sv, width =8, height = 15)
 ```
+
+
+## Compare effect sizes
+
+All 0 vs 10
+```{r}
+plot(ALL0$BETA, ALL10$BETA)
+cor(ALL0$BETA, ALL10$BETA)
+```
+
+WBS 0 vs 10
+```{r}
+plot(WBS0$BETA, WBS10$BETA)
+cor(WBS0$BETA, WBS10$BETA)
+```
+
+
+ALL 0 vs WBS 0
+```{r}
+overlap <- intersect(ALL0$SNP, WBS0$SNP)
+ALL0_overlap <- ALL0 %>% filter(SNP %in% overlap)
+WBS0_overlap <- WBS0 %>% filter(SNP %in% overlap)
+
+plot(ALL0_overlap$BETA, WBS0_overlap$BETA)
+cor(ALL0_overlap$BETA, WBS0_overlap$BETA)
+```
+
+ALL 10 vs WBS 10 
+```{r}
+ALL10_overlap <- ALL10 %>% filter(SNP %in% overlap)
+WBS10_overlap <- WBS10 %>% filter(SNP %in% overlap)
+
+plot(ALL10_overlap$BETA, WBS10_overlap$BETA)
+cor(ALL10_overlap$BETA, WBS10_overlap$BETA)
+```
+
+
+
+
+
 ## Compare to Neale lab GWAS
 
 ```{r}
@@ -31,25 +81,71 @@ toPlot <- chr22 %>% filter(pval < 0.05)
 toPlot$POS <- as.numeric(toPlot$POS)
 ggplot(data = toPlot, aes(x=POS, y=-1 * log10(pval))) + geom_point()
 ```
+
 ## Compare overlapping SNPs 
 
 ```{r}
 chr22$POS <- as.numeric(chr22$POS) 
-dfOverlap <- inner_join(chr22, df, by = "POS")
-
-plot(dfOverlap$BETA, dfOverlap$beta)
-cor(dfOverlap$BETA, dfOverlap$beta)
+NLoverlapp <- intersect(chr22$POS, ALL0_overlap$POS)
+NL <- chr22 %>% filter(POS %in% NLoverlapp) %>% group_by(POS) %>% slice(1)
 ```
+
+
+ALL 0 vs NL 
+```{r}
+ALL0_NL <- ALL0 %>% filter(POS %in% NLoverlapp)
+
+plot(ALL0_NL$BETA, NL$beta)
+cor(ALL0_NL$BETA,NL$beta)
+```
+
+ALL 10 vs NL  
+```{r}
+ALL10_NL <- ALL10 %>% filter(POS %in% NLoverlapp)
+
+plot(ALL10_NL$BETA, NL$beta)
+cor(ALL10_NL$BETA,NL$beta)
+```
+
+WBS 0 vs NL 
+```{r}
+WBS0_NL <- WBS0 %>% filter(POS %in% NLoverlapp)
+
+plot(WBS0_NL$BETA, NL$beta)
+cor(WBS0_NL$BETA,NL$beta)
+```
+
+WBS 10 vs NL
+```{r}
+WBS10_NL <- WBS10 %>% filter(POS %in% NLoverlapp)
+
+plot(WBS10_NL$BETA, NL$beta)
+cor(WBS10_NL$BETA,NL$beta)
+```
+
+
+## Compare to ALL with 10 PCs and 0.95 threshold
 
 ```{r}
-dfSig <- dfOverlap %>% filter(pval < 5e-8 | P < 5e-8)
-plot(dfSig$BETA, dfSig$beta)
-abline(v = 0, col = "red")
-abline(h = 0, col = "red")
-cor(dfSig$BETA, dfSig$beta)
+df95 <- fread("~/Downloads/fastGWA_0.95.fastGWA")
+
+ggplot(data = df95, aes(x=POS, y=-1 * log10(P))) + geom_point() + ggtitle("ALL - 10 - 0.95")
+```
+ ALL 0.95 vs 0.05 cutoff 
+```{r}
+plot(ALL10$BETA, df95$BETA)
+cor(ALL10$BETA, df95$BETA)
 ```
 
+ALL 0.95 vs WBS 0.05
 ```{r}
-df <- fread("~/Downloads/genotype_measurement_batch_22000.txt")
+df95_overlap <- df95 %>% filter(SNP %in% overlap)
+
+plot(WBS10_overlap$BETA, df95_overlap$BETA)
+cor(WBS10_overlap$BETA, df95_overlap$BETA)
 ```
+
+
+
+
 

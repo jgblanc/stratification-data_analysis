@@ -18,7 +18,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS)
+        expand("{root}/output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS)
 
 
 ## Compute FGr
@@ -112,5 +112,18 @@ rule run_fastGWA:
 	--grm-sparse {params.prefix_grm} --pfile {params.prefix_plink} \
 	--threads {threads} \
 	--out {params.prefix_out}
+        """
+
+## Run Vilma
+
+rule format_summary_stats:
+    input:
+        ss="{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA",
+        snps="/scratch/jgblanc/wb_high_info/varlist.txt.gz"
+    output:
+        "{root}/output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA"
+    shell:
+        """
+        Rscript code/run_gwas/format_vilma.R {input.ss} {input.snps} {output}
         """
 
