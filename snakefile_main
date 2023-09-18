@@ -45,7 +45,7 @@ rule compute_FGr_chr:
 
 rule concat_chr_Tm:
     input:
-        expand("{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}_{chr}.txt", chr = CHR, root=ROOT, dataset = DATASET, contrasts=CONTRASTS, subdataset=SUBDATASET)
+        expand("{{root}}/output/calculate_FGr/{{dataset}}/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
     output:
         "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
     params:
@@ -54,6 +54,7 @@ rule concat_chr_Tm:
     shell:
         """
         Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
+        gzip {output}
         """
 
 ## Run GWAS
@@ -72,7 +73,7 @@ rule assemble_fixed_covars:
 rule assemble_quant_covars:
     input:
         age="{root}/data/phenotypes/age_at_recruitment_21022.txt",
-        covar="{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
+        covar="{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt.gz",
         pcs="{root}/data/phenotypes/genetic_PC_22009.txt"
     output:
         "{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
@@ -81,7 +82,6 @@ rule assemble_quant_covars:
     shell:
         """
         Rscript code/run_gwas/assemble_quant_covar.R {input.age} {input.covar} {input.pcs} {params.pcNum} {output}
-        gzip {input.covar}
         """
 
 rule run_fastGWA:
