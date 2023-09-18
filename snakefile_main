@@ -9,7 +9,7 @@ TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_c
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 CONTRASTS = ["French-Sardinian"]
 PC = [0,10]
-GWAS=["ALL", "WBS"]
+GWAS=["WBS"]
 
 def get_chr_num(x):
   out = int(x)
