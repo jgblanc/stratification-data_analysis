@@ -15,7 +15,6 @@ def get_chr_num(x):
   out = int(x)
   return out
 
-
 rule all:
     input:
         expand("{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.estimates.tsv", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS)
@@ -101,8 +100,8 @@ rule run_fastGWA:
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
-        mem_mb=500000,
-        walltime="24:00:00"
+        mem_mb=50000,
+        walltime="00:30:00"
     shell:
         """
         gcta  --pheno {input.pheno} \
@@ -140,6 +139,10 @@ rule run_vilma:
         estimates = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.estimates.tsv"
     params:
         prefix_out = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}"
+    threads: 16
+    resources:
+        mem_mb=50000,
+        walltime="00:30:00"
     shell:
         """
         vilma fit --logfile {output.outlog} \
@@ -147,6 +150,7 @@ rule run_vilma:
 	      --output {params.prefix_out} \
 	      --ld-schema {input.ld} \
 	      -K 81 \
+	      --ldthresh 0.8 \
 	      --init-hg 0.3 \
 	      --samplesizes 400e3 \
 	      --names ukbb \
