@@ -100,7 +100,7 @@ rule run_fastGWA:
     threads: 16
     resources:
         mem_mb=100,
-        walltime="00:30:00"
+        time="00:30:00"
     shell:
         """
         gcta  --pheno {input.pheno} \

@@ -189,9 +189,10 @@ rule format_ss_pgs:
         "output/prs/hgdp/{dataset}/{gwas}/{contrasts}-PC{pc}.all.tsv"
     params:
         all_chrs = CHR,
+        num_chr = len(CHR),
         prefix_one = "output/prs/hgdp/{dataset}/vilma/{gwas}/{contrasts}",
         prefix_two = "-PC{pc}.estimates.tsv"
     shell:
         """
-        Rscript code/prs/combine_chr.R {params.all_chrs} {params.prefix_one} {params.prefix_two} {output}
+        Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
         """
