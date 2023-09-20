@@ -53,7 +53,6 @@ rule concat_chr_Tm:
     shell:
         """
         Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
-        gzip {output}
         """
 
 ## Run GWAS
@@ -72,7 +71,7 @@ rule assemble_fixed_covars:
 rule assemble_quant_covars:
     input:
         age="{root}/data/phenotypes/age_at_recruitment_21022.txt",
-        covar="{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt.gz",
+        covar="{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
         pcs="{root}/data/phenotypes/genetic_PC_22009.txt"
     output:
         "{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
@@ -112,7 +111,6 @@ rule run_fastGWA:
 	--grm-sparse {params.prefix_grm} --pfile {params.prefix_plink} \
 	--threads {threads} \
 	--out {params.prefix_out}
-	      gzip {input.qcovar}
         """
 
 ## Run Vilma
@@ -156,7 +154,6 @@ rule run_vilma:
 	      --names ukbb \
 	      --learn-scaling \
 	      --extract {input.ss}
-	      gzip {input.ss}
         """
 
 
