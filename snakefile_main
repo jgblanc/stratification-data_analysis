@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =["22"]
-#for i in range(1, 23):
-#  CHR.append(str(i))
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
 ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 DATASET = ["hgdp"]
 SUBDATASET = ["EUR"]
@@ -99,7 +99,7 @@ rule run_fastGWA:
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
-        mem_mb=50000,
+        mem_mb=100,
         walltime="00:30:00"
     shell:
         """
@@ -139,8 +139,8 @@ rule run_vilma:
         prefix_out = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}"
     threads: 16
     resources:
-        mem_mb=50000,
-        walltime="00:30:00"
+        mem_mb=10000,
+        walltime="03:00:00"
     shell:
         """
         vilma fit --logfile {output.outlog} \
@@ -149,7 +149,7 @@ rule run_vilma:
 	      --ld-schema {input.ld} \
 	      -K 81 \
 	      --ldthresh 0.8 \
-	      --init-hg 0.3 \
+	      --init-hg 0.5 \
 	      --samplesizes 400e3 \
 	      --names ukbb \
 	      --learn-scaling \

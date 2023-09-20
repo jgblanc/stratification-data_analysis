@@ -9,9 +9,9 @@ cluster:
     --error=logs/{rule}/%j.err
     --time={resources.time}
 default-resources:
-  - partition=tier2q
+  - partition=tier1q
   - mem_mb=1000
-  - time="24:00:00"
+  - time="00:30:00"
 restart-times: 3
 max-jobs-per-second: 10
 max-status-checks-per-second: 1
