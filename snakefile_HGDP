@@ -6,7 +6,6 @@ SPNUM = len(SUBPOPS)
 CHR =[]
 for i in range(20, 23):
   CHR.append(str(i))
-ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 CONTRASTS = ["French-Sardinian"]
@@ -18,7 +17,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}_{chr}-PC{pc}.sscore", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS, gwas=GWAS, contrasts=CONTRASTS, pc=PC)
+        expand("output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}-PC{pc}.all.sscore", chr=CHR, dataset = DATASET, subpops=SUBPOPS, gwas=GWAS, contrasts=CONTRASTS, pc=PC)
 
 
 
@@ -223,4 +222,19 @@ rule build_pgs:
         plink2 --pfile {params.prefix_in} \
         --score {input.betas} center cols=dosagesum,scoresums  \
         --out {params.prefix_out}
+        """
+
+rule combine_pgs:
+    input:
+        expand("output/prs/hgdp/{{dataset}}/{{gwas}}/scores/{{contrasts}}_{chr}-PC{{pc}}.sscore", chr=CHR)
+    output:
+        "output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}-PC{pc}.all.sscore"
+    params:
+        all_chrs = CHR,
+        num_chr = len(CHR)
+        prefix_one = "output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}",
+        prefix_two = "-PC{pc}.sscore"
+    shell:
+        """
+        Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
         """
