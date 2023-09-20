@@ -46,5 +46,5 @@ for (i in 2:chr_num) {
 }
 
 # Save output
-fwrite(df, out_file,col.names=T,row.names=F,quote=F,sep="\t")
+fwrite(df, outfile,col.names=T,row.names=F,quote=F,sep="\t")
 
