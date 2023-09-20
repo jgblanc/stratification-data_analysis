@@ -26,9 +26,9 @@ rule all:
 
 rule get_EUR_sample_list:
     input:
-        "{root}/data/hgdp/hgdp_wgs.20190516.metadata.txt"
+        "data/hgdp/hgdp_wgs.20190516.metadata.txt"
     output:
-        "{root}/data/hgdp/hgdp_wgs.20190516.EUR_samples.txt"
+        "data/hgdp/hgdp_wgs.20190516.EUR_samples.txt"
     shell:
         """
         Rscript code/hgdp/get_EUR_samples.R {input} {output}
@@ -39,13 +39,13 @@ rule HGDP_make_plink2_EUR:
         psam="/gpfs/data/berg-lab/data/HGDP/plink2-files-hg19/hgdp_wgs.20190516.full.chr{chr}.psam",
         pvar="/gpfs/data/berg-lab/data/HGDP/plink2-files-hg19/hgdp_wgs.20190516.full.chr{chr}.pvar",
         pgen="/gpfs/data/berg-lab/data/HGDP/plink2-files-hg19/hgdp_wgs.20190516.full.chr{chr}.pgen",
-        samples="{root}/data/hgdp/hgdp_wgs.20190516.EUR_samples.txt"
+        samples="data/hgdp/hgdp_wgs.20190516.EUR_samples.txt"
     output:
-        psam="{root}/data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}.psam",
-        pvar="{root}/data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}.pvar",
-        pgen="{root}/data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}.pgen"
+        psam="data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}.pgen"
     params:
-        prefix_out="{root}/data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/plink2-files-raw/EUR/hgdp_wgs.20190516.full.chr{chr}",
 	      prefix_in="/gpfs/data/berg-lab/data/HGDP/plink2-files-hg19/hgdp_wgs.20190516.full.chr{chr}"
     shell:
         """
@@ -64,14 +64,14 @@ rule HGDP_make_plink2_EUR:
 
 rule HGDP_freq:
     input:
-        psam="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
-        pvar="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
-        pgen="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+        psam="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
     output:
-        freq="{root}/data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq"
+        freq="data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq"
     params:
-        prefix_in="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
-        prefix_out="{root}/data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
+        prefix_in="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
     shell:
         """
         plink2 --pfile {params.prefix_in} \
@@ -86,10 +86,10 @@ rule HGDP_freq:
 # Right now set for 1%
 rule get_overlapping_snps:
     input:
-        freq_hgdp="{root}/data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq",
-	      freq_ukbb="{root}/data/ukbb/variants/ALL/ukb_imp_chr{chr}_v3.afreq"
+        freq_hgdp="data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq",
+	      freq_ukbb="data/ukbb/variants/ALL/ukb_imp_chr{chr}_v3.afreq"
     output:
-        "{root}/data/hgdp/variants/{dataset}/ALL/overlappingSNPs_chr{chr}.txt"
+        "data/hgdp/variants/{dataset}/ALL/overlappingSNPs_chr{chr}.txt"
     shell:
         """
         Rscript code/genotypes/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
@@ -97,10 +97,10 @@ rule get_overlapping_snps:
 
 rule get_overlapping_snps_WBS:
     input:
-        freq_hgdp="{root}/data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq",
-	      freq_ukbb="{root}/data/ukbb/variants/WBS/ukb_imp_chr{chr}_v3.afreq"
+        freq_hgdp="data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq",
+	      freq_ukbb="data/ukbb/variants/WBS/ukb_imp_chr{chr}_v3.afreq"
     output:
-        "{root}/data/hgdp/variants/{dataset}/WBS/overlappingSNPs_chr{chr}.txt"
+        "data/hgdp/variants/{dataset}/WBS/overlappingSNPs_chr{chr}.txt"
     shell:
         """
         Rscript code/genotypes/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
@@ -110,17 +110,17 @@ rule get_overlapping_snps_WBS:
 
 rule HGDP_recode:
     input:
-        psam="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
-        pvar="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
-        pgen="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
-      	snp_list="{root}/data/hgdp/variants/{dataset}/ALL/overlappingSNPs_chr{chr}.txt"
+        psam="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
+      	snp_list="data/hgdp/variants/{dataset}/ALL/overlappingSNPs_chr{chr}.txt"
     output:
-        psam="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
-        pvar="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
-        pgen="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
     params:
-        prefix_in="{root}/data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
-        prefix_out="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
+        prefix_in="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
     shell:
         """
         plink2 --pfile {params.prefix_in} \
@@ -134,11 +134,11 @@ rule HGDP_recode:
 
 rule get_EUR_subpop_list:
     input:
-        "{root}/data/hgdp/hgdp_wgs.20190516.metadata.txt"
+        "data/hgdp/hgdp_wgs.20190516.metadata.txt"
     output:
-        expand("{{root}}/data/hgdp/popIDs/{{dataset}}/{subpops}.txt", subpops=SUBPOPS)
+        expand("data/hgdp/popIDs/{{dataset}}/{subpops}.txt", subpops=SUBPOPS)
     params:
-        prefix_out="{root}/data/hgdp/popIDs/{dataset}/"
+        prefix_out="data/hgdp/popIDs/{dataset}/"
     shell:
         """
         Rscript code/hgdp/get_EUR_subpop_samples.R {input} {params.prefix_out}
@@ -148,15 +148,15 @@ rule get_EUR_subpop_list:
 
 rule get_subpop_AF:
     input:
-        psam="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
-        pvar="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
-        pgen="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
-        IDs="{root}/data/hgdp/popIDs/{dataset}/{subpops}.txt"
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
+        IDs="data/hgdp/popIDs/{dataset}/{subpops}.txt"
     output:
-        "{root}/data/hgdp/popAF/{dataset}/{subpops}_chr{chr}.afreq"
+        "data/hgdp/popAF/{dataset}/{subpops}_chr{chr}.afreq"
     params:
-        prefix_in="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
-        prefix_out="{root}/data/hgdp/popAF/{dataset}/{subpops}_chr{chr}"
+        prefix_in="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/popAF/{dataset}/{subpops}_chr{chr}"
     shell:
         """
         plink2 --pfile {params.prefix_in} \
@@ -169,12 +169,12 @@ rule get_subpop_AF:
 
 rule get_all_r:
     input:
-        expand("{{root}}/data/hgdp/popAF/{{dataset}}/{subpops}_chr{{chr}}.afreq", subpops=SUBPOPS)
+        expand("data/hgdp/popAF/{{dataset}}/{subpops}_chr{{chr}}.afreq", subpops=SUBPOPS)
     output:
-        "{root}/data/hgdp/r/{dataset}/r_list_{chr}.txt"
+        "data/hgdp/r/{dataset}/r_list_{chr}.txt"
     params:
         spnum = SPNUM,
-        prefix_out = "{root}/data/hgdp/r/{dataset}/"
+        prefix_out = "data/hgdp/r/{dataset}/"
     shell:
         """
         Rscript code/hgdp/get_pairwise_EUR_AF_contrasts.R {params.spnum} {input} {params.prefix_out} {output}
@@ -209,10 +209,10 @@ rule format_ss_pgs:
 
 rule build_pgs:
     input:
-        betas="output/prs/hgdp/{dataset}/{gwas}/plink_format/{contrasts}_{chr}-PC{pc}.betas"
-        psam="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
-        pvar="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
-        pgen="{root}/data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+        betas="output/prs/hgdp/{dataset}/{gwas}/plink_format/{contrasts}_{chr}-PC{pc}.betas",
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
     output:
         "output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}_{chr}-PC{pc}.sscore"
     params:
@@ -220,7 +220,7 @@ rule build_pgs:
         prefix_in="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
     shell:
         """
-        plink2 --pfile {params.prefix_in}
-        --score {input.betas} center cols=dosagesum,scoresums
+        plink2 --pfile {params.prefix_in} \
+        --score {input.betas} center cols=dosagesum,scoresums  \
         --out {params.prefix_out}
         """
