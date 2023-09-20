@@ -4,7 +4,7 @@ GWAS=["WBS"]
 SUBPOPS=["French", "Sardinian", "Orcadian", "Russian", "BergamoItalian", "Tuscan", "Basque", "Adygei"]
 SPNUM = len(SUBPOPS)
 CHR =[]
-for i in range(1, 23):
+for i in range(20, 23):
   CHR.append(str(i))
 ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
@@ -18,7 +18,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("{root}/data/hgdp/variants/{dataset}/WBS/overlappingSNPs_chr{chr}.txt", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS)
+        expand("output/prs/hgdp/{dataset}/{gwas}/{contrasts}-PC{pc}.all.tsv", root=ROOT, chr=CHR, dataset = DATASET, subpops=SUBPOPS, gwas=GWAS, contrasts=CONTRASTS, pc=PC)
 
 
 
@@ -184,11 +184,11 @@ rule get_all_r:
 
 rule format_ss_pgs:
     input:
-        expand("output/prs/hgdp/{dataset}/vilma/{{gwas}}/{{contrasts}}_{chr}-PC{{pc}}.estimates.tsv", chr=CHR)
+        expand("output/prs/hgdp/{{dataset}}/vilma/{{gwas}}/{{contrasts}}_{chr}-PC{{pc}}.estimates.tsv", chr=CHR)
     output:
         "output/prs/hgdp/{dataset}/{gwas}/{contrasts}-PC{pc}.all.tsv"
     params:
-        all_chrs = CHR
+        all_chrs = CHR,
         prefix_one = "output/prs/hgdp/{dataset}/vilma/{gwas}/{contrasts}",
         prefix_two = "-PC{pc}.estimates.tsv"
     shell:
