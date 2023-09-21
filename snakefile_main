@@ -131,10 +131,10 @@ rule run_fastGWA:
 
 rule format_summary_stats:
     input:
-        ss="{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA",
+        ss="{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
         snps="/scratch/jgblanc/wb_high_info/varlist.txt.gz"
     output:
-        "{root}/output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA"
+        "{root}/output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"
     shell:
         """
         Rscript code/run_gwas/format_vilma.R {input.ss} {input.snps} {output}
@@ -142,15 +142,15 @@ rule format_summary_stats:
 
 rule run_vilma:
     input:
-        ss="{root}/output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{contrasts}_{chr}-PC{pc}.fastGWA",
+        ss="{root}/output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
         ld="/scratch/jgblanc/wb_high_info/ld_manifest.txt"
     output:
-        outlog = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.log",
-        cov = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.covariance.pkl",
-        npz = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.npz",
-        estimates = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.estimates.tsv"
+        outlog = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.log",
+        cov = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
+        npz = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.npz",
+        estimates = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv"
     params:
-        prefix_out = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}"
+        prefix_out = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}"
     threads: 16
     resources:
         mem_mb=10000,
