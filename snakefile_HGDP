@@ -4,7 +4,7 @@ GWAS=["WBS"]
 SUBPOPS=["French", "Sardinian", "Orcadian", "Russian", "BergamoItalian", "Tuscan", "Basque", "Adygei"]
 SPNUM = len(SUBPOPS)
 CHR =[]
-for i in range(20, 23):
+for i in range(1, 23):
   CHR.append(str(i))
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
@@ -231,7 +231,7 @@ rule combine_pgs:
         "output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}-PC{pc}.all.sscore"
     params:
         all_chrs = CHR,
-        num_chr = len(CHR)
+        num_chr = len(CHR),
         prefix_one = "output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}",
         prefix_two = "-PC{pc}.sscore"
     shell:

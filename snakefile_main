@@ -140,7 +140,7 @@ rule run_vilma:
     threads: 16
     resources:
         mem_mb=10000,
-        time="03:00:00"
+        time="24:00:00"
     shell:
         """
         vilma fit --logfile {output.outlog} \
