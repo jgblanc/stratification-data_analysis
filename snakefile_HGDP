@@ -17,7 +17,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}-PC{pc}.all.sscore", chr=CHR, dataset = DATASET, subpops=SUBPOPS, gwas=GWAS, contrasts=CONTRASTS, pc=PC)
+        expand("output/prs/hgdp/{dataset}/scores/{gwas}/{contrasts}-PC{pc}.all.sscore", chr=CHR, dataset = DATASET, subpops=SUBPOPS, gwas=GWAS, contrasts=CONTRASTS, pc=PC)
 
 
 
@@ -200,7 +200,7 @@ rule format_ss_pgs:
     input:
         "output/prs/hgdp/{dataset}/vilma/{gwas}/{contrasts}_{chr}-PC{pc}.estimates.tsv"
     output:
-        "output/prs/hgdp/{dataset}/{gwas}/plink_format/{contrasts}_{chr}-PC{pc}.betas"
+        "output/prs/hgdp/{dataset}/plink_format/{gwas}/{contrasts}_{chr}-PC{pc}.betas"
     shell:
         """
         Rscript code/prs/format_ss_for_plink.R {input} {output}
@@ -208,14 +208,14 @@ rule format_ss_pgs:
 
 rule build_pgs:
     input:
-        betas="output/prs/hgdp/{dataset}/{gwas}/plink_format/{contrasts}_{chr}-PC{pc}.betas",
+        betas="output/prs/hgdp/{dataset}/plink_format/{gwas}/{contrasts}_{chr}-PC{pc}.betas",
         psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
         pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
         pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
     output:
-        "output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}_{chr}-PC{pc}.sscore"
+        "output/prs/hgdp/{dataset}/scores/{gwas}/{contrasts}_{chr}-PC{pc}.sscore"
     params:
-        prefix_out="output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}_{chr}-PC{pc}",
+        prefix_out="output/prs/hgdp/{dataset}/scores/{gwas}/{contrasts}_{chr}-PC{pc}",
         prefix_in="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
     shell:
         """
@@ -226,13 +226,13 @@ rule build_pgs:
 
 rule combine_pgs:
     input:
-        expand("output/prs/hgdp/{{dataset}}/{{gwas}}/scores/{{contrasts}}_{chr}-PC{{pc}}.sscore", chr=CHR)
+        expand("output/prs/hgdp/{{dataset}}/scores/{{gwas}}/{{contrasts}}_{chr}-PC{{pc}}.sscore", chr=CHR)
     output:
-        "output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}-PC{pc}.all.sscore"
+        "output/prs/hgdp/{dataset}/scores/{gwas}/{contrasts}-PC{pc}.all.sscore"
     params:
         all_chrs = CHR,
         num_chr = len(CHR),
-        prefix_one = "output/prs/hgdp/{dataset}/{gwas}/scores/{contrasts}",
+        prefix_one = "output/prs/hgdp/{dataset}/scores/{gwas}/{contrasts}",
         prefix_two = "-PC{pc}.sscore"
     shell:
         """
