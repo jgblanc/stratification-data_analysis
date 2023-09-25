@@ -2,7 +2,7 @@
 
 args=commandArgs(TRUE)
 
-if(length(args)<5){stop("Provide path to covariate files")}
+if(length(args)<4){stop("Provide path to covariate files")}
 
 suppressWarnings(suppressMessages({
   library(data.table)

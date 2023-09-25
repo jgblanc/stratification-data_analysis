@@ -8,9 +8,9 @@ SUBDATASET = ["EUR"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 CONTRASTS = ["French-Sardinian"]
-PC = [10,40]
+PC = [40]
 GWAS=["WBS"]
-COVAR = ["FGr-LOCO", "control"]
+COVAR = ["control","FGr-LOCO"]
 
 def get_chr_num(x):
   out = int(x)
@@ -18,7 +18,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS, covar=COVAR)
+        expand("{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS, covar=COVAR)
 
 
 ## Compute FGr

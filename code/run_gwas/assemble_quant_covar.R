@@ -19,16 +19,22 @@ outfile = args[5]
 dfAge <- fread(age)
 dfPc <- fread(pc)
 dfFgr <- fread(fgr)
+colnames(dfFgr) <- c("#FID" ,"IID", "Sex","FGr")
+dfFgr <- dfFgr %>% select("#FID" ,"IID", "FGr")
+#print(head(dfFgr))
+
 
 # Subset to correct number of PCs
 dfPc <- dfPc[,1:(pcNum + 2)]
-print(ncol(dfPc))
+#print(ncol(dfPc))
 
 # Join files
-df <- inner_join(dfAge, dfPc, dfFgr, by = c("#FID", "IID"))
+df1 <- inner_join(dfAge, dfPc)
+df <- inner_join(df1, dfFgr, by = c("#FID", "IID"))
 
 # Drop rows with NA
 df <- drop_na(df)
+print(head(df))
 
 # Save file
 fwrite(df, outfile,col.names=T,row.names=F,quote=F,sep="\t")
