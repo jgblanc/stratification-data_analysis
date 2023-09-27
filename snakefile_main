@@ -1,8 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
+CHR =["22"]
 for i in range(1, 23):
   CHR.append(str(i))
-ROOT = ["/gpfs/data/berg-lab/jgblanc/stratification-data_analysis"]
 DATASET = ["hgdp"]
 SUBDATASET = ["EUR"]
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
@@ -18,24 +17,24 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv", root=ROOT, chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS, covar=COVAR)
+        expand("output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.betas" chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS, covar=COVAR)
 
 
 ## Compute FGr
 
 rule compute_FGr_chr:
     input:
-        r="{root}/data/{dataset}/r/{subdataset}/{contrasts}_chr{chr}.rvec",
+        r="data/{dataset}/r/{subdataset}/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="{root}/data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt"
+        overlap_snps="data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt"
     output:
-        "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}_{chr}.txt"
+        "output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}_{chr}.txt"
     resources:
         mem_mb=2000,
 	walltime="00:03:00:00"
     params:
         gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3",
-        out_prefix = "{root}/output/calculate_FGr/{dataset}/{subdataset}/{contrasts}_{chr}"
+        out_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{contrasts}_{chr}"
     shell:
         """
         Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output}
@@ -45,12 +44,12 @@ rule compute_FGr_chr:
 
 rule concat_chr_Tm:
     input:
-        expand("{{root}}/output/calculate_FGr/{{dataset}}/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+        expand("output/calculate_FGr/{{dataset}}/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
     output:
-        "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
+        "output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
     params:
         chrNum = lambda wildcards: get_chr_num(wildcards.chr),
-        prefix_in = "{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
@@ -60,10 +59,10 @@ rule concat_chr_Tm:
 
 rule assemble_fixed_covars:
     input:
-        sex="{root}/data/phenotypes/genetic_sex_22001.txt",
-        batch="{root}/data/phenotypes/genotype_measurement_batch_22000.txt"
+        sex="data/phenotypes/genetic_sex_22001.txt",
+        batch="data/phenotypes/genotype_measurement_batch_22000.txt"
     output:
-        "{root}/output/run_gwas/covars/fixed.txt"
+        "output/run_gwas/covars/fixed.txt"
     shell:
         """
         Rscript code/run_gwas/assemble_fixed_covar.R {input.sex} {input.batch} {output}
@@ -71,11 +70,11 @@ rule assemble_fixed_covars:
 
 rule assemble_quant_covars:
     input:
-        age="{root}/data/phenotypes/age_at_recruitment_21022.txt",
-        covar="{root}/output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
-        pcs="{root}/data/phenotypes/genetic_PC_22009.txt"
+        age="data/phenotypes/age_at_recruitment_21022.txt",
+        covar="output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
+        pcs="data/phenotypes/genetic_PC_22009.txt"
     output:
-        "{root}/output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
+        "output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
     params:
         pcNum = lambda wildcards: get_chr_num(wildcards.pc)
     shell:
@@ -85,10 +84,10 @@ rule assemble_quant_covars:
 
 rule assemble_quant_covars_control:
     input:
-        age="{root}/data/phenotypes/age_at_recruitment_21022.txt",
-        pcs="{root}/data/phenotypes/genetic_PC_22009.txt"
+        age="data/phenotypes/age_at_recruitment_21022.txt",
+        pcs="data/phenotypes/genetic_PC_22009.txt"
     output:
-        "{root}/output/run_gwas/covars/{dataset}/{subdataset}/control_{contrasts}_{chr}-PC{pc}.txt"
+        "output/run_gwas/covars/{dataset}/{subdataset}/control_{contrasts}_{chr}-PC{pc}.txt"
     params:
         pcNum = lambda wildcards: get_chr_num(wildcards.pc)
     shell:
@@ -98,17 +97,17 @@ rule assemble_quant_covars_control:
 
 rule run_fastGWA:
     input:
-        pheno="{root}/data/phenotypes/StandingHeight_Normalized_50.txt",
+        pheno="data/phenotypes/StandingHeight_Normalized_50.txt",
         sp="/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM.grm.sp",
         id="/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM.grm.id",
-        qcovar="{root}/output/run_gwas/covars/{dataset}/{subdataset}/{covar}_{contrasts}_{chr}-PC{pc}.txt",
+        qcovar="output/run_gwas/covars/{dataset}/{subdataset}/{covar}_{contrasts}_{chr}-PC{pc}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="{root}/data/{dataset}/variants/{subdataset}/{gwas}/overlappingSNPs_chr{chr}.txt",
-        covar="{root}/output/run_gwas/covars/fixed.txt"
+        overlap_snps="data/{dataset}/variants/{subdataset}/{gwas}/overlappingSNPs_chr{chr}.txt",
+        covar="output/run_gwas/covars/fixed.txt"
     output:
-        "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        "output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
-        prefix_out = "{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}",
+        prefix_out = "output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}",
         prefix_grm = "/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3"
     threads: 16
@@ -131,10 +130,10 @@ rule run_fastGWA:
 
 rule format_summary_stats:
     input:
-        ss="{root}/output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        ss="output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
         snps="/scratch/jgblanc/wb_high_info/varlist.txt.gz"
     output:
-        "{root}/output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"
+        "output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"
     shell:
         """
         Rscript code/run_gwas/format_vilma.R {input.ss} {input.snps} {output}
@@ -142,15 +141,15 @@ rule format_summary_stats:
 
 rule run_vilma:
     input:
-        ss="{root}/output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        ss="output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
         ld="/scratch/jgblanc/wb_high_info/ld_manifest.txt"
     output:
-        outlog = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.log",
-        cov = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
-        npz = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.npz",
-        estimates = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv"
+        outlog = "output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.log",
+        cov = "output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
+        npz = "output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.npz",
+        estimates = "output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv"
     params:
-        prefix_out = "{root}/output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}"
+        prefix_out = "output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}"
     threads: 16
     resources:
         mem_mb=10000,
@@ -170,4 +169,18 @@ rule run_vilma:
 	      --extract {input.ss}
         """
 
+## Run selection test
+
+rule assign_snps_to_blocks:
+    input:
+        ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
+        ss="output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv",
+        r="data/{dataset}/r/{subdataset}/{contrasts}_chr{chr}.rvec"
+    output:
+        betas="output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.betas",
+        header="output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/header.txt"
+    shell:
+        """
+        Rscript code/pga_test/assign_snps_to_blocks.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {output.header}
+        """
 

@@ -147,5 +147,59 @@ cor(WBS10_overlap$BETA, df95_overlap$BETA)
 
 
 
+## Compare Vilma posterior means 
 
+```{r}
+df <- fread("~/Downloads/French-Sardinian_22-PC10.estimates.tsv")
+df <- df %>% separate(ID, c("ID", "tmp1", "tmp2"), "_")
+
+df2 <- inner_join(WBS10, df, by = c("SNP" = "ID", "A1" = "A1", "A2" = "A2")) %>% mutate(sig = case_when(abs(posterior_ukbb)> 0.0001 ~ P,abs(posterior_ukbb)<= 0.0001~ 1))
+
+ggplot(data = df2, aes(x = BETA, y = posterior_ukbb)) + geom_point()
+
+ggplot(data = df2 , aes(x = POS, y = -1 * log10(P))) + geom_point() + geom_point(aes(x = POS, y = -1 * log10(sig)), col = "red")
+```
+
+# PGS in HGDP 
+
+```{r}
+df <- fread("~/Downloads/FGr-LOCO_French-Sardinian-PC40.all.sscore")
+metadata <- fread("~/Downloads/hgdp_wgs.20190516.metadata.txt")
+
+df <- inner_join(df, metadata, by = c("#IID" = "sample"))
+```
+
+
+```{r}
+hist(df$SCORE1_SUM)
+plot(df$latitude, df$SCORE1_SUM)
+```
+
+```{r}
+dfR <- df %>% filter(population == "French" | population == "Sardinian")
+
+ggplot(data = dfR, aes(x = population, y = SCORE1_SUM)) + geom_point() + geom_boxplot(alpha = 0.05) + ylab("Height PGS")
+
+ggplot(data = df, aes(x = population, y = SCORE1_SUM)) + geom_point() + geom_boxplot(alpha = 0.05) + ylab("Height PGS")
+```
+
+```{r}
+dfControl <- fread("~/Downloads/control_French-Sardinian-PC40.all.sscore")
+
+dfControl <- inner_join(dfControl, metadata, by = c("#IID" = "sample"))
+
+dfRControl <- dfControl %>% filter(population == "French" | population == "Sardinian")
+
+ggplot(data = dfRControl, aes(x = population, y = SCORE1_SUM)) + geom_point() + geom_boxplot(alpha = 0.05) + ylab("Height PGS")
+
+ggplot(data = dfControl, aes(x = population, y = SCORE1_SUM)) + geom_point() + geom_boxplot(alpha = 0.05) + ylab("Height PGS")
+```
+
+
+
+```{r}
+dfR %>% group_by(population) %>% summarise(mean = mean(SCORE1_SUM))
+
+dfRControl %>% group_by(population) %>% summarise(mean = mean(SCORE1_SUM))
+```
 
