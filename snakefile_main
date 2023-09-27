@@ -17,7 +17,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.betas", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS, covar=COVAR)
+        expand("output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}.all-PC{pc}.betas", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS, covar=COVAR)
 
 
 ## Compute FGr
@@ -177,9 +177,19 @@ rule assign_snps_to_blocks:
         ss="output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv",
         r="data/{dataset}/r/{subdataset}/{contrasts}_chr{chr}.rvec"
     output:
-        betas="output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.betas",
+        betas="output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.betas"
     shell:
         """
         Rscript code/pga_test/assign_snps_to_blocks.R {input.ldBlocks} {input.ss} {input.r} {output.betas}
         """
 
+rule concat_snps:
+    input:
+        expand("output/pga_test/{{dataset}}/{{subdataset}}/formated_ss/{{gwas}}/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.betas", chr=CHR)
+    output:
+        "output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}.all-PC{pc}.betas"
+    shell:
+        """
+        cat {input} > {output}
+        rm {input}
+        """
