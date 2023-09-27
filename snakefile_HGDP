@@ -9,7 +9,7 @@ for i in range(1, 23):
 TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 CONTRASTS = ["French-Sardinian"]
-PC = [10,40]
+PC = [40]
 COVAR=["FGr-LOCO", "control"]
 
 def get_params(x):
@@ -238,4 +238,5 @@ rule combine_pgs:
     shell:
         """
         Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
+	rm {input}
         """
