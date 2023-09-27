@@ -31,9 +31,6 @@ rvec <- fread(rFile)
 df <- inner_join(rvec, dfss, by = c("ID", "REF", "ALT"))
 df <- df %>% separate(ID, c("chr", "POS"), remove = FALSE)
 
-# Save header
-header <- c("#CHROM", "ID", "POS", "REF", "ALT", "r", "posterior_ukbb","block")
-fwrite(header, outfile_header, row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Assign SNPs to blocks
 
@@ -58,7 +55,7 @@ out <- df_blocks %>% select("#CHROM", "ID", "POS", "REF", "ALT", "r", "posterior
 
 
 # Save output
-fwrite(out, outfile_betas, row.names = F, col.names = T, quote = F, sep = "\t")
+fwrite(out, outfile, row.names = F, col.names = F, quote = F, sep = "\t")
 
 
 
