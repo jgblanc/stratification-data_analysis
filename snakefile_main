@@ -17,7 +17,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}.all-PC{pc}.betas", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS, covar=COVAR)
+        expand("output/pga_test/{dataset}/{subdataset}/results/{gwas}/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, pc=PC, gwas=GWAS, covar=COVAR)
 
 
 ## Compute FGr
@@ -192,4 +192,14 @@ rule concat_snps:
         """
         cat {input} > {output}
         rm {input}
+        """
+
+rule pga_test:
+    input:
+        "output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}.all-PC{pc}.betas"
+    output:
+        "output/pga_test/{dataset}/{subdataset}/results/{gwas}/{covar}_{contrasts}.all-PC{pc}.results"
+    shell:
+        """
+        Rscript code/pga_test/run_test_jacknife.R {input} {output}
         """
