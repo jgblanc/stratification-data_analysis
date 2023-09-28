@@ -68,4 +68,4 @@ colnames(out) <- c("q", "pval")
 out[1,] <- c(q, pval)
 
 # Save output
-fwrite(df, outfile,col.names=T,row.names=F,quote=F,sep="\t")
+fwrite(out, outfile,col.names=T,row.names=F,quote=F,sep="\t")
