@@ -1,0 +1,33 @@
+# Snakefile to run HGDP (full data) / UKBB  data analysis
+GWAS=["WBS"]
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
+TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
+#CONTRASTS = [s.rstrip("_chr9") for s in TMP]
+CONTRASTS = ["French-Sardinian"]
+PC = [40]
+COVAR=["FGr-LOCO", "control"]
+
+def get_params(x):
+  out = x.split("_")[1]
+  return out
+
+rule all:
+    input:
+        expand("data/sds/variants/sds_chr{chr}.txt", chr=CHR)
+
+
+# SDS Data processing
+
+rule overlapping_snp_WBS:
+    input:
+        freq_ukbb="data/ukbb/variants/WBS/ukb_imp_chr{chr}_v3.afreq",
+	      sds="data/sds/SDS_UK10K_n3195_release_Sep_19_2016.tab"
+    output:
+        "data/sds/variants/sds_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/sds/flip_overlapping_snps.R {input.freq_ukbb} {input.sds} {output}
+        """
+

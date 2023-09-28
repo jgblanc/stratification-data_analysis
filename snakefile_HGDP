@@ -92,7 +92,7 @@ rule get_overlapping_snps:
         "data/hgdp/variants/{dataset}/ALL/overlappingSNPs_chr{chr}.txt"
     shell:
         """
-        Rscript code/genotypes/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
+        Rscript code/hgdp/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
         """
 
 rule get_overlapping_snps_WBS:
@@ -103,7 +103,7 @@ rule get_overlapping_snps_WBS:
         "data/hgdp/variants/{dataset}/WBS/overlappingSNPs_chr{chr}.txt"
     shell:
         """
-        Rscript code/genotypes/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
+        Rscript code/hgdp/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
         """
 
 ## Recode HGDP with UKBB ref/alt alleles and save to new directory
