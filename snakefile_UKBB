@@ -15,7 +15,7 @@ for i in range(1, nPART+1):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/grm/{subset}/sparseGRM.grm.sp",chr=CHR, subset=SUBSET, npart=nPART, parts=PARTS)
+        expand("/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",chr=CHR, subset=SUBSET, npart=nPART, parts=PARTS)
 
 
 ## UKBB Genotype data processing

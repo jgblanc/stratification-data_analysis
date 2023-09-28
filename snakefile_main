@@ -25,15 +25,15 @@ rule all:
 rule compute_FGr_chr:
     input:
         r="data/{dataset}/r/{subdataset}/{contrasts}_chr{chr}.rvec",
-        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3.pgen",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/{dataset}/variants/{subdataset}/overlappingSNPs_chr{chr}.txt"
     output:
         "output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}_{chr}.txt"
     resources:
         mem_mb=2000,
-	walltime="00:03:00:00"
+	time="00:03:00:00"
     params:
-        gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ukb_imp_chr{chr}_v3",
+        gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
         out_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{contrasts}_{chr}"
     shell:
         """

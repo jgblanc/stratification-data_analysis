@@ -5,16 +5,17 @@
 
 args=commandArgs(TRUE)
 
-if(length(args)<3){stop("Rscript flip_overlapping_snps.R <ukbb.freq> <SDS> <outfile>")}
+if(length(args)<4){stop("Rscript flip_overlapping_snps.R <ukbb.freq> <SDS> <outfile>")}
 
 suppressWarnings(suppressMessages({
   library(data.table)
-  library(dplyr)
+  library(tidyverse)
 }))
 
 ukbb_file = args[1]
 sds_file = args[2]
-outfile = args[3]
+outfile_r = args[3]
+outfile_snps = args[4]
 
 # Read in UKBB freq file
 ukbb <- fread(ukbb_file)
@@ -38,6 +39,10 @@ df_out <- df_flipped %>% select("#CHROM", "ID.x", "REF", "ALT", "SDS")
 colnames(df_out) <- c("#CHROM", "ID", "REF", "ALT", "r")
 
 # Save output
-fwrite(df_out,outfile, row.names = F, col.names = T, quote = F, sep = "\t")
+fwrite(df_out,outfile_r, row.names = F, col.names = T, quote = F, sep = "\t")
 
+# Format for overlapping snps
+df_snps <- df_out %>% select(ID, REF)
 
+# Save output
+fwrite(df_snps,outfile_snps, row.names = F, col.names = T, quote = F, sep = "\t")

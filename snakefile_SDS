@@ -15,7 +15,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/sds/variants/sds_chr{chr}.txt", chr=CHR)
+        expand("data/sds/variants/UK10K/WBS/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS)
 
 
 # SDS Data processing
@@ -25,9 +25,10 @@ rule overlapping_snp_WBS:
         freq_ukbb="data/ukbb/variants/WBS/ukb_imp_chr{chr}_v3.afreq",
 	      sds="data/sds/SDS_UK10K_n3195_release_Sep_19_2016.tab"
     output:
-        "data/sds/variants/sds_chr{chr}.txt"
+        rvec="data/sds/r/UK10K/sds_chr{chr}.rvec",
+	snps="data/sds/variants/UK10K/WBS/overlappingSNPs_chr{chr}.txt"
     shell:
         """
-        Rscript code/sds/flip_overlapping_snps.R {input.freq_ukbb} {input.sds} {output}
+        Rscript code/sds/flip_overlapping_snps.R {input.freq_ukbb} {input.sds} {output.rvec} {output.snps}
         """
 
