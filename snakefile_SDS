@@ -15,7 +15,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/sds/variants/UK10K/WBS/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS)
+        expand("data/sds/UK10K/WBS/variants/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS)
 
 
 # SDS Data processing
