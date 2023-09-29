@@ -22,11 +22,11 @@ rule all:
 
 rule overlapping_snp_WBS:
     input:
-        freq_ukbb="data/ukbb/variants/WBS/ukb_imp_chr{chr}_v3.afreq",
+        freq_ukbb="data/ukbb/WBS/variants/ukb_imp_chr{chr}_v3.afreq",
 	      sds="data/sds/SDS_UK10K_n3195_release_Sep_19_2016.tab"
     output:
-        rvec="data/sds/r/UK10K/sds_chr{chr}.rvec",
-	snps="data/sds/variants/UK10K/WBS/overlappingSNPs_chr{chr}.txt"
+        rvec="data/sds/UK10K/r/sds_chr{chr}.rvec",
+	snps="data/sds/UK10K/WBS/variants/overlappingSNPs_chr{chr}.txt"
     shell:
         """
         Rscript code/sds/flip_overlapping_snps.R {input.freq_ukbb} {input.sds} {output.rvec} {output.snps}

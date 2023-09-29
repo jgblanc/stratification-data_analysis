@@ -10,7 +10,8 @@ SUBDATASET = ["UK10K"]
 CONTRASTS = ["sds"]
 PC = [40]
 GWAS=["WBS"]
-COVAR = ["control","FGr-LOCO"]
+COVAR = ["no-Fgr","FGr-LOCO"]
+PHENOTYPE=["StandingHeight_Normalized_50"]
 
 def get_chr_num(x):
   out = int(x)
@@ -18,16 +19,16 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr-LOCO_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS)
+        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE)
 
 
 ## Compute FGr
 
 rule compute_FGr_chr:
     input:
-        r="data/{dataset}/r/{subdataset}/{contrasts}_chr{chr}.rvec",
+        r="data/{dataset}/{subdataset}/r/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/{dataset}/variants/{subdataset}/{gwas}/overlappingSNPs_chr{chr}.txt"
+        overlap_snps="data/{dataset}/{subdataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
     output:
         "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt"
     resources:
@@ -63,19 +64,19 @@ rule assemble_fixed_covars:
         sex="data/phenotypes/genetic_sex_22001.txt",
         batch="data/phenotypes/genotype_measurement_batch_22000.txt"
     output:
-        "output/run_gwas/covars/fixed.txt"
+        "output/run_gwas/fixed_covars.txt"
     shell:
         """
         Rscript code/run_gwas/assemble_fixed_covar.R {input.sex} {input.batch} {output}
         """
 
-rule assemble_quant_covars:
+rule assemble_quant_covars_FGr:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
         covar="output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
         pcs="data/phenotypes/genetic_PC_22009.txt"
     output:
-        "output/run_gwas/covars/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
+        "output/run_gwas/{dataset}/{subdataset}/{gwas}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
     params:
         pcNum = lambda wildcards: get_chr_num(wildcards.pc)
     shell:
@@ -83,12 +84,12 @@ rule assemble_quant_covars:
         Rscript code/run_gwas/assemble_quant_covar.R {input.age} {input.covar} {input.pcs} {params.pcNum} {output}
         """
 
-rule assemble_quant_covars_control:
+rule assemble_quant_covars:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
         pcs="data/phenotypes/genetic_PC_22009.txt"
     output:
-        "output/run_gwas/covars/{dataset}/{subdataset}/control_{contrasts}_{chr}-PC{pc}.txt"
+        "output/run_gwas/{dataset}/{subdataset}/{gwas}/covariates/no-FGr_{contrasts}_{chr}-PC{pc}.txt"
     params:
         pcNum = lambda wildcards: get_chr_num(wildcards.pc)
     shell:
@@ -98,17 +99,17 @@ rule assemble_quant_covars_control:
 
 rule run_fastGWA:
     input:
-        pheno="data/phenotypes/StandingHeight_Normalized_50.txt",
+        pheno="data/phenotypes/{phenotype}.txt",
         sp="/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM.grm.sp",
         id="/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM.grm.id",
-        qcovar="output/run_gwas/covars/{dataset}/{subdataset}/{covar}_{contrasts}_{chr}-PC{pc}.txt",
+        qcovar="output/run_gwas/{dataset}/{subdataset}/{gwas}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/{dataset}/variants/{subdataset}/{gwas}/overlappingSNPs_chr{chr}.txt",
-        covar="output/run_gwas/covars/fixed.txt"
+        overlap_snps="data/{dataset}/{subdataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt",
+        covar="output/run_gwas/fixed_covars.txt"
     output:
-        "output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        "output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
-        prefix_out = "output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}",
+        prefix_out = "output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw/{covar}_{contrasts}_{chr}-PC{pc}",
         prefix_grm = "/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3"
     threads: 16
