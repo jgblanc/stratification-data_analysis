@@ -43,7 +43,7 @@ rule compute_FGr_chr:
 
 # Add together individal chromosomes LOCO
 
-rule concat_chr_Tm:
+rule concat_chr_FGr:
     input:
         expand("output/calculate_FGr/{{dataset}}/{{subdataset}}/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
     output:
