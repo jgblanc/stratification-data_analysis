@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 DATASET = ["sds"]
 SUBDATASET = ["UK10K"]
 #TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
@@ -19,7 +19,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Compute FGr
@@ -132,10 +132,10 @@ rule run_fastGWA:
 
 rule format_summary_stats:
     input:
-        ss="output/run_gwas/{dataset}/{subdataset}/raw/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        ss="output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
         snps="/scratch/jgblanc/wb_high_info/varlist.txt.gz"
     output:
-        "output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"
+        "output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma_format/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"
     shell:
         """
         Rscript code/run_gwas/format_vilma.R {input.ss} {input.snps} {output}
@@ -143,15 +143,15 @@ rule format_summary_stats:
 
 rule run_vilma:
     input:
-        ss="output/run_gwas/{dataset}/{subdataset}/vilma_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        ss="output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma_format/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
         ld="/scratch/jgblanc/wb_high_info/ld_manifest.txt"
     output:
-        outlog = "output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.log",
-        cov = "output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
-        npz = "output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.npz",
-        estimates = "output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv"
+        outlog = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.log",
+        cov = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
+        npz = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.npz",
+        estimates = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv"
     params:
-        prefix_out = "output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}"
+        prefix_out = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}"
     threads: 16
     resources:
         mem_mb=10000,
@@ -176,10 +176,10 @@ rule run_vilma:
 rule assign_snps_to_blocks:
     input:
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
-        ss="output/prs/{dataset}/{subdataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv",
-        r="data/{dataset}/r/{subdataset}/{contrasts}_chr{chr}.rvec"
+        ss="output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv",
+        r="data/{dataset}/{subdataset}/r/{contrasts}_chr{chr}.rvec"
     output:
-        betas="output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.betas"
+        betas="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}_{chr}-PC{pc}.betas"
     shell:
         """
         Rscript code/pga_test/assign_snps_to_blocks.R {input.ldBlocks} {input.ss} {input.r} {output.betas}
@@ -187,9 +187,9 @@ rule assign_snps_to_blocks:
 
 rule concat_snps:
     input:
-        expand("output/pga_test/{{dataset}}/{{subdataset}}/formated_ss/{{gwas}}/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.betas", chr=CHR)
+        expand("output/pga_test/{{dataset}}/{{subdataset}}/{{gwas}}/{{phenotype}}/formated_ss/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.betas", chr=CHR)
     output:
-        "output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}.all-PC{pc}.betas"
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas"
     shell:
         """
         cat {input} > {output}
@@ -198,9 +198,9 @@ rule concat_snps:
 
 rule pga_test:
     input:
-        "output/pga_test/{dataset}/{subdataset}/formated_ss/{gwas}/{covar}_{contrasts}.all-PC{pc}.betas"
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas"
     output:
-        "output/pga_test/{dataset}/{subdataset}/results/{gwas}/{covar}_{contrasts}.all-PC{pc}.results"
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results/{covar}_{contrasts}.all-PC{pc}.results"
     shell:
         """
         Rscript code/pga_test/run_test_jacknife.R {input} {output}
