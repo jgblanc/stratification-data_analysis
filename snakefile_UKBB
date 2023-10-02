@@ -24,7 +24,7 @@ rule all:
 
 rule UKBB_begen_to_plink2:
     input:
-        bgen="/gpfs/data/pierce-lab/uk-biobank-genotypes/ukb_imp_chr{chr}_v3.bgen",
+        bgen="/gpfs/data/xhe-lab/uk-biobank-genotypes/ukb_imp_chr{chr}_v3.bgen",
         sample="/gpfs/data/berg-lab/data/ukbb/ukb22828_c22_b0_v3_s487192.sample"
     output:
         psam="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.psam",
@@ -54,7 +54,7 @@ rule UKBB_begen_to_plink2:
 
 rule UKBB_begen_to_plink2_WBS:
     input:
-        bgen="/gpfs/data/pierce-lab/uk-biobank-genotypes/ukb_imp_chr{chr}_v3.bgen",
+        bgen="/gpfs/data/xhe-lab/uk-biobank-genotypes/ukb_imp_chr{chr}_v3.bgen",
         sample="/gpfs/data/berg-lab/data/ukbb/ukb22828_c22_b0_v3_s487192.sample",
         WBS="data/ukbb/WBS.ids"
     output:
