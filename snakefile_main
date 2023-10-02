@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =["22"]
-#for i in range(1, 23):
-#  CHR.append(str(i))
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
 DATASET = ["sds"]
 SUBDATASET = ["UK10K"]
 #TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]

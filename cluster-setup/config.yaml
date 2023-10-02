@@ -5,7 +5,7 @@ cluster:
     --ntasks={threads}
     --mem={resources.mem_mb}
     --job-name=smk-{rule}-{wildcards.dataset}
-    --output=logs/{rule}/%j.out
+    --output=logs/{rule}/{wildcards.dataset}%j.out
     --error=logs/{rule}/%j.err
     --time={resources.time}
 default-resources:
