@@ -32,6 +32,7 @@ rule UKBB_begen_to_plink2:
 	      pgen="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen"
     params:
         prefix="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
+    threads: 16
     resources:
         mem_mb=38000,
 	walltime="00:06:00:00"
@@ -47,7 +48,7 @@ rule UKBB_begen_to_plink2:
 	      --max-alleles 2 \
 	      --make-pgen \
 	      --set-all-var-ids @:# \
-	      --threads 20 \
+	      --threads 16 \
 	      --memory 38000 \
 	      --out {params.prefix}
 	      """
