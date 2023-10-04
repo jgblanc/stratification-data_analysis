@@ -11,7 +11,8 @@ CONTRASTS = ["sds"]
 PC = [0,10,40]
 GWAS=["WBS"]
 COVAR = ["no-FGr","FGr-LOCO"]
-PHENOTYPE=["StandingHeight_Normalized_50", "BMI_Normalized_21001", "AgeOfMenarche_Normalized_2714", "HipCircumference_Normalized_49", "WaistCircumference_Normalized_48", "BirthWeight_Normalized_20022"]
+#PHENOTYPE=["StandingHeight_Normalized_50", "BMI_Normalized_21001", "AgeOfMenarche_Normalized_2714", "HipCircumference_Normalized_49", "WaistCircumference_Normalized_48", "BirthWeight_Normalized_20022"]
+PHENOTYPE = ["BMI_Normalized_21001"]
 
 def get_chr_num(x):
   out = int(x)
@@ -139,6 +140,7 @@ rule format_summary_stats:
     shell:
         """
         Rscript code/run_gwas/format_vilma.R {input.ss} {input.snps} {output}
+        rm {input.ss}
         """
 
 rule run_vilma:
@@ -169,6 +171,7 @@ rule run_vilma:
 	      --names ukbb \
 	      --learn-scaling \
 	      --extract {input.ss}
+	      rm {input.ss}
         """
 
 ## Run selection test
@@ -183,6 +186,7 @@ rule assign_snps_to_blocks:
     shell:
         """
         Rscript code/pga_test/assign_snps_to_blocks.R {input.ldBlocks} {input.ss} {input.r} {output.betas}
+        rm {input.ss}
         """
 
 rule concat_snps:
@@ -204,4 +208,5 @@ rule pga_test:
     shell:
         """
         Rscript code/pga_test/run_test_jacknife.R {input} {output}
+        gzip {input}
         """
