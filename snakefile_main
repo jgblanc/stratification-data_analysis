@@ -11,8 +11,8 @@ CONTRASTS = ["sds"]
 PC = [0,10,40]
 GWAS=["WBS"]
 COVAR = ["no-FGr","FGr-LOCO"]
-PHENOTYPE=["StandingHeight_Normalized_50", "BMI_Normalized_21001", "AgeOfMenarche_Normalized_2714", "HipCircumference_Normalized_49", "WaistCircumference_Normalized_48", "BirthWeight_Normalized_20022"]
-#PHENOTYPE = ["BMI_Normalized_21001"]
+#PHENOTYPE=["StandingHeight_Normalized_50", "BMI_Normalized_21001", "AgeOfMenarche_Normalized_2714", "HipCircumference_Normalized_49", "WaistCircumference_Normalized_48", "BirthWeight_Normalized_20022"]
+PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 
 def get_chr_num(x):
   out = int(x)
