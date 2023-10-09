@@ -11,8 +11,9 @@ CONTRASTS = ["sds"]
 PC = [0,10,40]
 GWAS=["WBS"]
 COVAR = ["no-FGr","FGr-LOCO"]
-#PHENOTYPE=["StandingHeight_Normalized_50", "BMI_Normalized_21001", "AgeOfMenarche_Normalized_2714", "HipCircumference_Normalized_49", "WaistCircumference_Normalized_48", "BirthWeight_Normalized_20022"]
-PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+PHENOTYPE=['Cholesterol_Normalized_30690', 'AspartateAminotransferase_Normalized_30650', 'HDL_Normalized_30760', 'BasophillPercentage_Normalized_30220', 'BodyWeight_Normalized_21002']
+#PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+print(PHENOTYPE)
 
 def get_chr_num(x):
   out = int(x)
@@ -100,7 +101,7 @@ rule assemble_quant_covars:
 
 rule run_fastGWA:
     input:
-        pheno="data/phenotypes/{phenotype}.txt",
+        pheno="data/phenotypes/normalized/{phenotype}.txt",
         sp="/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM.grm.sp",
         id="/scratch/jgblanc/ukbb/grm/{gwas}/sparseGRM.grm.id",
         qcovar="output/run_gwas/{dataset}/{subdataset}/{gwas}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
