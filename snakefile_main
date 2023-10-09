@@ -149,12 +149,12 @@ rule run_vilma:
         ss="output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma_format/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
         ld="/scratch/jgblanc/wb_high_info/ld_manifest.txt"
     output:
-        outlog = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.log",
-        cov = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
-        npz = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.npz",
-        estimates = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv"
+        outlog = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.log",
+        cov = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
+        npz = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.npz",
+        estimates = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv"
     params:
-        prefix_out = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}"
+        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}"
     threads: 16
     resources:
         mem_mb=10000,
@@ -180,10 +180,10 @@ rule run_vilma:
 rule assign_snps_to_blocks:
     input:
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
-        ss="output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv",
+        ss="/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv",
         r="data/{dataset}/{subdataset}/r/{contrasts}_chr{chr}.rvec",
-        cov = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
-        npz = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.npz"
+        cov = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
+        npz = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.npz"
     output:
         betas="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}_{chr}-PC{pc}.betas"
     shell:
