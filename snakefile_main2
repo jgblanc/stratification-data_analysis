@@ -11,7 +11,7 @@ CONTRASTS = ["sds"]
 PC = [0,10,40]
 GWAS=["WBS"]
 COVAR = ["no-FGr","FGr-LOCO"]
-PHENOTYPE=["AgeOfMenarche_Normalized_2714", "StandingHeight_Normalized_50","BirthWeight_Normalized_20022", "BodyWeight_Normalized_21002", "HipCircumference_Normalized_49", "WaistCircumference_Normalized_48"]
+PHENOTYPE=["AgeOfMenarche_Normalized_2714", "StandingHeight_Normalized_50","BirthWeight_Normalized_20022", "BMI_Normalized_21001", "HipCircumference_Normalized_49", "WaistCircumference_Normalized_48"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 print(PHENOTYPE)
 
@@ -220,7 +220,7 @@ rule pga_test:
 
 rule concat_pga_test:
     input:
-        expand("output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
+        expand("output/pga_test/{{dataset}}/{{subdataset}}/{{gwas}}/{phenotype}/results/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
     output:
         "plots/{dataset}/{subdataset}/{gwas}/results.txt"
     shell:

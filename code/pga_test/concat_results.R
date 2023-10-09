@@ -13,8 +13,7 @@ suppressWarnings(suppressMessages({
 
 outfile = args[1]
 
-dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 5))
-colnames(dfOut) <- c("q", "p", "phenotype", "covar", "pc")
+dfOut <- matrix(NA, nrow = 1, ncol = 5)
 
 for (i in 2:length(args)) {
 
@@ -50,7 +49,8 @@ for (i in 2:length(args)) {
 }
 
 # Remove first row
-dfOut <- dfOut[2:nrow(dfOut),]
+dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
+colnames(dfOut) <- c("q", "p", "phenotype", "covar", "pc")
 
 # Save file
 print(dfOut)
