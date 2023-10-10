@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=main
-#SBATCH --output=logs/main.out
-#SBATCH --error=logs/main.err
+#SBATCH --job-name=main_test
+#SBATCH --output=logs/main_test.out
+#SBATCH --error=logs/main_test.err
 #SBATCH --time=48:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
