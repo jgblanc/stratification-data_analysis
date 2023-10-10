@@ -11,7 +11,7 @@ CONTRASTS = ["sds"]
 PC = [0,10,40]
 GWAS=["WBS"]
 COVAR = ["no-FGr","FGr-LOCO"]
-PHENOTYPE=['Cholesterol_Normalized_30690', 'AspartateAminotransferase_Normalized_30650', 'HDL_Normalized_30760', 'BasophillPercentage_Normalized_30220', 'BodyWeight_Normalized_21002']
+PHENOTYPE=['Cholesterol_Normalized_30690', 'AspartateAminotransferase_Normalized_30650', 'HDL_Normalized_30760', 'BasophillPercentage_Normalized_30220', 'BodyWeight_Normalized_21002',"AgeOfMenarche_Normalized_2714", "StandingHeight_Normalized_50","BirthWeight_Normalized_20022", "BMI_Normalized_21001", "HipCircumference_Normalized_49", "WaistCircumference_Normalized_48"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 print(PHENOTYPE)
 
@@ -214,4 +214,16 @@ rule pga_test:
         """
         Rscript code/pga_test/run_test_jacknife.R {input} {output}
         gzip {input}
+        """
+
+## Compile Results
+
+rule concat_pga_test:
+    input:
+        expand("output/pga_test/{{dataset}}/{{subdataset}}/{{gwas}}/{phenotype}/results/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
+    output:
+        "plots/{dataset}/{subdataset}/{gwas}/results.txt"
+    shell:
+        """
+        Rscript code/pga_test/concat_results.R {output} {input}
         """
