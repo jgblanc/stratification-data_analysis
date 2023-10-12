@@ -8,10 +8,10 @@ SUBDATASET = ["UK10K"]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 #CONTRASTS = ["French-Sardinian", "BergamoItalian-Basque"]
 CONTRASTS = ["sds"]
-PC = [0,10,40]
+PC = [40,10,0]
 GWAS=["WBS"]
-COVAR = ["no-FGr","FGr-LOCO"]
-PHENOTYPE=["AgeOfMenarche_Normalized_2714", "StandingHeight_Normalized_50","BirthWeight_Normalized_20022", "BMI_Normalized_21001", "HipCircumference_Normalized_49", "WaistCircumference_Normalized_48"]
+COVAR = ["no-FGr", "FGr-LOCO"]
+PHENOTYPE=['StandingHeight_Normalized_50']
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 print(PHENOTYPE)
 
@@ -21,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("plots/{dataset}/{subdataset}/{gwas}/results.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand(output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.sscore", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Compute FGr
@@ -228,3 +228,40 @@ rule concat_pga_test:
         Rscript code/pga_test/concat_results.R {output} {input}
         """
 
+## Compute R2 in non-WBS Europeans
+
+rule pgs_sscore:
+    input:
+        betas="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas.gzip",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+        IDs="data/ukbb/nonWBS-White.ids"
+    output:
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.{chr}-PC{pc}.sscore"
+    params:
+        prefix_out="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.{chr}-PC{pc}",
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
+    shell:
+        """
+        gunzip {input}
+        plink2 --pfile {params.prefix_in} \
+        --keep {input.IDs}
+        --score {input.betas} center cols=dosagesum,scoresums  \
+        --out {params.prefix_out}
+        """
+
+
+rule combine_pgs:
+    input:
+        expand("output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.{chr}-PC{pc}.sscore", chr=CHR)
+    output:
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.sscore"
+    params:
+        all_chrs = CHR,
+        num_chr = len(CHR),
+        prefix_one = "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}",
+        prefix_two = "-PC{pc}.sscore"
+    shell:
+        """
+        Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
+	rm {input}
+        """

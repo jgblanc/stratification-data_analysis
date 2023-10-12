@@ -13,6 +13,19 @@ library(ggpubr)
 ```
 
 
+## Get non-WBS IDs 
+
+```{r}
+WBS <- fread("~/Downloads/WBS.ids")
+ALL <- fread("~/Downloads/EthnicBackground_21000.txt")
+
+df <- ALL %>% filter(!IID %in% WBS$IID) %>% filter(EthnicBackground_21000 %in% c(1, 1001, 1002, 1003))
+dfOut <- df[,1:2]
+
+fwrite(dfOut,"~/Downloads/nonWBS-White.ids", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+
 ## Look at fastGWA chr22
 
 ```{r}
@@ -202,4 +215,25 @@ dfR %>% group_by(population) %>% summarise(mean = mean(SCORE1_SUM))
 
 dfRControl %>% group_by(population) %>% summarise(mean = mean(SCORE1_SUM))
 ```
+
+
+```{r}
+df <- fread("../plots/sds/UK10K/WBS/results.txt")
+df$log10P <- -1 *  log10(df$p)
+df$pc <- as.character(df$pc)
+df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
+ 
+
+df_covar <- df %>% filter(covar == TRUE)
+df_novar <- df %>% filter(covar == FALSE)
+df_covar$diff <- df_covar$q - df_novar$q
+
+ggplot(df, aes(y = phenotype, x = pc, fill = q)) + geom_tile() + facet_wrap(~covar) + scale_fill_gradient(low="white", high="blue") + geom_text(aes(label=sig), color="black", size=5) 
+```
+
+```{r}
+ggplot(df_covar, aes(y = phenotype, x = pc, fill = diff)) + geom_tile()+ scale_fill_gradient2(low="red", mid = "white", high="blue")
+```
+
+
 
