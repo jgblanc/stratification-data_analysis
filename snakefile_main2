@@ -8,7 +8,7 @@ SUBDATASET = ["UK10K"]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 #CONTRASTS = ["French-Sardinian", "BergamoItalian-Basque"]
 CONTRASTS = ["sds"]
-PC = [40,10,0]
+PC = [40]
 GWAS=["WBS"]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=['StandingHeight_Normalized_50']
@@ -209,10 +209,11 @@ rule pga_test:
     input:
         "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas"
     output:
-        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results/{covar}_{contrasts}.all-PC{pc}.results"
+        results="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results/{covar}_{contrasts}.all-PC{pc}.results",
+	gzip="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas.gz"
     shell:
         """
-        Rscript code/pga_test/run_test_jacknife.R {input} {output}
+        Rscript code/pga_test/run_test_jacknife.R {input} {output.results}
         gzip {input}
         """
 
@@ -232,19 +233,17 @@ rule concat_pga_test:
 
 rule format_ss_pgs:
     input:
-        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas.gzip"
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas.gz"
     output:
-        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/plink_format/{covar}_{contrasts}_{chr}-PC{pc}.betas"
+        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/plink_format/{covar}_{contrasts}.all-PC{pc}.betas"
     shell:
         """
-        gunzip {input}
         Rscript code/prs/format_ss_for_plink.R {input} {output}
-        gzip {input}
         """
 
 rule pgs_sscore:
     input:
-        betas="output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/plink_format/{covar}_{contrasts}_{chr}-PC{pc}.betas"",
+        betas="output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/plink_format/{covar}_{contrasts}.all-PC{pc}.betas",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
         IDs="data/ukbb/nonWBS-White.ids"
     output:
@@ -255,10 +254,9 @@ rule pgs_sscore:
     shell:
         """
         plink2 --pfile {params.prefix_in} \
-        --keep {input.IDs}
+        --keep {input.IDs} \
         --score {input.betas} center cols=dosagesum,scoresums  \
         --out {params.prefix_out}
-        rm {input.betas}
         """
 
 
@@ -276,4 +274,5 @@ rule combine_pgs:
         """
         Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
 	      rm {input}
+	      rm {params.prefix_one}*.log
         """

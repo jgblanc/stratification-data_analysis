@@ -22,7 +22,7 @@ df <- fread(ss)
 
 colnames(df) <- c("#CHROM", "ID", "POS", "REF", "ALT", "r", "posterior_ukbb","block")
 df <- df %>% separate(ID, c("ID", "tmp1", "tmp2"), "_") %>%
-  selec(ID, ALT, posterior_ukbb)
+  select(ID, ALT, posterior_ukbb)
 
 
 # Save output

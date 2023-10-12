@@ -20,7 +20,7 @@ print(p1)
 print(p2)
 
 # Read in first data frame
-fn <- paste0(p1, "_", args[5], p2)
+fn <- paste0(p1, ".", args[5], p2)
 print(fn)
 df <- fread(fn)
 
@@ -32,7 +32,7 @@ if (chr_num > 1) {
     print(paste0("Adding chr num ", args[4+i]))
 
     # Read in data frame
-    fn <- paste0(p1, "_", args[4+i], p2)
+    fn <- paste0(p1, ".", args[4+i], p2)
     print(fn)
     tmp <- fread(fn)
 
