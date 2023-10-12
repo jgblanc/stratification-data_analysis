@@ -21,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.sscore", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.r2", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Compute FGr
@@ -259,7 +259,6 @@ rule pgs_sscore:
         --out {params.prefix_out}
         """
 
-
 rule combine_pgs:
     input:
         expand("output/prs/{{dataset}}/{{subdataset}}/{{gwas}}/{{phenotype}}/pgs_europeans/{{covar}}_{{contrasts}}.{chr}-PC{{pc}}.sscore", chr=CHR)
@@ -275,4 +274,15 @@ rule combine_pgs:
         Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
 	      rm {input}
 	      rm {params.prefix_one}*.log
+        """
+
+rule calculate_r2:
+    input:
+        phenotype = "data/phenotypes/normalized/{phenotype}.txt"
+        pgs = output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.sscore
+    output:
+        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.r2"
+    shell:
+        """
+        Rscript code/prs/compute_r2.R {input.phenotype} {input.pgs} {output}
         """

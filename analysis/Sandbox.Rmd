@@ -26,6 +26,27 @@ fwrite(dfOut,"~/Downloads/nonWBS-White.ids", row.names = F, col.names = T, quote
 ```
 
 
+
+```{r}
+prs <- fread("~/Downloads/FGr-LOCO_sds.all-PC40.sscore")
+pheno <- fread("~/Downloads/StandingHeight_Normalized_50.txt")
+
+df <- inner_join(prs, pheno, by = c("#IID"= "IID"))
+plot(df$SCORE1_SUM, df$Height)
+
+cor(df$SCORE1_SUM, df$Height)
+
+mod <- lm(df$SCORE1_SUM ~ df$Height)
+```
+
+
+
+
+
+
+
+
+
 ## Look at fastGWA chr22
 
 ```{r}
