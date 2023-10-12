@@ -8,11 +8,11 @@ SUBDATASET = ["UK10K"]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 #CONTRASTS = ["French-Sardinian", "BergamoItalian-Basque"]
 CONTRASTS = ["sds"]
-PC = [0,10,40]
+PC = [40,10,0]
 GWAS=["WBS"]
-COVAR = ["no-FGr","FGr-LOCO"]
-PHENOTYPE=['Cholesterol_Normalized_30690', 'AspartateAminotransferase_Normalized_30650', 'HDL_Normalized_30760', 'BasophillPercentage_Normalized_30220', 'BodyWeight_Normalized_21002',"AgeOfMenarche_Normalized_2714", "StandingHeight_Normalized_50","BirthWeight_Normalized_20022", "BMI_Normalized_21001", "HipCircumference_Normalized_49", "WaistCircumference_Normalized_48"]
-#PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+COVAR = ["no-FGr", "FGr-LOCO"]
+#PHENOTYPE=['Cholesterol_Normalized_30690']
+PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 print(PHENOTYPE)
 
 def get_chr_num(x):

@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=main_test
-#SBATCH --output=logs/main_test.out
-#SBATCH --error=logs/main_test.err
-#SBATCH --time=48:00:00
+#SBATCH --job-name=main
+#SBATCH --output=logs/main.out
+#SBATCH --error=logs/main.err
+#SBATCH --time=24:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem-per-cpu=2000
@@ -13,6 +13,7 @@ module load python/3.10.5
 module load plink/2.0
 module load gcta/1.94.1
 module load R
+source ../myVilma/bin/activate 
 
 echo "SLURM_JOBID="$SLURM_JOBID
 cat snakefile_UKBB
