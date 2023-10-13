@@ -8,10 +8,10 @@ SUBDATASET = ["UK10K"]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 #CONTRASTS = ["French-Sardinian", "BergamoItalian-Basque"]
 CONTRASTS = ["sds"]
-PC = [40,10,0]
+PC = [0,10,40]
 GWAS=["WBS"]
-COVAR = ["no-FGr", "FGr-LOCO"]
-#PHENOTYPE=['Cholesterol_Normalized_30690']
+COVAR = ["FGr-LOCO"]
+#PHENOTYPE=['PlateletCount_Normalized_30080']
 PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 print(PHENOTYPE)
 
@@ -21,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("plots/{dataset}/{subdataset}/{gwas}/results.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.r2", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Compute FGr
@@ -209,10 +209,11 @@ rule pga_test:
     input:
         "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas"
     output:
-        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results/{covar}_{contrasts}.all-PC{pc}.results"
+        results="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results/{covar}_{contrasts}.all-PC{pc}.results",
+	gzip="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas.gz"
     shell:
         """
-        Rscript code/pga_test/run_test_jacknife.R {input} {output}
+        Rscript code/pga_test/run_test_jacknife.R {input} {output.results}
         gzip {input}
         """
 
@@ -226,4 +227,63 @@ rule concat_pga_test:
     shell:
         """
         Rscript code/pga_test/concat_results.R {output} {input}
+        """
+
+## Compute R2 in non-WBS Europeans
+
+rule format_ss_pgs:
+    input:
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas.gz"
+    output:
+        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/plink_format/{covar}_{contrasts}.all-PC{pc}.betas"
+    shell:
+        """
+        Rscript code/prs/format_ss_for_plink.R {input} {output}
+        """
+
+rule pgs_sscore:
+    input:
+        betas="output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/plink_format/{covar}_{contrasts}.all-PC{pc}.betas",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+        IDs="data/ukbb/nonWBS-White.ids"
+    output:
+        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.{chr}-PC{pc}.sscore"
+    params:
+        prefix_out="output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.{chr}-PC{pc}",
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
+    threads: 16
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --keep {input.IDs} \
+        --score {input.betas} center cols=dosagesum,scoresums  \
+        --out {params.prefix_out}
+        """
+
+rule combine_pgs:
+    input:
+        expand("output/prs/{{dataset}}/{{subdataset}}/{{gwas}}/{{phenotype}}/pgs_europeans/{{covar}}_{{contrasts}}.{chr}-PC{{pc}}.sscore", chr=CHR)
+    output:
+        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.sscore"
+    params:
+        all_chrs = CHR,
+        num_chr = len(CHR),
+        prefix_one = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}",
+        prefix_two = "-PC{pc}.sscore"
+    shell:
+        """
+        Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
+	      rm {input}
+	      rm {params.prefix_one}*.log
+        """
+
+rule calculate_r2:
+    input:
+        phenotype = "data/phenotypes/normalized/{phenotype}.txt",
+        pgs = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.sscore"
+    output:
+        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.r2"
+    shell:
+        """
+        Rscript code/prs/compute_r2.R {input.phenotype} {input.pgs} {output}
         """

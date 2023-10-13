@@ -22,10 +22,11 @@ phenos <- fread(pheno_file)
 prs <- fread(prs_file)
 
 # Join data
-df <- inner_join(prs, pheno, by = c("#IID"= "IID"))
+df <- inner_join(prs, phenos, by = c("#IID"= "IID"))
+print(head(df))
 
 # Compute r
-r <- cor(df$SCORE1_SUM, df$Height)
+r <- cor(df$SCORE1_SUM, df[,5])
 
 # Compute r^2
 r2 <- r^2
@@ -33,6 +34,8 @@ r2 <- r^2
 # Set up output table
 dfOut <- matrix(NA, ncol = 2, nrow = 1)
 colnames(dfOut) <- c("r", "r2")
+dfOut[1,1] <- r
+dfOut[1,2] <- r2
 
 # Save output
 fwrite(dfOut, out_file, row.names = F, col.names = F, quote = F, sep = "\t")
