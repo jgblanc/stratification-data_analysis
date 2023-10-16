@@ -43,14 +43,16 @@ dfOut[,1] <- seq(1,40)
 # Compute multiple R^2 and rho(PC, FGr)
 for (i in 1:nrow(dfOut)) {
 
-  print(i)
 
   # Compute variance explained
-  mod <- lm(dfCombine$FGr ~ . ,data=dfCombine[,3:42])
-  r2 <- cor(y, fitted(mod))^2
-
+  mod <- lm(dfCombine$FGr ~ . ,data=dfCombine[,3:(i+2)])
+  r2 <- cor(dfCombine$FGr, fitted(mod))^2
+  print(r2)
+  
   # Compute correlation
-  c1 <- as.numeric(unlist(df[,2+i]))
+  name <- paste0("PC_", i)
+  print(name)
+  c1 <- dfCombine[[name]]
   ct <- cor.test(dfCombine$FGr,c1)
   rho <- ct$estimate
   lc <- ct$conf.int[1]
@@ -60,7 +62,7 @@ for (i in 1:nrow(dfOut)) {
   dfOut[i,2] <- r2
   dfOut[i,3] <- rho
   dfOut[i,4] <- lc
-  dfOut[i,5] <- up
+  dfOut[i,5] <- uc
 
 }
 
