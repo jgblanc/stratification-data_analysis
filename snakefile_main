@@ -21,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.r2", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("plots/{dataset}/{subdataset}/{gwas}/r2_results.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Compute FGr
@@ -286,4 +286,14 @@ rule calculate_r2:
     shell:
         """
         Rscript code/prs/compute_r2.R {input.phenotype} {input.pgs} {output}
+        """
+
+rule concat_pga_test:
+    input:
+        expand("output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.r2", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
+    output:
+        "plots/{dataset}/{subdataset}/{gwas}/r2_results.txt"
+    shell:
+        """
+        Rscript code/prs/concat_r2.R {output} {input}
         """
