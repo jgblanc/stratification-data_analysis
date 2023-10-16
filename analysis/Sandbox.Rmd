@@ -249,12 +249,60 @@ df_covar <- df %>% filter(covar == TRUE)
 df_novar <- df %>% filter(covar == FALSE)
 df_covar$diff <- df_covar$q - df_novar$q
 
-ggplot(df, aes(y = phenotype, x = pc, fill = q)) + geom_tile() + facet_wrap(~covar) + scale_fill_gradient(low="white", high="blue") + geom_text(aes(label=sig), color="black", size=5) 
+df <- df %>% separate("phenotype", c("phenotype", "tmp1", "tmp2"))
+
+# Get bonferonni correction for all 
+df$p.adjust <- p.adjust(df$p)
+df <- df %>% mutate(sig2 = case_when(p.adjust <= 0.05 ~ "*", p.adjust > 0.05 ~ ""))
+
+
+df$covar <- as.factor(df$covar)
+levels(df$covar) <- c("FALSE", "TRUE")
+label_names <- list("FALSE" = "Uncorrected", "TRUE" = TeX("$\\hat{F}_{Gr}$") )
+
+hospital_labeller <- function(variable,value){
+  return(label_names[value])
+}
+
+# Figure 
+pl <- ggplot(df, aes(y = phenotype, x = pc, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Number of PCs") + theme_bw(base_size = 14) + theme(axis.text = element_text(color = "black")) 
+
+ggsave("~/Desktop/hm.png",pl)
 ```
 
 ```{r}
-ggplot(df_covar, aes(y = phenotype, x = pc, fill = diff)) + geom_tile()+ scale_fill_gradient2(low="red", mid = "white", high="blue")
+dfr2 <- fread("../plots/sds/UK10K/WBS/r2_results.txt") 
+dfr2 <- dfr2 %>% separate("phenotype", c("phenotype", "tmp1", "tmp2")) %>% select(r, r2, phenotype, pc)
+
+#library(reshape2)
+df_melt <- melt(dfr2, id.vars = c("phenotype", "r", "r2"))
+
+df_melt$value <- as.character(df_melt$value)
+pl <- ggplot(data = df_melt, aes(x = r, y = phenotype, fill = value)) + geom_bar(stat='identity', position='dodge') + theme_classic(base_size = 14) + theme(axis.text = element_text(color = "black")) + ylab("") + xlab("Pearson's Correlation (r)") + scale_fill_manual(values = c("plum1", "plum3", "plum4"), name = "PCs")
+ggsave("~/Desktop/r2.png",pl, height = 5, width= 7)
 ```
 
+
+
+```{r}
+PCs <- fread("~/Downloads/genetic_PC_22009.txt")
+FGr <- fread("~/Downloads/FGr-LOCO_sds_22.txt")
+
+df <- inner_join(PCs, FGr)
+
+tmp <- df[,3:42]
+tm <- scale(tmp)
+mod <- lm(df$FGr ~ tm)
+mod2 <- lm(df$FGr ~ ., data=df[,3:42])
+cor(df$FGr, fitted(mod2))^2
+summary(mod2)
+
+c1 <- as.numeric(unlist(df[,3]))
+ct <- cor.test(df$FGr,c1)
+ct
+ct$conf.int[1:2]   
+
+cor(df$FGr, df[,3])
+```
 
 

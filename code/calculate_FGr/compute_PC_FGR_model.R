@@ -1,0 +1,78 @@
+## Concatenate projections and compute correlation with PCs
+## This script reads in all the projected test vectors for each chromosome and adds them all together, and scales the final covariate
+## It then treats this as the response variable and commputes the slope with all the PCs
+
+args=commandArgs(TRUE)
+
+if(length(args)<3){stop("Rscript conccat_FGr_LOCO.R <prefix to Tm chromosomes> <chromosome number> <outfile>")}
+
+suppressWarnings(suppressMessages({
+  library(data.table)
+  library(dplyr)
+}))
+
+Tm_prefix = args[1]
+PC_file = args[2]
+outfile = args[3]
+
+
+# Get list of all but the focal chromosome
+chrs <- seq(1,22)
+
+# Add Tm for each chromosome to each other
+df <- fread(paste0(Tm_prefix, "_", chrs[1], ".txt"))
+for (i in 2:length(chrs)) {
+
+  new <- fread(paste0(Tm_prefix, "_", chrs[i], ".txt"))
+  df$FGr <- df$FGr + new$FGr
+
+}
+
+df$FGr <- scale(df$FGr)
+
+# Join with PCs
+PCs <- fread(PC_file)
+dfCombine <- inner_join(PCs, df)
+print(head(dfCombine[,3]))
+print(head(dfCombine[,42]))
+
+# Construct data fram to collate results
+dfOut <- matrix(NA, nrow = 40, ncol = 5)
+dfOut[,1] <- seq(1,40)
+
+# Compute multiple R^2 and rho(PC, FGr)
+for (i in 1:nrow(dfOut)) {
+
+  print(i)
+
+  # Compute variance explained
+  mod <- lm(dfCombine$FGr ~ . ,data=dfCombine[,3:42])
+  r2 <- cor(y, fitted(mod))^2
+
+  # Compute correlation
+  c1 <- as.numeric(unlist(df[,2+i]))
+  ct <- cor.test(dfCombine$FGr,c1)
+  rho <- ct$estimate
+  lc <- ct$conf.int[1]
+  uc <- ct$conf.int[2]
+
+  # Collect output
+  dfOut[i,2] <- r2
+  dfOut[i,3] <- rho
+  dfOut[i,4] <- lc
+  dfOut[i,5] <- up
+
+}
+
+
+# Save output
+dfOut <- as.data.frame(dfOut)
+colnames(dfOut) <- c("PC", "r2", "rho", "lc", "up")
+fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
+
+
+
+
+
+
+
