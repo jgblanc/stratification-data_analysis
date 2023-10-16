@@ -10,7 +10,7 @@ SUBDATASET = ["UK10K"]
 CONTRASTS = ["sds"]
 PC = [0,10,40]
 GWAS=["WBS"]
-COVAR = ["FGr-LOCO"]
+COVAR = ["FGr-LOCO", "no-FGr"]
 #PHENOTYPE=['PlateletCount_Normalized_30080']
 PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 print(PHENOTYPE)

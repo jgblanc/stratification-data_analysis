@@ -17,6 +17,8 @@ dfOut <- matrix(NA, nrow = 1, ncol = 5)
 
 for (i in 2:length(args)) {
 
+  print(i)
+
   # Get results file name
   filename = args[i]
 
@@ -26,6 +28,7 @@ for (i in 2:length(args)) {
   # Extract which covariate was used
   tmp <- strsplit(filename, "/")[[1]][8]
   covar <- strsplit(tmp, "_")[[1]][1]
+  print(covar)
   if (covar == "FGr-LOCO") {
     covar <- TRUE
   } else if (covar == "no-FGr") {
@@ -33,6 +36,7 @@ for (i in 2:length(args)) {
   } else {
     covar <- NA
   }
+  print(covar)
 
   # Extract number of PCs used
   pc <- regmatches(tmp, gregexpr("([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])", tmp))[[1]]
