@@ -288,9 +288,9 @@ rule calculate_r2:
         Rscript code/prs/compute_r2.R {input.phenotype} {input.pgs} {output}
         """
 
-rule concat_pga_test:
+rule concat_r2:
     input:
-        expand("output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.r2", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
+        expand("output/prs/{{dataset}}/{{subdataset}}/{{gwas}}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.r2", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
     output:
         "plots/{dataset}/{subdataset}/{gwas}/r2_results.txt"
     shell:
