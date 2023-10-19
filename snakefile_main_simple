@@ -13,6 +13,7 @@ GWAS=["WBS"]
 COVAR = ["FGr-LOCO", "no-FGr"]
 PHENOTYPE=["StandingHeight_Normalized_50"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+PVALUE_THRESHOLD = "1e-5"
 print(PHENOTYPE)
 
 def get_chr_num(x):
@@ -21,7 +22,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Compute FGr
@@ -127,69 +128,25 @@ rule run_fastGWA:
 	--out {params.prefix_out}
         """
 
-## Run Vilma
-
-rule format_summary_stats:
-    input:
-        ss="output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
-        snps="/scratch/jgblanc/wb_high_info/varlist.txt.gz"
-    output:
-        "output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma_format/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"
-    shell:
-        """
-        Rscript code/run_gwas/format_vilma.R {input.ss} {input.snps} {output}
-        rm {input.ss}
-        """
-
-rule run_vilma:
-    input:
-        ss="output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma_format/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
-        ld="/scratch/jgblanc/wb_high_info/ld_manifest.txt"
-    output:
-        outlog = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.log",
-        cov = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
-        npz = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.npz",
-        estimates = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv"
-    params:
-        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}"
-    threads: 16
-    resources:
-        mem_mb=10000,
-        time="24:00:00"
-    shell:
-        """
-        vilma fit --logfile {output.outlog} \
-	      --sumstats {input.ss} \
-	      --output {params.prefix_out} \
-	      --ld-schema {input.ld} \
-	      -K 81 \
-	      --ldthresh 0.8 \
-	      --init-hg 0.5 \
-	      --samplesizes 400e3 \
-	      --names ukbb \
-	      --learn-scaling \
-	      --extract {input.ss}
-	      rm {input.ss}
-        """
-
-## Run selection test
+## Pick minimum p-value per block
 
 rule assign_snps_to_blocks:
     input:
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
-        ss="/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv",
+        ss="output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
         r="data/{dataset}/{subdataset}/r/{contrasts}_chr{chr}.rvec",
-        cov = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.covariance.pkl",
-        npz = "/scratch/jgblanc/stratification-data_analysis/output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/vilma/{covar}_{contrasts}_{chr}-PC{pc}.npz"
     output:
-        betas="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}_{chr}-PC{pc}.betas"
+        betas="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas"
+    params:
+        pt = PVALUE_THRESHOLD
     shell:
         """
-        Rscript code/pga_test/assign_snps_to_blocks.R {input.ldBlocks} {input.ss} {input.r} {output.betas}
+        Rscript code/pga_test/assign_snps_to_blocks_LR.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {params.pt}
         rm {input.ss}
-        rm {input.cov}
-        rm {input.npz}
         """
+
+## Run selection test
+
 
 rule concat_snps:
     input:
