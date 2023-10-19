@@ -8,10 +8,10 @@ SUBDATASET = ["UK10K"]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 #CONTRASTS = ["French-Sardinian", "BergamoItalian-Basque"]
 CONTRASTS = ["sds"]
-PC = [0,10,40]
+PC = [40]
 GWAS=["WBS"]
 COVAR = ["FGr-LOCO", "no-FGr"]
-PHENOTYPE=['PlateletCount_Normalized_30080']
+PHENOTYPE=["StandingHeight_Normalized_50"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 print(PHENOTYPE)
 
@@ -21,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Compute FGr
@@ -109,7 +109,7 @@ rule run_fastGWA:
     output:
         "output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
-        prefix_out = "output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}"
+        prefix_out = "output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
@@ -123,6 +123,7 @@ rule run_fastGWA:
 	--extract {input.overlap_snps} \
 	--fastGWA-lr \
 	--threads {threads} \
+	--pfile {params.prefix_plink} \
 	--out {params.prefix_out}
         """
 
