@@ -285,24 +285,14 @@ ggsave("~/Desktop/r2.png",pl, height = 5, width= 7)
 
 
 ```{r}
-PCs <- fread("~/Downloads/genetic_PC_22009.txt")
-FGr <- fread("~/Downloads/FGr-LOCO_sds_22.txt")
+df <- fread("../plots/sds/UK10K/WBS/sds_PCs_FGr.txt")
 
-df <- inner_join(PCs, FGr)
+pl <- ggplot(df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 14) 
+ggsave("~/Desktop/var.png",pl, height = 3, width= 7)
 
-tmp <- df[,3:42]
-tm <- scale(tmp)
-mod <- lm(df$FGr ~ tm)
-mod2 <- lm(df$FGr ~ ., data=df[,3:42])
-cor(df$FGr, fitted(mod2))^2
-summary(mod2)
 
-c1 <- as.numeric(unlist(df[,3]))
-ct <- cor.test(df$FGr,c1)
-ct
-ct$conf.int[1:2]   
-
-cor(df$FGr, df[,3])
+pl2 <- ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 14)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) 
+ggsave("~/Desktop/rho.png",pl2, height = 3, width= 7)
 ```
 
 
