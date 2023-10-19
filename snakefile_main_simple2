@@ -9,10 +9,10 @@ SUBDATASET = ["UK10K"]
 #CONTRASTS = ["French-Sardinian", "BergamoItalian-Basque"]
 CONTRASTS = ["sds"]
 PC = [0,10,40]
-GWAS=["WBS"]
+GWAS=["ALL"]
 COVAR = ["FGr-LOCO", "no-FGr"]
-#PHENOTYPE=["StandingHeight_Normalized_50"]
-PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+PHENOTYPE=["StandingHeight_Normalized_50"]
+#PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 PVALUE_THRESHOLD = "1e-5"
 print(PHENOTYPE)
 

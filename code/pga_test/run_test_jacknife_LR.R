@@ -66,7 +66,7 @@ main <- function(df) {
 
   x <- c(q, pval)
 
-  return(q, pval)
+  return(x)
 }
 
 
