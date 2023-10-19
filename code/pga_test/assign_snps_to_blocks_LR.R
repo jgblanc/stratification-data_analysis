@@ -24,13 +24,15 @@ ld <- fread(ldFile)
 # Read in summary stats
 ss <- fread(ssFile)
 colnames(ss)[4] <- "ALT"
-colnames(ss)[5] <- "RED"
+colnames(ss)[5] <- "REF"
+colnames(ss)[2] <- "ID"
+print(head(ss))
 
 # Read in r file
 rvec <- fread(rFile)
 
 # Combine r and ss
-df <- inner_join(rvec, dfss, by = c("ID", "REF", "ALT"))
+df <- inner_join(rvec, ss, by = c("ID", "REF", "ALT"))
 df <- df %>% separate(ID, c("chr", "POS"), remove = FALSE)
 print(head(df))
 print(nrow(df))
