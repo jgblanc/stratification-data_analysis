@@ -6,11 +6,11 @@ SPNUM = len(SUBPOPS)
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
+#TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/r/EUR/") if f.endswith('_chr9.rvec')]
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
-CONTRASTS = ["French-Sardinian"]
-PC = [40]
-COVAR=["FGr-LOCO", "control"]
+#CONTRASTS = ["French-Sardinian"]
+#PC = [40]
+#COVAR=["FGr-LOCO", "control"]
 
 def get_params(x):
   out = x.split("_")[1]
@@ -18,7 +18,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq", chr=CHR, dataset = DATASET, subpops=SUBPOPS, gwas=GWAS, contrasts=CONTRASTS, pc=PC, covar=COVAR)
+        expand("data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq", chr=CHR, dataset = DATASET)
 
 
 
@@ -71,7 +71,7 @@ rule HGDP_freq:
         freq="data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq"
     params:
         prefix_in="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
-        prefix_out="data/hgdp/variants-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
+        prefix_out="data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}"
     shell:
         """
         plink2 --pfile {params.prefix_in} \
