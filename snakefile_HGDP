@@ -18,7 +18,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/plink2-files/{dataset}/{gwas}/hgdp_wgs.20190516.full.chr{chr}.psam", chr=CHR, dataset = DATASET, gwas=GWAS)
+        expand("data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt", chr=CHR, dataset = DATASET, gwas=GWAS)
 
 
 
@@ -118,6 +118,22 @@ rule HGDP_recode:
 	      --make-pgen \
         --out {params.prefix_out}
         """
+
+# Make Lat and Long Test Vector
+
+rule get_TestVector:
+    input:
+        metadata="data/hgdp/hgdp_wgs.20190516.metadata.txt",
+        psam="data/hgdp/plink2-files/{dataset}/{gwas}/hgdp_wgs.20190516.full.chr1.psam"
+    output:
+        Lat="data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt",
+        Long="data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt"
+    shell:
+        """
+        Rscript code/hgdp/get_LatLong_Tvec.R {input.metadata} {input.psam} {output.Lat} {output.Long}
+        """
+
+
 
 ## Get list of all population IDs
 
