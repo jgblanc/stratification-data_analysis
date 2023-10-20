@@ -18,7 +18,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/{dataset}/{gwas}/r/Lat_chr{chr}.rvec", chr=CHR, dataset = DATASET, gwas=GWAS)
+        expand("data/hgdp/{dataset}/r/Lat_chr{chr}.rvec", chr=CHR, dataset = DATASET, gwas=GWAS)
 
 
 
@@ -161,7 +161,7 @@ rule compute_r:
         Long="data/hgdp/{dataset}/r/Long_chr{chr}.rvec"
     params:
         prefix_tp = "data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
-        prefix_out = "data/hgdp/{dataset}/{gwas}/r/"
+        prefix_out = "data/hgdp/{dataset}/r/"
     shell:
         """
         Rscript code/hgdp/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}

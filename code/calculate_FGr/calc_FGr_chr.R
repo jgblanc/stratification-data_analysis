@@ -23,9 +23,11 @@ m <- nrow(gwasID)
 
 # Read in and format r
 r <- fread(r_file)
+dfSnps <- fread(snps_file)
+r <- inner_join(r, dfSnps)
 r <- r %>% dplyr::select("ID", "ALT", "r")
 colnames(r) <- c("ID", "A1", "BETA")
-print(head(r))
+print(nrow(r))
 
 # Compute GWAS genotype counts
 outfile_count <- paste0(out_prefix, "G_count")
