@@ -121,6 +121,22 @@ rule HGDP_recode:
         --out {params.prefix_out}
         """
 
+rule HGDP_recoded_freq:
+    input:
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+    output:
+	      freq="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq"
+    params:
+        prefix_in="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+	      --freq \
+        --out {params.prefix_out}
+        """
 
 ## Get overlapping set of final SNPS
 
