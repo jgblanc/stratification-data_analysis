@@ -18,7 +18,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq", chr=CHR, dataset = DATASET)
+        expand("data/hgdp/{dataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt", chr=CHR, dataset = DATASET, gwas=GWAS)
 
 
 
@@ -83,13 +83,12 @@ rule HGDP_freq:
 
 ## Get overlapping set of final SNPS
 
-# Right now set for 1%
 rule get_overlapping_snps:
     input:
-        freq_hgdp="data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq",
-	      freq_ukbb="data/ukbb/variants/ALL/ukb_imp_chr{chr}_v3.afreq"
+        freq_hgdp="data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq",
+	      freq_ukbb="data/ukbb/{gwas}/variants/ukb_imp_chr{chr}_v3.afreq"
     output:
-        "data/hgdp/variants/{dataset}/ALL/overlappingSNPs_chr{chr}.txt"
+        "data/hgdp/{dataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
     shell:
         """
         Rscript code/hgdp/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
