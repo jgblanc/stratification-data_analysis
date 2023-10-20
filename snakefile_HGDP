@@ -18,7 +18,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam", chr=CHR, dataset = DATASET)
+        expand("data/hgdp/{dataset}/{gwas}/r/Lat_chr{chr}.rvec", chr=CHR, dataset = DATASET, gwas=GWAS)
 
 
 
@@ -140,7 +140,7 @@ rule get_overlapping_snps:
 rule get_TestVector:
     input:
         metadata="data/hgdp/hgdp_wgs.20190516.metadata.txt",
-        psam="data/hgdp/plink2-files/{dataset}/{gwas}/hgdp_wgs.20190516.full.chr1.psam"
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr1.psam"
     output:
         Lat="data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt",
         Long="data/hgdp/{dataset}/{gwas}/TestVecs/Long.txt"
@@ -150,15 +150,20 @@ rule get_TestVector:
         """
 
 
-rule compute_R_Lat:
+rule compute_r:
     input:
-        Lat="data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt",
-        tp_genos="{root}/data/ukbb-hgdp/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+        Tvec="data/hgdp/{dataset}/{gwas}/TestVecs/{contrasts}.txt",
+        tp_genos="data/ukbb-hgdp/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
+        snps="data/hgdp/{dataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
     output:
-        "data/hgdp/{dataset}/{gwas}/r/Lat"
+        Lat="data/hgdp/{dataset}/{gwas}/r/Lat_chr{chr}.rvec",
+        Long="data/hgdp/{dataset}/{gwas}/r/Long_chr{chr}.rvec"
+    params:
+        prefix_tp = "data/ukbb-hgdp/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out = "data/hgdp/{dataset}/{gwas}/r/{contrasts}_chr{chr}"
     shell:
         """
-        Rscript code/hgdp/get_LatLong_Tvec.R {input.metadata} {input.psam} {output.Lat} {output.Long}
+        Rscript code/hgdp/compute_cord_r.R {params.prefix_tp} {input.Tvec} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
         """
 
 
