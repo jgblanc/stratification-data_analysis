@@ -127,7 +127,7 @@ rule get_TestVector:
         psam="data/hgdp/plink2-files/{dataset}/{gwas}/hgdp_wgs.20190516.full.chr1.psam"
     output:
         Lat="data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt",
-        Long="data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt"
+        Long="data/hgdp/{dataset}/{gwas}/TestVecs/Long.txt"
     shell:
         """
         Rscript code/hgdp/get_LatLong_Tvec.R {input.metadata} {input.psam} {output.Lat} {output.Long}
