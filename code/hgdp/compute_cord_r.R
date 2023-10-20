@@ -67,7 +67,8 @@ colnames(testID) <- c("IID",  "Sex")
 n <- nrow(testID)
 
 # Compute b for latitude
-r_lat = compute_b(path_to_gwas = gwas_prefix, path_to_testvec = tvec_file_lat, test_type = "latitude", outpath = out_prefix)
+r_lat = compute_b(path_to_test = test_prefix, testvec_file = tvec_file_lat, test_type = "latitude", outpath = out_prefix)
+r_lat$BETA  <- r_lat$BETA * (1/n)
 print(head(r_lat))
 
 # Compute b for latitude

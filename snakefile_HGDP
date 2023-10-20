@@ -153,14 +153,14 @@ rule get_TestVector:
 rule compute_r:
     input:
         TvecLat="data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt",
-        TvecLong="data/hgdp/{dataset}/{gwas}/TestVecs/Long.txt"
-        tp_genos="data/ukbb-hgdp/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
+        TvecLong="data/hgdp/{dataset}/{gwas}/TestVecs/Long.txt",
+        tp_genos="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
         snps="data/hgdp/{dataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
     output:
         Lat="data/hgdp/{dataset}/{gwas}/r/Lat_chr{chr}.rvec",
         Long="data/hgdp/{dataset}/{gwas}/r/Long_chr{chr}.rvec"
     params:
-        prefix_tp = "data/ukbb-hgdp/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_tp = "data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
         prefix_out = "data/hgdp/{dataset}/{gwas}/r/"
     shell:
         """

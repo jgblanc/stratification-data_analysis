@@ -9,7 +9,7 @@ plink2 \
   --pfile $pfile_path \
   --extract $overlap_snps \
   --glm omit-ref allow-no-covars \
-  --pheno $pheno_path \
+  --pheno iid-only $pheno_path \
   --pheno-name $test_type \
   --geno-counts \
   --out $outfile
