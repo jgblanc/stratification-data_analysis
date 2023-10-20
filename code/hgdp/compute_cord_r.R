@@ -11,22 +11,23 @@ suppressWarnings(suppressMessages({
 }))
 
 test_prefix = args[1]
-tvec_file = args[2]
-out_prefix = args[3]
-overlap_snps = args[4]
-outfile_lat = args[5]
-outfile_long = args[6]
+tvec_file_lat = args[2]
+tvec_file_long=args[3]
+out_prefix = args[4]
+overlap_snps = args[5]
+outfile_lat = args[6]
+outfile_long = args[7]
 
 ####################
 ## Functions #######
 ####################
 
 # Compute G %*% t(X) %*% T
-compute_b <- function(path_to_test, path_to_testvec, test_type, outpath) {
+compute_b <- function(path_to_test, testvec_file, test_type, outpath) {
 
   # Compute t(X)T
   outfile_XT <- paste0(outpath, "xt_temp")
-  pheno_file <- paste0(path_to_testvec, "_", test_type, ".txt")
+  pheno_file <- testvec_file
   cmd_XT <- paste("sh code/calculate_Tm/compute_XT.sh", path_to_test, pheno_file, test_type, outfile_XT, overlap_snps, sep = " ")
   system(cmd_XT)
 
@@ -66,7 +67,7 @@ colnames(testID) <- c("IID",  "Sex")
 n <- nrow(testID)
 
 # Compute b for latitude
-r_lat = compute_b(path_to_gwas = gwas_prefix, path_to_testvec = tvec_file, test_type = "latitude", outpath = out_prefix)
+r_lat = compute_b(path_to_gwas = gwas_prefix, path_to_testvec = tvec_file_lat, test_type = "latitude", outpath = out_prefix)
 print(head(r_lat))
 
 # Compute b for latitude

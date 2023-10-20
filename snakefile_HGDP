@@ -152,7 +152,8 @@ rule get_TestVector:
 
 rule compute_r:
     input:
-        Tvec="data/hgdp/{dataset}/{gwas}/TestVecs/{contrasts}.txt",
+        TvecLat="data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt",
+        TvecLong="data/hgdp/{dataset}/{gwas}/TestVecs/Long.txt"
         tp_genos="data/ukbb-hgdp/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
         snps="data/hgdp/{dataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
     output:
@@ -160,10 +161,10 @@ rule compute_r:
         Long="data/hgdp/{dataset}/{gwas}/r/Long_chr{chr}.rvec"
     params:
         prefix_tp = "data/ukbb-hgdp/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
-        prefix_out = "data/hgdp/{dataset}/{gwas}/r/{contrasts}_chr{chr}"
+        prefix_out = "data/hgdp/{dataset}/{gwas}/r/"
     shell:
         """
-        Rscript code/hgdp/compute_cord_r.R {params.prefix_tp} {input.Tvec} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
+        Rscript code/hgdp/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
         """
 
 
