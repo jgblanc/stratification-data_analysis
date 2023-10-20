@@ -102,7 +102,7 @@ rule HGDP_recode:
         psam="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
         pvar="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
         pgen="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
-      	snp_list="data/hgdp/{dataset}/{gwas}/variants/overlappingSNPs_chr{chr}.tx"
+      	snp_list="data/hgdp/{dataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
     output:
         psam="data/hgdp/plink2-files/{dataset}/{gwas}/hgdp_wgs.20190516.full.chr{chr}.psam",
         pvar="data/hgdp/plink2-files/{dataset}/{gwas}/hgdp_wgs.20190516.full.chr{chr}.pvar",
