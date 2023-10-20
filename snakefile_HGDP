@@ -142,8 +142,8 @@ rule get_TestVector:
         metadata="data/hgdp/hgdp_wgs.20190516.metadata.txt",
         psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr1.psam"
     output:
-        Lat="data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt",
-        Long="data/hgdp/{dataset}/{gwas}/TestVecs/Long.txt"
+        Lat="data/hgdp/{dataset}/TestVecs/Lat.txt",
+        Long="data/hgdp/{dataset}/TestVecs/Long.txt"
     shell:
         """
         Rscript code/hgdp/get_LatLong_Tvec.R {input.metadata} {input.psam} {output.Lat} {output.Long}
@@ -152,19 +152,20 @@ rule get_TestVector:
 
 rule compute_r:
     input:
-        TvecLat="data/hgdp/{dataset}/{gwas}/TestVecs/Lat.txt",
-        TvecLong="data/hgdp/{dataset}/{gwas}/TestVecs/Long.txt",
+        TvecLat="data/hgdp/{dataset}/TestVecs/Lat.txt",
+        TvecLong="data/hgdp/{dataset}/TestVecs/Long.txt",
         tp_genos="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
-        snps="data/hgdp/{dataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
+        snps="data/hgdp/{dataset}/variants-fliped/flipped_snps_{chr}.txt"
     output:
-        Lat="data/hgdp/{dataset}/{gwas}/r/Lat_chr{chr}.rvec",
-        Long="data/hgdp/{dataset}/{gwas}/r/Long_chr{chr}.rvec"
+        Lat="data/hgdp/{dataset}/r/Lat_chr{chr}.rvec",
+        Long="data/hgdp/{dataset}/r/Long_chr{chr}.rvec"
     params:
         prefix_tp = "data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
         prefix_out = "data/hgdp/{dataset}/{gwas}/r/"
     shell:
         """
         Rscript code/hgdp/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
+        rm {params.prefix_out}xt_temp.*
         """
 
 

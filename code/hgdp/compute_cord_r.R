@@ -48,7 +48,7 @@ compute_b <- function(path_to_test, testvec_file, test_type, outpath) {
 
   #  Re-write .linear file with correct betas
   beta_plink$BETA <- betas_plink_norm
-  beta_reformat <- beta_plink %>% dplyr::select(ID, A1, BETA)
+  beta_reformat <- beta_plink %>% dplyr::select("#CHROM","ID", "REF", "ALT",  "BETA")
   beta_reformat[is.na(beta_reformat)] <- 0
 
   return(beta_reformat)
@@ -69,14 +69,14 @@ n <- nrow(testID)
 # Compute b for latitude
 r_lat = compute_b(path_to_test = test_prefix, testvec_file = tvec_file_lat, test_type = "latitude", outpath = out_prefix)
 r_lat$BETA  <- r_lat$BETA * (1/n)
+colnames(r_lat)[5] <- "r"
 print(head(r_lat))
+fwrite(r_lat, outfile_lat, row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Compute b for latitude
-b_long = compute_b(path_to_test = test_prefix, path_to_gwas = gwas_prefix, path_to_testvec = tvec_file, test_type = "longitude", outpath = out_prefix)
-b_long = as.data.frame(b_long)
-colnames(b_long) <- "longitude"
+r_long = compute_b(path_to_test = test_prefix, testvec_file = tvec_file_long, test_type = "longitude", outpath = out_prefix)
+r_long$BETA  <- r_long$BETA * (1/n)
+colnames(r_long)[5] <- "r"
+print(head(r_long))
+fwrite(r_long, outfile_long, row.names = F, col.names = T, quote = F, sep = "\t")
 
-b <- cbind(b_lat, b_long)
-
-
-fwrite(b, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
