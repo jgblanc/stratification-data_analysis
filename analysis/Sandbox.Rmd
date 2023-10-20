@@ -252,7 +252,7 @@ df_covar$diff <- df_covar$q - df_novar$q
 df <- df %>% separate("phenotype", c("phenotype", "tmp1", "tmp2"))
 
 # Get bonferonni correction for all 
-df$p.adjust <- p.adjust(df$p)
+df <- df %>% group_by(covar, pc) %>% mutate(p.adjust = p.adjust(p))
 df <- df %>% mutate(sig2 = case_when(p.adjust <= 0.05 ~ "*", p.adjust > 0.05 ~ ""))
 
 
@@ -267,7 +267,9 @@ hospital_labeller <- function(variable,value){
 # Figure 
 pl <- ggplot(df, aes(y = phenotype, x = pc, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Number of PCs") + theme_bw(base_size = 14) + theme(axis.text = element_text(color = "black")) 
 
-ggsave("~/Desktop/hm.png",pl)
+pl
+
+#ggsave("~/Desktop/hm.png",pl)
 ```
 
 ```{r}
@@ -294,5 +296,45 @@ ggsave("~/Desktop/var.png",pl, height = 3, width= 7)
 pl2 <- ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 14)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) 
 ggsave("~/Desktop/rho.png",pl2, height = 3, width= 7)
 ```
+
+
+
+
+
+
+```{r}
+df <- fread("../plots/sds/UK10K/WBS/results_LR.txt")
+df$log10P <- -1 *  log10(df$p)
+df$pc <- as.character(df$pc)
+df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
+ 
+
+df_covar <- df %>% filter(covar == TRUE)
+df_novar <- df %>% filter(covar == FALSE)
+df_covar$diff <- df_covar$q - df_novar$q
+
+df <- df %>% separate("phenotype", c("phenotype", "tmp1", "tmp2"))
+
+# Get bonferonni correction for all 
+df <- df %>% group_by(covar, pc) %>% mutate(p.adjust = p.adjust(p))
+df <- df %>% mutate(sig2 = case_when(p.adjust <= 0.05 ~ "*", p.adjust > 0.05 ~ ""))
+
+
+df$covar <- as.factor(df$covar)
+levels(df$covar) <- c("FALSE", "TRUE")
+label_names <- list("FALSE" = "Uncorrected", "TRUE" = TeX("$\\hat{F}_{Gr}$") )
+
+hospital_labeller <- function(variable,value){
+  return(label_names[value])
+}
+
+# Figure 
+pl <- ggplot(df, aes(y = phenotype, x = pc, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Number of PCs") + theme_bw(base_size = 14) + theme(axis.text = element_text(color = "black")) 
+
+pl
+
+#ggsave("~/Desktop/hm2.png",pl)
+```
+
 
 

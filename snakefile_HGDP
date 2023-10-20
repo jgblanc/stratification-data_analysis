@@ -1,6 +1,6 @@
 # Snakefile to run HGDP (full data) / UKBB  data analysis
-DATASET=["EUR"]
-GWAS=["WBS"]
+DATASET=["EUR", "ALL"]
+GWAS=["WBS", "ALL"]
 SUBPOPS=["French", "Sardinian", "Orcadian", "Russian", "BergamoItalian", "Tuscan", "Basque", "Adygei"]
 SPNUM = len(SUBPOPS)
 CHR =[]
@@ -18,7 +18,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("output/prs/hgdp/{dataset}/scores/{gwas}/{covar}_{contrasts}-PC{pc}.all.sscore", chr=CHR, dataset = DATASET, subpops=SUBPOPS, gwas=GWAS, contrasts=CONTRASTS, pc=PC, covar=COVAR)
+        expand("data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq", chr=CHR, dataset = DATASET, subpops=SUBPOPS, gwas=GWAS, contrasts=CONTRASTS, pc=PC, covar=COVAR)
 
 
 
@@ -68,10 +68,10 @@ rule HGDP_freq:
         pvar="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
         pgen="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
     output:
-        freq="data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq"
+        freq="data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq"
     params:
         prefix_in="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
-        prefix_out="data/hgdp/variants/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
+        prefix_out="data/hgdp/variants-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
     shell:
         """
         plink2 --pfile {params.prefix_in} \
@@ -179,6 +179,28 @@ rule get_all_r:
         """
         Rscript code/hgdp/get_pairwise_EUR_AF_contrasts.R {params.spnum} {input} {params.prefix_out} {output}
         """
+
+## Get latitude and longitude allele frequency contrasts
+
+rule get_r_LatLong:
+    input:
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
+        IDs="data/hgdp/popIDs/{dataset}/{subpops}.txt"
+    output:
+        "data/hgdp/r/{dataset}/r_list_{chr}.txt"
+    params:
+        spnum = SPNUM,
+        prefix_out = "data/hgdp/r/{dataset}/"
+    shell:
+        """
+        Rscript code/hgdp/get_pairwise_EUR_AF_contrasts.R {params.spnum} {input} {params.prefix_out} {output}
+        """
+
+
+
+
 
 ## Build polygenic scores
 
