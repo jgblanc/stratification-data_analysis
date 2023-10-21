@@ -1,7 +1,7 @@
 # Snakefile to run HGDP (full data) / UKBB  data analysis
 DATASET=["EUR", "ALL"]
 GWAS=["WBS", "ALL"]
-SUBPOPS=["French", "Sardinian", "Orcadian", "Russian", "BergamoItalian", "Tuscan", "Basque", "Adygei"]
+SUBPOPS=["CENTRAL_SOUTH_ASIA", "AFRICA", "OCEANIA", "EUROPE", "MIDDLE_EAST", "AMERICA", "EAST_ASIA"]
 SPNUM = len(SUBPOPS)
 CHR =[]
 for i in range(1, 23):
@@ -18,7 +18,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/{dataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt", chr=CHR, dataset = DATASET, gwas=GWAS)
+        expand("data/hgdp/popIDs/ALL/{subpops}.txt", chr=CHR, dataset = DATASET, gwas=GWAS, subpops=SUBPOPS)
 
 
 
@@ -149,8 +149,6 @@ rule get_overlapping_snps:
         Rscript code/hgdp/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
         """
 
-
-
 # Make Lat and Long Test Vector
 
 rule get_TestVector:
@@ -164,7 +162,6 @@ rule get_TestVector:
         """
         Rscript code/hgdp/get_LatLong_Tvec.R {input.metadata} {input.psam} {output.Lat} {output.Long}
         """
-
 
 rule compute_r:
     input:
@@ -184,41 +181,18 @@ rule compute_r:
         rm {params.prefix_out}xt_temp.*
         """
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Get list of all population IDs
 
-rule get_EUR_subpop_list:
+rule get_region_list:
     input:
         "data/hgdp/hgdp_wgs.20190516.metadata.txt"
     output:
-        expand("data/hgdp/popIDs/{{dataset}}/{subpops}.txt", subpops=SUBPOPS)
+        expand("data/hgdp/popIDs/ALL/{subpops}.txt", subpops=SUBPOPS)
     params:
-        prefix_out="data/hgdp/popIDs/{dataset}/"
+        prefix_out="data/hgdp/ALL/popIDs/"
     shell:
         """
-        Rscript code/hgdp/get_EUR_subpop_samples.R {input} {params.prefix_out}
+        Rscript code/hgdp/get_region_samples.R {input} {params.prefix_out}
         """
 
 ## Get population specifc allele frequencies

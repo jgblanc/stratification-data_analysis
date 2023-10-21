@@ -337,4 +337,8 @@ pl
 ```
 
 
+```{r}
+dfAA <- fread("../plots/hgdp/ALL/WBS/results_LR.txt")
+
+```
 
