@@ -13,7 +13,7 @@ suppressWarnings(suppressMessages({
 
 outfile = args[1]
 
-dfOut <- matrix(NA, nrow = 1, ncol = 7)
+dfOut <- matrix(NA, nrow = 1, ncol = 8)
 
 for (i in 2:length(args)) {
 
@@ -26,6 +26,7 @@ for (i in 2:length(args)) {
   # Extract which covariate was used
   tmp <- strsplit(filename, "/")[[1]][8]
   covar <- strsplit(tmp, "_")[[1]][1]
+  contrast <- strsplit(tmp, "_")[[1]][2]
   if (covar == "FGr-LOCO") {
     covar <- TRUE
   } else if (covar == "no-FGr") {
@@ -45,14 +46,14 @@ for (i in 2:length(args)) {
   p_NS <- dfTmp[1,4]
 
   # Save results in table
-  x <- c(q, p, q_NS, p_NS, phenotype, covar, pc)
+  x <- c(q, p, q_NS, p_NS, phenotype, covar, pc, contrast)
   dfOut <- rbind(dfOut, x)
 
 }
 
 # Remove first row
 dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
-colnames(dfOut) <- c("q", "p", "q_NoSign", "p_NoSign", "phenotype", "covar", "pc")
+colnames(dfOut) <- c("q", "p", "q_NoSign", "p_NoSign", "phenotype", "covar", "pc", "contrast")
 
 # Save file
 print(dfOut)
