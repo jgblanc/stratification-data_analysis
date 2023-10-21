@@ -26,6 +26,7 @@ for (i in 2:length(args)) {
   # Extract which covariate was used
   tmp <- strsplit(filename, "/")[[1]][8]
   covar <- strsplit(tmp, "_")[[1]][1]
+  contrast <- strsplit(tmp, "_")[[1]][2]
   if (covar == "FGr-LOCO") {
     covar <- TRUE
   } else if (covar == "no-FGr") {
@@ -43,14 +44,14 @@ for (i in 2:length(args)) {
   p <- dfTmp[1,2]
 
   # Save results in table
-  x <- c(q, p, phenotype, covar, pc)
+  x <- c(q, p, phenotype, covar, pc, contrast)
   dfOut <- rbind(dfOut, x)
 
 }
 
 # Remove first row
 dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
-colnames(dfOut) <- c("q", "p", "phenotype", "covar", "pc")
+colnames(dfOut) <- c("q", "p", "phenotype", "covar", "pc", "contrast")
 
 # Save file
 print(dfOut)
