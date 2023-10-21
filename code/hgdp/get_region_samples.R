@@ -24,7 +24,7 @@ subpops <- unique(pops$region)
 for (i in 1:length(subpops)) {
 
   # Filter IDs
-  df <- pops %>% filter(population == subpops[i]) %>% select(sample)
+  df <- pops %>% filter(region == subpops[i]) %>% select(sample)
   df$SEX <- rep(NA, nrow(df))
   colnames(df) <- c("#IID", "SEX")
 

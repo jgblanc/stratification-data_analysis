@@ -18,7 +18,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/popIDs/ALL/{subpops}.txt", chr=CHR, dataset = DATASET, gwas=GWAS, subpops=SUBPOPS)
+        expand("data/hgdp/popIDs/ALL/{subpops}.txt" , chr=CHR, dataset = DATASET, gwas=GWAS, subpops=SUBPOPS)
 
 
 
