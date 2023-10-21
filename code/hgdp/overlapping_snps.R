@@ -24,6 +24,7 @@ tp <- subset(tp, tp$ALT_FREQS > 0.01  & tp$ALT_FREQS < 0.99)
 
 # Get overlapping SNPs with same alt/ref
 matched <- inner_join(ukbb, tp, by = c("#CHROM", "ID", "ALT", "REF"))
+matched <- matched %>% select("ID", "REF")
 
 fwrite(matched,outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 

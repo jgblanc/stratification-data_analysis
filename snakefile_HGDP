@@ -106,8 +106,7 @@ rule HGDP_recode:
     output:
         psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
         pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
-        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
-	freq="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq"
+        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
     params:
         prefix_in="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
         prefix_out="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
@@ -117,7 +116,6 @@ rule HGDP_recode:
         --extract {input.snp_list} \
 	      --ref-allele {input.snp_list} \
 	      --make-pgen \
-	      --freq \
         --out {params.prefix_out}
         """
 

@@ -4,9 +4,9 @@ cluster:
     --partition={resources.partition}
     --ntasks={threads}
     --mem={resources.mem_mb}
-    --job-name=smk-{rule}-{wildcards.phenotype}
-    --output=logs/{rule}/{wildcards.phenotype}.%j.out
-    --error=logs/{rule}/{wildcards.phenotype}.%j.err
+    --job-name=smk-{rule}-{wildcards}
+    --output=logs/{rule}/{wildcards}.%j.out
+    --error=logs/{rule}/{wildcards}.%j.err
     --time={resources.time}
 default-resources:
   - partition=tier1q
