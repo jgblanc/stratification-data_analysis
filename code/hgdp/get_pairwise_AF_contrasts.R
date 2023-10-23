@@ -38,15 +38,16 @@ for (i in 1:nrow(pw_comb)) {
   out$r <- r
 
   # Get subpop names
-  nm1 <- strsplit(strsplit(args[id1+1], "/")[[1]][11], "_")[[1]][1]
-  nm2 <- strsplit(strsplit(args[id2+1], "/")[[1]][11], "_")[[1]][1]
+  print(strsplit(args[id1+1], "/"))
+  nm1 <- strsplit(strsplit(args[id1+1], "/")[[1]][5], "_")[[1]][1]
+  nm2 <- strsplit(strsplit(args[id2+1], "/")[[1]][5], "_")[[1]][1]
 
   # Change in output
   df[i,1] <- nm1
   df[i,2] <- nm2
 
   # Get chromosome number
-  chr <- strsplit(strsplit(strsplit(args[id1+1], "/")[[1]][11], "_")[[1]][2], ".afreq")[[1]][1]
+  chr <- strsplit(strsplit(strsplit(args[id1+1], "/")[[1]][5], "_")[[1]][2], ".afreq")[[1]][1]
 
 
   # Save output
