@@ -338,7 +338,22 @@ pl
 
 
 ```{r}
-dfAA <- fread("../plots/hgdp/ALL/WBS/results_LR.txt")
+dfAA <- fread("../plots/hgdp/ALL/ALL/results_LR.txt")
+dfAA <- dfAA %>% separate(contrast, c("contrast"))
+df$pc <- as.character(df$pc)
+dfAA <- dfAA %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
+levels(dfAA$covar) <- c("FALSE", "TRUE")
+label_names <- list("FALSE" = "Uncorrected", "TRUE" = TeX("$\\hat{F}_{Gr}$") )
+
+dfAA_Lat <- dfAA %>% filter(contrast == "Lat")
+
+hospital_labeller <- function(variable,value){
+  return(label_names[value])
+}
+
+
+
+ggplot(dfAA_Lat, aes(y = phenotype, x = , fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold")  + ylab("") + xlab("Number of PCs") + theme_bw(base_size = 14) + theme(axis.text = element_text(color = "black")) 
 
 ```
 
