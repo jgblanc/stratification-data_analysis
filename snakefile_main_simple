@@ -8,7 +8,7 @@ TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/ALL/r/") if f.endswith('_c
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 #CONTRASTS = ["French-Sardinian", "BergamoItalian-Basque"]
 CONTRASTS = ["Lat", "Long"]
-PC = [0]
+PC = [0,10]
 GWAS=["ALL"]
 COVAR = ["no-FGr", "FGr-LOCO"]
 #PHENOTYPE=[ "HipCircumference_Normalized_49"]
@@ -151,7 +151,7 @@ rule concat_snps:
     input:
         expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/{{dataset}}/{{subdataset}}/{{gwas}}/{{phenotype}}/formated_ss_LR/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.betas", chr=CHR)
     output:
-        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
     shell:
         """
         cat {input} > {output}
@@ -160,14 +160,12 @@ rule concat_snps:
 
 rule pga_test:
     input:
-        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
     output:
-        results="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results",
-	gzip="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
+        results="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results"
     shell:
         """
         Rscript code/pga_test/run_test_jacknife_LR.R {input} {output.results}
-        gzip {input}
         """
 
 ## Compile Results

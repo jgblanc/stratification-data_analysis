@@ -58,8 +58,8 @@ main <- function(df) {
   # Compute sigma squared
   sigma2 <- ((num_blocks -  1)/num_blocks) * sum((jacknives - qBar)^2 )
 
-  # Compute full q
-  q <- calc_q(df)
+  # Compute full q diveded by var
+  q <- calc_q(df) / sqrt(sigma2)
 
   # Compute p-value
   pval <- pnorm(abs(q), mean = 0, sd = sqrt(sigma2),lower.tail = FALSE) * 2
