@@ -358,43 +358,41 @@ ggsave("~/Desktop/rho.png",pl2, height = 3, width= 7)
 
 HGDP Simple Lat Long 
 ```{r}
-df <- fread("../plots/hgdp/EUR/WBS/results_LR.txt")
+df <- fread("../plots/hgdp/ALL/ALL/results_LR_LatLong.txt")
 df$pc <- as.character(df$pc)
 df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
 df <- df %>% separate("phenotype", c("phenotype", "tmp1", "tmp2"))
 df <- df %>% separate(contrast, c("contrast"))
 
 # Get bonferonni correction column wise  
-df <- df %>% group_by(covar, pc, contrast) %>% mutate(p.adjust = p.adjust(p))
+df<- df %>% group_by(covar, pc, contrast) %>% mutate(p.adjust = p.adjust(p))
 df <- df %>% mutate(sig2 = case_when(p.adjust <= 0.05 ~ "*", p.adjust > 0.05 ~ ""))
 
 df$covar <- as.factor(df$covar)
 levels(df$covar) <- c("FALSE", "TRUE")
 label_names <- list("FALSE" = TeX("No $\\hat{F}_{Gr}$") , "TRUE" = TeX("$\\hat{F}_{Gr}$") )
+df <- df %>% mutate(pheno = case_when(phenotype == "MeanCorpuscularHaemoglobinConcentration" ~ "MCHC", TRUE ~ phenotype))
 
 # Figure 
-pl1 <- ggplot(df, aes(y = phenotype, x = contrast, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller)+ scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Test Vector") + theme_bw(base_size = 14) + theme(axis.text = element_text(color = "black"), plot.title = element_text(hjust = 0.5)) + ggtitle("Effect Sizes")
+df1 <- df %>% filter(pc == 0)
+pl1 <- ggplot(df1, aes(y = pheno, x = contrast, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller)+ scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Test Vector") + theme_bw(base_size = 16) + theme(axis.text = element_text(color = "black"), plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ggtitle("0 PCs")
 
-pl1
-
-# No Sign 
-df <- df %>% group_by(covar, pc) %>% mutate(p.adjust_NoSign = p.adjust(p_NoSign))
-df <- df %>% mutate(sigNoSign = case_when(p.adjust_NoSign <= 0.05 ~ "*", p.adjust_NoSign > 0.05 ~ ""))
-
-pl2 <- ggplot(df, aes(y = phenotype, x = contrast, fill = q_NoSign)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sigNoSign), color="black", size=7, fontface="bold")  + ylab("") + xlab("Test Vector") + theme_bw(base_size = 14) + theme(axis.text = element_text(color = "black"), plot.title = element_text(hjust = 0.5)) + ggtitle("No Effect Sizes")
-
+df2 <- df %>% filter(pc == 10)
+pl2 <- ggplot(df2, aes(y = pheno, x = contrast, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller)+ scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Test Vector") + theme_bw(base_size = 16) + theme(axis.text = element_text(color = "black"), plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ggtitle("10 PCs")
 pl2
 
 pl <- ggpubr::ggarrange(pl1, pl2, nrow = 1, widths = c(1, 1))
 
 
-ggsave("~/Desktop/HGDPLatLongWBS.png",pl, width = 15, height = 8)
+ggsave("~/Desktop/HGDPLatLong0.png",pl2, height = 10, width = 5)
+
+#ggplot(df, aes(y = phenotype, x = contrast, fill = q)) + geom_tile() + facet_grid(vars(covar),vars(pc))+ scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Test Vector") + theme_bw(base_size = 14) + theme(axis.text = element_text(color = "black"), plot.title = element_text(hjust = 0.5))
 
 ```
 
 
 ```{r}
-df <- fread()
+df <- fread("~/stratification-data_analysis/plots/hgdp/EUR/ALL/results_LR_pairwise_EUR.txt")
 df$pc <- as.character(df$pc)
 df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
 df <- df %>% separate("phenotype", c("phenotype", "tmp1", "tmp2"))
@@ -424,7 +422,7 @@ pl2
 pl <- ggpubr::ggarrange(pl1, pl2, nrow = 1, widths = c(1, 1))
 
 
-#ggsave("~/Desktop/HGDP_Regions.png",pl, width = 15, height = 8)
+ggsave("~/Desktop/HGDP_EUR.png",pl, width = 15, height = 8)
 
 ```
 
