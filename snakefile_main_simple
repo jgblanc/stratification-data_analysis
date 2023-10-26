@@ -8,7 +8,7 @@ TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/ALL/r/") if f.endswith('_c
 #CONTRASTS = [s.rstrip("_chr9") for s in TMP]
 #CONTRASTS = ["French-Sardinian", "BergamoItalian-Basque"]
 CONTRASTS = ["Lat", "Long"]
-PC = [0,10]
+PC = [0,2,10]
 GWAS=["ALL"]
 COVAR = ["no-FGr", "FGr-LOCO"]
 #PHENOTYPE=[ "HipCircumference_Normalized_49"]
@@ -22,7 +22,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("plots/{dataset}/{subdataset}/{gwas}/results_LR_LatLong.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Compute FGr
@@ -151,7 +151,7 @@ rule concat_snps:
     input:
         expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/{{dataset}}/{{subdataset}}/{{gwas}}/{{phenotype}}/formated_ss_LR/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.betas", chr=CHR)
     output:
-        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
     shell:
         """
         cat {input} > {output}
@@ -160,12 +160,14 @@ rule concat_snps:
 
 rule pga_test:
     input:
-        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
+        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
     output:
-        results="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results"
+        results="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results",
+	gzip="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
     shell:
         """
         Rscript code/pga_test/run_test_jacknife_LR.R {input} {output.results}
+	gzip {input}
         """
 
 ## Compile Results
