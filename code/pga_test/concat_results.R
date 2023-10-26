@@ -13,7 +13,7 @@ suppressWarnings(suppressMessages({
 
 outfile = args[1]
 
-dfOut <- matrix(NA, nrow = 1, ncol = 5)
+dfOut <- matrix(NA, nrow = 1, ncol = 6)
 
 for (i in 2:length(args)) {
 
@@ -22,11 +22,15 @@ for (i in 2:length(args)) {
 
   # Extract phenotype
   phenotype <- strsplit(filename, "/")[[1]][6]
+  print(phenotype)
 
   # Extract which covariate was used
   tmp <- strsplit(filename, "/")[[1]][8]
+  print(tmp)
   covar <- strsplit(tmp, "_")[[1]][1]
+  print(covar)
   contrast <- strsplit(tmp, "_")[[1]][2]
+  print(contrast)
   if (covar == "FGr-LOCO") {
     covar <- TRUE
   } else if (covar == "no-FGr") {
@@ -37,7 +41,7 @@ for (i in 2:length(args)) {
 
   # Extract number of PCs used
   pc <- regmatches(tmp, gregexpr("([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])", tmp))[[1]]
-
+  print(pc)
   # Read in results
   dfTmp <- fread(filename)
   q <- dfTmp[1,1]

@@ -11,8 +11,8 @@ CONTRASTS = ["sds"]
 PC = [0,10,40]
 GWAS=["WBS"]
 COVAR = ["FGr-LOCO", "no-FGr"]
-PHENOTYPE=['MeanCorpuscularHaemoglobinConcentration_Normalized_30060']
-#PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+#PHENOTYPE=['MeanCorpuscularHaemoglobinConcentration_Normalized_30060']
+PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 print(PHENOTYPE)
 
 def get_chr_num(x):
@@ -21,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("plots/{dataset}/{subdataset}/{gwas}/results.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 ## Compute FGr
