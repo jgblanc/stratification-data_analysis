@@ -62,6 +62,9 @@ q <- calc_q(df)
 # Compute p-value
 pval <- pnorm(abs(q), mean = 0, sd = sqrt(sigma2),lower.tail = FALSE) * 2
 
+# Divide q by variance
+q <- q/sqrt(sigma2)
+
 # Set up output table
 out <- as.data.frame(matrix(nrow = 1, ncol =2))
 colnames(out) <- c("q", "pval")
