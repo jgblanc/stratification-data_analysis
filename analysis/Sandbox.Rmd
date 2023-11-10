@@ -245,9 +245,10 @@ df <- fread("../plots/sds/UK10K/WBS/results.txt")
 df$pc <- as.character(df$pc)
 df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
 df <- df %>% separate("phenotype", c("phenotype", "tmp1", "tmp2"))
+df <- df %>% mutate(pheno = case_when(phenotype == "MeanCorpuscularHaemoglobinConcentration" ~ "MCHC", TRUE ~ phenotype))
 
 # Get bonferonni correction column wise  
-df <- df %>% group_by(covar, pc) %>% mutate(p.adjust = p.adjust(p))
+df <- df %>% group_by(covar, pc) %>% mutate(p.adjust = p.adjust(p, method ="bonferroni"))
 df <- df %>% mutate(sig2 = case_when(p.adjust <= 0.05 ~ "*", p.adjust > 0.05 ~ ""))
 
 df$covar <- as.factor(df$covar)
@@ -259,7 +260,7 @@ hospital_labeller <- function(variable,value){
 }
 
 # Figure 
-pl <- ggplot(df, aes(y = phenotype, x = pc, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Number of PCs") + theme_bw(base_size = 14) + theme(axis.text = element_text(color = "black")) 
+pl <- ggplot(df, aes(y = pheno, x = pc, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Number of PCs") + theme_bw(base_size = 14) + theme(axis.text = element_text(color = "black")) 
 
 pl
 
@@ -360,12 +361,12 @@ HGDP Simple Lat Long
 ```{r}
 df <- fread("../plots/hgdp/ALL/ALL/results_LR_LatLong.txt")
 df$pc <- as.character(df$pc)
-df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
+df <- df %>% mutate(sig = case_when(p <= 0.00227 ~ "*", p > 0.00227 ~ ""))
 df <- df %>% separate("phenotype", c("phenotype", "tmp1", "tmp2"))
 df <- df %>% separate(contrast, c("contrast"))
 
 # Get bonferonni correction column wise  
-df<- df %>% group_by(covar, pc, contrast) %>% mutate(p.adjust = p.adjust(p))
+df<- df %>% group_by(covar, pc, contrast) %>% mutate(p.adjust = p.adjust(p, method = "bonferroni"))
 df <- df %>% mutate(sig2 = case_when(p.adjust <= 0.05 ~ "*", p.adjust > 0.05 ~ ""))
 
 df$covar <- as.factor(df$covar)
@@ -376,19 +377,41 @@ df <- df %>% mutate(pheno = case_when(phenotype == "MeanCorpuscularHaemoglobinCo
 # Figure 
 df1 <- df %>% filter(pc == 0)
 pl1 <- ggplot(df1, aes(y = pheno, x = contrast, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller)+ scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Test Vector") + theme_bw(base_size = 16) + theme(axis.text = element_text(color = "black"), plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ggtitle("0 PCs")
+pl1
+
+df05 <- df %>% filter(pc == 2)
+pl05 <- ggplot(df05, aes(y = pheno, x = contrast, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller)+ scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Test Vector") + theme_bw(base_size = 16) + theme(axis.text = element_text(color = "black"), plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ggtitle("2 PCs")
+pl05
 
 df2 <- df %>% filter(pc == 10)
 pl2 <- ggplot(df2, aes(y = pheno, x = contrast, fill = q)) + geom_tile() + facet_wrap(~covar, labeller = hospital_labeller)+ scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Test Vector") + theme_bw(base_size = 16) + theme(axis.text = element_text(color = "black"), plot.title = element_text(hjust = 0.5), legend.position = "bottom") + ggtitle("10 PCs")
 pl2
 
-pl <- ggpubr::ggarrange(pl1, pl2, nrow = 1, widths = c(1, 1))
+pl <- ggpubr::ggarrange(pl1,pl05, pl2, nrow = 1)
 
 
-ggsave("~/Desktop/HGDPLatLong0.png",pl2, height = 10, width = 5)
+ggsave("~/Desktop/HGDPLatLong.png",pl, height = 10, width = 15)
 
 #ggplot(df, aes(y = phenotype, x = contrast, fill = q)) + geom_tile() + facet_grid(vars(covar),vars(pc))+ scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig2), color="black", size=7, fontface="bold")  + ylab("") + xlab("Test Vector") + theme_bw(base_size = 14) + theme(axis.text = element_text(color = "black"), plot.title = element_text(hjust = 0.5))
 
 ```
+
+```{r}
+df <- fread("~/Downloads/SDS_PC_WBS")
+df$PC <- as.integer(df$PC)
+
+#pl <- ggplot(df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 14) 
+pl <- ggplot(df[1:40,], aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold')) + geom_hline(yintercept = 1, color = "red", linetype = "dashed", size = 1.5) 
+#+ ggtitle("SDS - WBS")
+pl
+ggsave("~/Desktop/SDSWBS.png",pl, height = 4, width = 8)
+
+
+pl2 <- ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 22)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) 
+pl2
+ggsave("~/Desktop/rho.png",pl2, height = 4, width= 8)
+```
+
 
 
 ```{r}
