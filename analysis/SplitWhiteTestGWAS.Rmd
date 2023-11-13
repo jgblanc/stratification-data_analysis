@@ -9,3 +9,51 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+```{r}
+East <- fread("../data/phenotypes/PlaceOfBirthEastCord_130.txt")
+North <- fread("../data/phenotypes/PlaceOfBirthNorthCord_129.txt")
+
+ids <- fread("../data/ukbb/White.ids")
+wbs <- fread("../data/ukbb/WBS.ids")
+
+dfWBS <- inner_join(wbs, East)
+dfWBS <- inner_join(dfWBS, North)
+
+dfGWAS <- subset(ids, !(ids$IID %in% wbs$IID))
+dfGWAS <- dfGWAS[-1,]
+```
+
+
+```{r}
+set.seed(1212)
+
+# Sample random subsets of test panel size
+n <- c(100, 1000, 5000, 50000, 100000)
+
+for (i in 1:length(n)) {
+  
+  df <- dfWBS %>% sample_n(n[i]) %>% select("#FID", "IID")
+  
+  name <- paste0("../data/ukbb/tp/t", format(n[i], scientific=F), ".txt")
+  fwrite(df, name ,row.names=F,quote=F,sep="\t", col.names = T)
+  
+}
+```
+
+
+```{r}
+set.seed(1313)
+
+# Sample random subsets of test panel size
+n <- c(6000, 60000)
+
+for (i in 1:length(n)) {
+  
+  df <- dfGWAS %>% sample_n(n[i]) %>% select("#FID", "IID")
+  
+  name <- paste0("../data/ukbb/gp/g", n[i], ".txt")
+  fwrite(df, name ,row.names=F,quote=F,sep="\t", col.names = T)
+  
+}
+```

@@ -2,16 +2,16 @@
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-DATASET = ["hgdp"]
-SUBDATASET = ["ALL"]
-CONTRASTS = ["Lat", "Long"]
-PC = [0,2,10]
-GWAS=["ALL"]
-COVAR = ["no-FGr", "FGr-LOCO"]
+#DATASET = ["hgdp"]
+#SUBDATASET = ["ALL"]
+#CONTRASTS = ["Lat", "Long"]
+#PC = [0,2,10]
+#GWAS=["ALL"]
+#COVAR = ["no-FGr", "FGr-LOCO"]
 #PHENOTYPE=[ "HipCircumference_Normalized_49"]
-PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
-PVALUE_THRESHOLD = "1e-5"
-print(CONTRASTS)
+#PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+#PVALUE_THRESHOLD = "1e-5"
+#print(CONTRASTS)
 
 def get_chr_num(x):
   out = int(x)
@@ -19,9 +19,20 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("plots/{dataset}/{subdataset}/{gwas}/results_LR_LatLong.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("data/SS/overlappingSNPs_chr{chr}.txt", chr=CHR)
 
 
+# Get final set of SNP (White MAF > 1%)
+
+rule get_overlapping_snps:
+    input:
+        "data/ukbb/variants/White/ukb_imp_chr{chr}_v3.afreq""
+    output:
+        "data/SS/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        cut -f2,3 {input} > {output}
+        """
 
 
 
