@@ -3,8 +3,8 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["SS"]
-SUBDATASET = ["ALL"]
-CONTRASTS = ["Lat", "Long"]
+SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
+CONTRASTS = ["north", "east"]
 PC = [0,2,10]
 GWAS=["ALL"]
 COVAR = ["no-FGr", "FGr-LOCO"]
@@ -19,7 +19,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/SS/overlappingSNPs_chr{chr}.txt", chr=CHR)
+        expand("data/SS/{subdataset}/TestVecs/{contrasts}.txt", chr=CHR, subdataset=SUBDATASET, contrasts=CONSTRASTS)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -28,13 +28,45 @@ rule get_overlapping_snps:
     input:
         "data/ukbb/variants/White/ukb_imp_chr{chr}_v3.afreq"
     output:
-        "data/SS/overlappingSNPs_chr{chr}.txt"
+        "data/SS/variants/overlappingSNPs_chr{chr}.txt"
     shell:
         """
         cut -f2,3 {input} > {output}
         """
 
 
+# Make Birth Coordinates Test Vector
+
+rule get_TestVector:
+    input:
+        North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
+        East = "data/phenotypes/PlaceOfBirthEastCord_130.txt",
+        ids="data/ukbb/SS/tp/{subdataset}.txt"
+    output:
+        north = "data/SS/{subdataset}/TestVecs/north.txt",
+        east = "data/SS/{subdataset}/TestVecs/east.txt"
+    shell:
+        """
+        Rscript code/SS/get_Tvec.R {input.North} {input.East} {input.ids} {output.north} {output.east}
+        """
+
+rule compute_r:
+    input:
+        TvecLat="data/hgdp/{dataset}/TestVecs/Lat.txt",
+        TvecLong="data/hgdp/{dataset}/TestVecs/Long.txt",
+        tp_genos="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        snps="data/hgdp/{dataset}/variants-fliped/flipped_snps_{chr}.txt"
+    output:
+        Lat="data/hgdp/{dataset}/r/Lat_chr{chr}.rvec",
+        Long="data/hgdp/{dataset}/r/Long_chr{chr}.rvec"
+    params:
+        prefix_tp = "data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out = "data/hgdp/{dataset}/r/"
+    shell:
+        """
+        Rscript code/hgdp/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
+        rm {params.prefix_out}xt_temp.*
+        """
 
 
 
@@ -43,7 +75,7 @@ rule get_overlapping_snps:
 rule compute_FGr_chr:
     input:
         r="data/{dataset}/{subdataset}/r/{contrasts}_chr{chr}.rvec",
-        gp_genos="/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3.pgen",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/{dataset}/{subdataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
     output:
         "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt"
