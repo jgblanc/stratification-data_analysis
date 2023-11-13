@@ -2,7 +2,7 @@
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-SUBSET=["WBS"]
+SUBSET=["White"]
 nPART=250
 PARTS = []
 for i in range(1, nPART+1):
@@ -35,7 +35,7 @@ rule UKBB_begen_to_plink2:
     threads: 16
     resources:
         mem_mb=38000,
-	walltime="00:06:00:00"
+	time="00:06:00:00"
     shell:
         """
 	      plink2 --bgen {input.bgen} ref-first \
@@ -64,9 +64,10 @@ rule UKBB_begen_to_plink2_WBS:
 	      pgen="/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3.pgen"
     params:
         prefix="/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3"
+    threads: 16	
     resources:
         mem_mb=38000,
-	walltime="00:06:00:00"
+	time="06:00:00"
     shell:
         """
 	      plink2 --bgen {input.bgen} ref-first \
@@ -80,7 +81,7 @@ rule UKBB_begen_to_plink2_WBS:
 	      --max-alleles 2 \
 	      --make-pgen \
 	      --set-all-var-ids @:# \
-	      --threads 20 \
+	      --threads 16 \
 	      --memory 38000 \
 	      --out {params.prefix}
 	      """
@@ -89,21 +90,22 @@ rule UKBB_begen_to_plink2_EUR:
     input:
         bgen="/gpfs/data/xhe-lab/uk-biobank-genotypes/ukb_imp_chr{chr}_v3.bgen",
         sample="/gpfs/data/berg-lab/data/ukbb/ukb22828_c22_b0_v3_s487192.sample",
-        WBS="data/ukbb/White.ids"
+        White="data/ukbb/White.ids"
     output:
         psam="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.psam",
 	      pvar="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pvar",
 	      pgen="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen"
     params:
         prefix="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3"
+    threads: 16
     resources:
         mem_mb=38000,
-	walltime="00:06:00:00"
+	time="06:00:00"
     shell:
         """
 	      plink2 --bgen {input.bgen} ref-first \
 	      --sample {input.sample} \
-	      --keep {input.WBS} \
+	      --keep {input.White} \
 	      --mind 0.1 \
         --geno 0.1 \
         --maf 0.01 \
@@ -112,7 +114,7 @@ rule UKBB_begen_to_plink2_EUR:
 	      --max-alleles 2 \
 	      --make-pgen \
 	      --set-all-var-ids @:# \
-	      --threads 20 \
+	      --threads 16 \
 	      --memory 38000 \
 	      --out {params.prefix}
 	      """
