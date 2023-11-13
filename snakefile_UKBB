@@ -15,7 +15,7 @@ for i in range(1, nPART+1):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.psam",chr=CHR, subset=SUBSET, npart=nPART, parts=PARTS)
+        expand("data/ukbb/variants/{subset}/ukb_imp_chr{chr}_v3.afreq",chr=CHR, subset=SUBSET, npart=nPART, parts=PARTS)
 
 
 ## UKBB Genotype data processing
@@ -64,7 +64,7 @@ rule UKBB_begen_to_plink2_WBS:
 	      pgen="/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3.pgen"
     params:
         prefix="/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3"
-    threads: 16	
+    threads: 16
     resources:
         mem_mb=38000,
 	time="06:00:00"
