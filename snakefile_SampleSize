@@ -19,7 +19,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/SS/{subdataset}/TestVecs/{contrasts}.txt", chr=CHR, subdataset=SUBDATASET, contrasts=CONSTRASTS)
+        expand("data/SS/{subdataset}/TestVecs/{contrasts}.txt", chr=CHR, subdataset=SUBDATASET, contrasts=CONTRASTS)
 
 
 # Get final set of SNP (White MAF > 1%)

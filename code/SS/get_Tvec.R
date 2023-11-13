@@ -34,7 +34,7 @@ print(head(dfEast))
 
 # Set up outfiles
 dfNorth <- dfNorth %>% select("IID", "north")
-dfEast <- df %>% select("IID", "east")
+dfEast <- dfEast %>% select("IID", "east")
 
 
 # Save output
