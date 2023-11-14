@@ -19,7 +19,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/SS/{subdataset}/r/North_chr{chr}.rvec", chr=CHR, subdataset=SUBDATASET, contrasts=CONTRASTS)
+        expand("data/SS/{subdataset}/r/north_chr{chr}.rvec", chr=CHR, subdataset=SUBDATASET, contrasts=CONTRASTS)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -52,13 +52,13 @@ rule get_TestVector:
 
 rule compute_r:
     input:
-        TvecNorth="data/SS/{subdataset}/TestVecs/North.txt",
-        TvecEast="data/SS/{subdataset}/TestVecs/East.txt",
+        TvecNorth="data/SS/{subdataset}/TestVecs/north.txt",
+        TvecEast="data/SS/{subdataset}/TestVecs/east.txt",
         IDs="data/ukbb/SS/tp/{subdataset}.txt",
         snps="data/SS/variants/overlappingSNPs_chr{chr}.txt"
     output:
-        North="data/SS/{subdataset}/r/North_chr{chr}.rvec",
-        East="data/SS/{subdataset}/r/East_chr{chr}.rvec"
+        North="data/SS/{subdataset}/r/north_chr{chr}.rvec",
+        East="data/SS/{subdataset}/r/east_chr{chr}.rvec"
     params:
         prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
         prefix_out = "data/SS/{subdataset}/r/"

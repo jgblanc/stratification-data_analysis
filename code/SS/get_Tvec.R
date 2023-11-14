@@ -33,8 +33,8 @@ colnames(dfEast)[3] <- "east"
 print(head(dfEast))
 
 # Set up outfiles
-dfNorth <- dfNorth %>% select("IID", "north")
-dfEast <- dfEast %>% select("IID", "east")
+dfNorth <- dfNorth %>% select("#FID","IID", "north")
+dfEast <- dfEast %>% select("#FID","IID", "east")
 
 
 # Save output
