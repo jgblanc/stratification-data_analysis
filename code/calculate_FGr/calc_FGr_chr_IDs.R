@@ -19,8 +19,12 @@ IDs_file = args[6]
 
 # Read in GWAS individuals
 gwasID <- fread(paste0(gwas_prefix, ".psam"))
-colnames(gwasID) <- c("FID", "IID",  "Sex")
+colnames(gwasID) <- c("#FID", "IID",  "Sex")
+ID <- fread(IDs_file)
+gwasID <- inner_join(gwasID, ID)
 m <- nrow(gwasID)
+print(m)
+print(head(gwasID))
 
 # Read in and format r
 r <- fread(r_file)
@@ -46,6 +50,9 @@ length_mc_genos <- length_mc_genos * (1/(m-1))
 
 #  Re-write .linear file with correct betas
 r$BETA <- r$BETA * (1/length_mc_genos)
+r[is.na(r)] <- 0
+r$BETA[!is.finite(r$BETA)] <- 0
+print(head(r, 14))
 
 # Save r to use as scoring weights
 fwrite(r, paste0(out_prefix, ".xt_temp.glm.linear"), sep = "\t")
