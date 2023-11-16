@@ -3,7 +3,7 @@
 
 args=commandArgs(TRUE)
 
-if(length(args)<4){stop("Rscript calc_FGr_chr.R <gwas panel prefix> <output directory> <contrasts> <overlap snps> <output file>")}
+if(length(args)<5){stop("Rscript calc_FGr_chr.R <gwas panel prefix> <output directory> <contrasts> <overlap snps> <output file>")}
 
 suppressWarnings(suppressMessages({
   library(data.table)
@@ -45,6 +45,7 @@ length_mc_genos <- length_mc_genos * (1/(m-1))
 
 #  Re-write .linear file with correct betas
 r$BETA <- r$BETA * (1/length_mc_genos)
+r[is.na(r)] <- 0
 
 # Save r to use as scoring weights
 fwrite(r, paste0(out_prefix, ".xt_temp.glm.linear"), sep = "\t")

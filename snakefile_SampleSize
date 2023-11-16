@@ -21,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/SS/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt", chr=CHR, subdataset=SUBDATASET,gwas=GWAS, contrasts=CONTRASTS)
+        expand("output/calculate_FGr/SS/{subdataset}/FGr_{contrasts}_{chr}.txt", chr=CHR, subdataset=SUBDATASET,gwas=GWAS, contrasts=CONTRASTS)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -76,19 +76,18 @@ rule compute_FGr_chr:
     input:
         r="data/SS/{subdataset}/r/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/SS/variants/overlappingSNPs_chr{chr}.txt",
-        IDs="data/ukbb/SS/gp/{gwas}.txt"
+        overlap_snps="data/SS/variants/overlappingSNPs_chr{chr}.txt"
     output:
-        "output/calculate_FGr/SS/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt"
+        "output/calculate_FGr/SS/{subdataset}/FGr_{contrasts}_{chr}.txt"
     resources:
         mem_mb=2000,
 	time="03:00:00"
     params:
         gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
-        out_prefix = "output/calculate_FGr/SS/{subdataset}/{gwas}/{contrasts}_{chr}"
+        out_prefix = "output/calculate_FGr/SS/{subdataset}/{contrasts}_{chr}"
     shell:
         """
-        Rscript code/calculate_FGr/calc_FGr_chr_IDs.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output} {input.IDs}
+        Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output}
         """
 
 # Add together individal chromosomes LOCO
