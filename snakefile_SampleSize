@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =["22"]
-#for i in range(1, 23):
-#  CHR.append(str(i))
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
 DATASET = ["SS"]
 SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
 CONTRASTS = ["north", "east"]
