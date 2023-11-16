@@ -1,12 +1,14 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 DATASET = ["SS"]
-SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
+#SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
+SUBDATASET = ["t100"]
 CONTRASTS = ["north", "east"]
 PC = [0,2,10]
-GWAS=["ALL"]
+#GWAS=["g5000", "g50000"]
+GWAS = ["g5000"]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=[ "HipCircumference_Normalized_49"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
@@ -19,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/SS/{subdataset}/r/north_chr{chr}.rvec", chr=CHR, subdataset=SUBDATASET, contrasts=CONTRASTS)
+        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt", chr=CHR, subdataset=SUBDATASET, contrasts=CONTRASTS)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -68,26 +70,25 @@ rule compute_r:
         rm {params.prefix_out}xt_temp.*
         """
 
-
-
 ## Compute FGr
 
 rule compute_FGr_chr:
     input:
-        r="data/{dataset}/{subdataset}/r/{contrasts}_chr{chr}.rvec",
+        r="data/SS/{subdataset}/r/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/{dataset}/{subdataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
+        overlap_snps="data/SS/variants/overlappingSNPs_chr{chr}.txt",
+        IDs="data/ukbb/SS/gp/{gwas}.txt"
     output:
         "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt"
     resources:
         mem_mb=2000,
 	time="03:00:00"
     params:
-        gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3",
-        out_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/{contrasts}_{chr}"
+        gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
+        out_prefix = "output/calculate_FGr/SS/{subdataset}/{gwas}/{contrasts}_{chr}"
     shell:
         """
-        Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output}
+        Rscript code/calculate_FGr/calc_FGr_chr_IDs.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output} {input.IDs}
         """
 
 # Add together individal chromosomes LOCO

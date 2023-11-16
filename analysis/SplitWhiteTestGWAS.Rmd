@@ -9,19 +9,43 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Get non-WBS IDs 
 
 ```{r}
+WBS <- fread("~/Downloads/WBS.ids")
+ALL <- fread("~/Downloads/EthnicBackground_21000.txt")
+
+df <- ALL %>% filter(!IID %in% WBS$IID) %>% filter(EthnicBackground_21000 %in% c(1, 1001, 1002, 1003))
+dfOut <- df[,1:2]
+
+fwrite(dfOut,"~/Downloads/nonWBS-White.ids", row.names = F, col.names = T, quote = F, sep = "\t")
+```
+
+## Get GWAS and Test panels 
+
+```{r}
+# People genotyped in "White" subset
+geno <- fread("../data/phenotypes/ukb_imp_chr22_v3.psam")
+
+# People phenotyped for birth coordinate
 East <- fread("../data/phenotypes/PlaceOfBirthEastCord_130.txt")
 North <- fread("../data/phenotypes/PlaceOfBirthNorthCord_129.txt")
 
+# IDs for white and WBS
 ids <- fread("../data/ukbb/White.ids")
 wbs <- fread("../data/ukbb/WBS.ids")
 
+# get geno and phenotyped test panel
 dfWBS <- inner_join(wbs, East)
 dfWBS <- inner_join(dfWBS, North)
+dfWBS <- inner_join(dfWBS, geno)
 
+# get geno and phenotyped gwas panel 
 dfGWAS <- subset(ids, !(ids$IID %in% wbs$IID))
 dfGWAS <- dfGWAS[-1,]
+geno$`#FID` <- as.character(geno$`#FID`)
+geno$IID <- as.character(geno$IID)
+dfGWAS <- inner_join(dfGWAS, geno)
 ```
 
 
@@ -46,7 +70,7 @@ for (i in 1:length(n)) {
 set.seed(1313)
 
 # Sample random subsets of test panel size
-n <- c(6000, 60000)
+n <- c(5000, 50000)
 
 for (i in 1:length(n)) {
   
