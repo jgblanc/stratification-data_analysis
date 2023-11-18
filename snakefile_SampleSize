@@ -111,7 +111,7 @@ rule concat_chr_FGr:
 
 rule merge_GWAS:
     input:
-        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen", chr=CHR)
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen", chr=CHR),
         overlap_snps="data/ukbb/ukbb_pc_snps.txt",
         IDs="data/ukbb/SS/gp/{gwas}.txt",
         MergeList = "/scratch/jgblanc/ukbb/plink2-files/White/all_chrms.txt"
@@ -129,7 +129,8 @@ rule merge_GWAS:
         """
         plink2 --pmerge-list {input.MergeList} \
         --keep {input.IDs} \
-        --extract {input.overlap_snps}
+        --extract {input.overlap_snps} \
+	--make-pgen \
         --out {params.prefix_out}
         """
 
