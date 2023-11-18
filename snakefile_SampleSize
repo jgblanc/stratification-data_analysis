@@ -111,7 +111,7 @@ rule concat_chr_FGr:
 
 rule make_tmp_plink2:
     input:
-        gp="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen"
+        gp="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/ukbb/ukbb_pc_snps.txt",
         IDs="data/ukbb/SS/gp/{gwas}.txt"
     output:
@@ -135,28 +135,28 @@ rule make_tmp_plink2:
         """
 
 
-rule merge_GWAS:
-    input:
-        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen", chr=CHR),
-        MergeList = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/all_chrms.txt"
-    output:
-        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pgen",
-        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pvar",
-        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.psam"
-    params:
-        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all"
-    threads: 16
-    resources:
-        mem_mb=38000,
-        time="03:00:00"
-    shell:
-        """
-        plink2 --pmerge-list {input.MergeList} \
-        --keep {input.IDs} \
-        --extract {input.overlap_snps} \
-	--make-pgen \
-        --out {params.prefix_out}
-        """
+#rule merge_GWAS:
+#    input:
+#        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen", chr=CHR),
+#        MergeList = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/all_chrms.txt"
+#    output:
+#        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pgen",
+#        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pvar",
+#        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.psam"
+#    params:
+#        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all"
+#    threads: 16
+#    resources:
+#        mem_mb=38000,
+#        time="03:00:00"
+#    shell:
+#        """
+#        plink2 --pmerge-list {input.MergeList} \
+#        --keep {input.IDs} \
+#        --extract {input.overlap_snps} \
+#	--make-pgen \
+#        --out {params.prefix_out}
+#        """
 
 rule run_PCA:
     input:
