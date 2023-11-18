@@ -21,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen", chr=CHR, subdataset=SUBDATASET,gwas=GWAS, contrasts=CONTRASTS)
+        expand("data/SS/{gwas}/pca.eigenvec", chr=CHR, subdataset=SUBDATASET,gwas=GWAS, contrasts=CONTRASTS)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -135,52 +135,28 @@ rule make_tmp_plink2:
         """
 
 
-#rule merge_GWAS:
-#    input:
-#        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen", chr=CHR),
-#        MergeList = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/all_chrms.txt"
-#    output:
-#        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pgen",
-#        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pvar",
-#        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.psam"
-#    params:
-#        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all"
-#    threads: 16
-#    resources:
-#        mem_mb=38000,
-#        time="03:00:00"
-#    shell:
-#        """
-#        plink2 --pmerge-list {input.MergeList} \
-#        --keep {input.IDs} \
-#        --extract {input.overlap_snps} \
-#	--make-pgen \
-#        --out {params.prefix_out}
-#        """
-
-rule run_PCA:
+rule merge_GWAS_PCA:
     input:
-        gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pgen",
-        overlap_snps="LD PRUNED SNPS",
-        IDs="data/ukbb/SS/gp/{gwas}.txt"
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen", chr=CHR)
     output:
         vec="data/SS/{gwas}/pca.eigenvec",
         val="data/SS/{gwas}/pca.eigenval"
     params:
         prefix_out = "data/SS/{gwas}/pca",
-        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all"
+        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}", chr=CHR, newline="\n")
     threads: 16
     resources:
-        mem_mb=100,
-        time="00:30:00"
+        mem_mb=38000,
+        time="03:00:00"
     shell:
         """
-        plink2 --pfile {params.prefix_plink} \
-        --keep {input.IDs} \
-        --extract {input.overlap_snps} \
+        echo {params.merge_prefix} > tmp_chrm_list.txt
+        plink2 --pmerge-list  tmp_chrm_list.txt \
         --pca 40 approx \
         --out {params.prefix_out}
+        rm tmp_chrm_list.txt
         """
+
 
 ## Run GWAS
 
