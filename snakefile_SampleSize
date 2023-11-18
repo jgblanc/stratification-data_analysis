@@ -21,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pgen", chr=CHR, subdataset=SUBDATASET,gwas=GWAS, contrasts=CONTRASTS)
+        expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen", chr=CHR, subdataset=SUBDATASET,gwas=GWAS, contrasts=CONTRASTS)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -109,12 +109,36 @@ rule concat_chr_FGr:
 
 ## GWAS panel PCA
 
+rule make_tmp_plink2:
+    input:
+        gp="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen"
+        overlap_snps="data/ukbb/ukbb_pc_snps.txt",
+        IDs="data/ukbb/SS/gp/{gwas}.txt"
+    output:
+        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen",
+        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pvar",
+        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.psam"
+    params:
+        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3"
+    threads: 16
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_plink} \
+        --keep {input.IDs} \
+        --extract {input.overlap_snps} \
+	--make-pgen \
+        --out {params.prefix_out}
+        """
+
+
 rule merge_GWAS:
     input:
-        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen", chr=CHR),
-        overlap_snps="data/ukbb/ukbb_pc_snps.txt",
-        IDs="data/ukbb/SS/gp/{gwas}.txt",
-        MergeList = "/scratch/jgblanc/ukbb/plink2-files/White/all_chrms.txt"
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen", chr=CHR),
+        MergeList = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/all_chrms.txt"
     output:
         "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pgen",
         "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pvar",
