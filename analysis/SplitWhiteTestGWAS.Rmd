@@ -81,3 +81,20 @@ for (i in 1:length(n)) {
   
 }
 ```
+
+
+
+```{r}
+SNPs <- fread("~/Downloads/ukb_snp_qc.txt")
+
+
+df <- SNPs %>% select("chromosome", "position", "allele1_ref", "allele2_alt", "in_PCA") %>% filter(in_PCA == 1)
+df <- df %>% select("chromosome", "position", "allele1_ref")
+
+df$ID <- paste(df$chromosome, df$position, sep=":")
+df <- df %>% select("ID",  "allele1_ref")
+colnames(df) <- c("ID", "REF")
+
+fwrite(df,"~/stratification-data_analysis/output/transfer/ukbb_pc_snps.txt", row.names = F, col.names = T, quote = F, sep = "\t")
+s```
+

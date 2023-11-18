@@ -21,7 +21,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/SS/{subdataset}/FGr_{contrasts}_{chr}.txt", chr=CHR, subdataset=SUBDATASET,gwas=GWAS, contrasts=CONTRASTS)
+        expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pgen", chr=CHR, subdataset=SUBDATASET,gwas=GWAS, contrasts=CONTRASTS)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -76,13 +76,14 @@ rule compute_FGr_chr:
     input:
         r="data/SS/{subdataset}/r/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/SS/variants/overlappingSNPs_chr{chr}.txt"
+        overlap_snps="data/SS/variants/overlappingSNPs_chr{chr}.txt",
+        IDs="data/ukbb/SS/tp/{subdataset}.txt"
     output:
         "output/calculate_FGr/SS/{subdataset}/FGr_{contrasts}_{chr}.txt"
     resources:
-        mem_mb=2000,
+        mem_mb=38000,
 	time="03:00:00"
-    threads: 8	
+    threads: 8
     params:
         gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
         out_prefix = "output/calculate_FGr/SS/{subdataset}/{contrasts}_{chr}"
@@ -95,15 +96,65 @@ rule compute_FGr_chr:
 
 rule concat_chr_FGr:
     input:
-        expand("output/calculate_FGr/{{dataset}}/{{subdataset}}/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+        expand("output/calculate_FGr/{{dataset}}/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
     output:
-        "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr-LOCO_{contrasts}_{chr}.txt"
+        "output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
     params:
         chrNum = lambda wildcards: get_chr_num(wildcards.chr),
-        prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
+        """
+
+## GWAS panel PCA
+
+rule merge_GWAS:
+    input:
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen", chr=CHR)
+        overlap_snps="data/ukbb/ukbb_pc_snps.txt",
+        IDs="data/ukbb/SS/gp/{gwas}.txt",
+        MergeList = "/scratch/jgblanc/ukbb/plink2-files/White/all_chrms.txt"
+    output:
+        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pgen",
+        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pvar",
+        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.psam"
+    params:
+        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all"
+    threads: 16
+    resources:
+        mem_mb=38000,
+        time="03:00:00"
+    shell:
+        """
+        plink2 --pmerge-list {input.MergeList} \
+        --keep {input.IDs} \
+        --extract {input.overlap_snps}
+        --out {params.prefix_out}
+        """
+
+rule run_PCA:
+    input:
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all.pgen",
+        overlap_snps="LD PRUNED SNPS",
+        IDs="data/ukbb/SS/gp/{gwas}.txt"
+    output:
+        vec="data/SS/{gwas}/pca.eigenvec",
+        val="data/SS/{gwas}/pca.eigenval"
+    params:
+        prefix_out = "data/SS/{gwas}/pca",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/ukb_imp.all"
+    threads: 16
+    resources:
+        mem_mb=100,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_plink} \
+        --keep {input.IDs} \
+        --extract {input.overlap_snps} \
+        --pca 40 approx \
+        --out {params.prefix_out}
         """
 
 ## Run GWAS
