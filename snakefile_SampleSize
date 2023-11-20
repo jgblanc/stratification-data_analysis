@@ -7,8 +7,8 @@ SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
 #SUBDATASET = ["t100"]
 CONTRASTS = ["north", "east"]
 PC = [0,2,10]
-#GWAS=["g5000", "g50000"]
-GWAS = ["g5000"]
+GWAS=["g5000", "g50000"]
+#GWAS = ["g5000"]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=[ "HipCircumference_Normalized_49"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
@@ -137,24 +137,28 @@ rule make_tmp_plink2:
 
 rule merge_GWAS_PCA:
     input:
-        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen", chr=CHR)
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{{gwas}}/tmp_{chr}.pgen", chr=CHR)
     output:
         vec="data/SS/{gwas}/pca.eigenvec",
         val="data/SS/{gwas}/pca.eigenval"
     params:
         prefix_out = "data/SS/{gwas}/pca",
-        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}", chr=CHR, newline="\n")
+        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/White/{{gwas}}/tmp_{chr}", chr=CHR, newline="\n"),
+	remove_path = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/"
     threads: 16
     resources:
         mem_mb=38000,
         time="03:00:00"
     shell:
         """
-        echo {params.merge_prefix} > tmp_chrm_list.txt
+	echo {params.merge_prefix} > tmp.txt
+        tr ' ' '\n' < "tmp.txt" > "tmp_chrm_list.txt" 
         plink2 --pmerge-list  tmp_chrm_list.txt \
         --pca 40 approx \
         --out {params.prefix_out}
-        rm tmp_chrm_list.txt
+        rm tmp*
+	rm {params.remove_path}*
+	rm {params.prefix_out}.p*
         """
 
 
