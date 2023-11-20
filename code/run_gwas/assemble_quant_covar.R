@@ -26,7 +26,7 @@ dfFgr <- dfFgr %>% select("#FID" ,"IID", "FGr")
 
 # Subset to correct number of PCs
 dfPc <- dfPc[,1:(pcNum + 2)]
-#print(ncol(dfPc))
+print(ncol(dfPc))
 
 # Join files
 df1 <- inner_join(dfAge, dfPc)
