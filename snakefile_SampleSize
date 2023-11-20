@@ -3,12 +3,12 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["SS"]
-SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
-#SUBDATASET = ["t100"]
+#SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
+SUBDATASET = ["t100"]
 CONTRASTS = ["north", "east"]
 PC = [40]
-GWAS=["g5000", "g50000"]
-#GWAS = ["g5000"]
+#GWAS=["g5000", "g50000"]
+GWAS = ["g5000"]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=[ "StandingHeight_Normalized_50"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
@@ -27,7 +27,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/SS/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA", chr=CHR, subdataset=SUBDATASET,gwas=GWAS,phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("plots/SS/{subdataset}/{gwas}/results_NorthEast.txt", chr=CHR, subdataset=SUBDATASET,gwas=GWAS,phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -243,10 +243,10 @@ rule run_fastGWA:
 rule assign_snps_to_blocks:
     input:
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
-        ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/{dataset}/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
-        r="data/{dataset}/{subdataset}/r/{contrasts}_chr{chr}.rvec",
+        ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/SS/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        r="data/SS/{subdataset}/r/{contrasts}_chr{chr}.rvec",
     output:
-        betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas"
+        betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas"
     params:
         pt = PVALUE_THRESHOLD
     shell:
@@ -259,9 +259,9 @@ rule assign_snps_to_blocks:
 
 rule concat_snps:
     input:
-        expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/{{dataset}}/{{subdataset}}/{{gwas}}/{{phenotype}}/formated_ss_LR/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.betas", chr=CHR)
+        expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/SS/{{subdataset}}/{{gwas}}/{{phenotype}}/formated_ss_LR/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.betas", chr=CHR)
     output:
-        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
+        "output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
     shell:
         """
         cat {input} > {output}
@@ -270,10 +270,10 @@ rule concat_snps:
 
 rule pga_test:
     input:
-        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
+        "output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
     output:
-        results="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results",
-	gzip="output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
+        results="output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results",
+	gzip="output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
     shell:
         """
         Rscript code/pga_test/run_test_jacknife_LR.R {input} {output.results}
@@ -284,9 +284,9 @@ rule pga_test:
 
 rule concat_pga_test:
     input:
-        expand("output/pga_test/{{dataset}}/{{subdataset}}/{{gwas}}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
+        expand("output/pga_test/SS/{{subdataset}}/{{gwas}}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
     output:
-        "plots/{dataset}/{subdataset}/{gwas}/results_LR_LatLong.txt"
+        "plots/SS/{subdataset}/{gwas}/results_NorthEast.txt"
     shell:
         """
         Rscript code/pga_test/concat_results_LR.R {output} {input}
