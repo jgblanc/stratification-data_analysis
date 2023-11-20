@@ -3,17 +3,23 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["SS"]
-#SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
-SUBDATASET = ["t100"]
+SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
+#SUBDATASET = ["t100"]
 CONTRASTS = ["north", "east"]
-PC = [0,2,10]
-#GWAS=["g5000", "g50000"]
-GWAS = ["g5000"]
+PC = [40]
+GWAS=["g5000", "g50000"]
+#GWAS = ["g5000"]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=[ "HipCircumference_Normalized_49"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 PVALUE_THRESHOLD = "1e-5"
 #print(CONTRASTS)
+
+
+wildcard_constraints:
+    subdataset="t[0-9]*",
+    gwas="g[0-9]*"
+
 
 def get_chr_num(x):
   out = int(x)
@@ -21,7 +27,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/run_gwas/SS/{subdataset}/{gwas}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt", chr=CHR, subdataset=SUBDATASET,gwas=GWAS, contrasts=CONTRASTS)
+        expand("output/run_gwas/SS/{subdataset}/{gwas}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt", chr=CHR, subdataset=SUBDATASET,gwas=GWAS, contrasts=CONTRASTS, pc=PC)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -96,12 +102,12 @@ rule compute_FGr_chr:
 
 rule concat_chr_FGr:
     input:
-        expand("output/calculate_FGr/{{dataset}}/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+        expand("output/calculate_FGr/SS/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
     output:
-        "output/calculate_FGr/{dataset}/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
+        "output/calculate_FGr/SS/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
     params:
         chrNum = lambda wildcards: get_chr_num(wildcards.chr),
-        prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/SS/{subdataset}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
@@ -178,7 +184,7 @@ rule assemble_fixed_covars:
 rule assemble_quant_covars_FGr:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
-        covar="output/calculate_FGr/SS/{subdataset}/{gwas}/FGr-LOCO_{contrasts}_{chr}.txt",
+        covar="output/calculate_FGr/SS/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
         pcs="data/SS/{gwas}/pca.eigenvec"
     output:
         "output/run_gwas/SS/{subdataset}/{gwas}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
