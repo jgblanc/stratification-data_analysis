@@ -51,10 +51,13 @@ for (i in 1:nrow(dfOut)) {
   print(r2)
 
   # Compute correlation
-  name <- paste0("PC_", i)
+  #name <- paste0("PC_", i)
+  name <- paste0("PC", i)
   print(name)
   c1 <- dfCombine[[name]]
-  ct <- cor.test(dfCombine$FGr,c1)
+  print(length(c1))
+  print(length(dfCombine$FGr))
+  ct <- cor.test(as.numeric(dfCombine$FGr),as.numeric(c1))
   rho <- ct$estimate
   lc <- ct$conf.int[1]
   uc <- ct$conf.int[2]
