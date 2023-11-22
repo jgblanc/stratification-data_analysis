@@ -3,12 +3,12 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["SS"]
-SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
-#SUBDATASET = ["t100"]
+#SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
+SUBDATASET = ["t100"]
 CONTRASTS = ["north", "east"]
 PC = [0, 10, 40]
-GWAS=["g5000", "g50000"]
-#GWAS = ["g5000"]
+#GWAS=["g5000", "g50000"]
+GWAS = ["g5000"]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=[ "StandingHeight_Normalized_50"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
@@ -27,7 +27,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("plots/SS/{subdataset}/{gwas}/results_NorthEast.txt", chr=CHR, subdataset=SUBDATASET,gwas=GWAS,phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("output/calculate_FGr/SS/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt"", chr=CHR, subdataset=SUBDATASET,gwas=GWAS,phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -292,86 +292,16 @@ rule concat_pga_test:
         Rscript code/pga_test/concat_results_LR.R {output} {input}
         """
 
-## Compute R2 in non-WBS Europeans
-
-rule format_ss_pgs:
-    input:
-        "output/pga_test/{dataset}/{subdataset}/{gwas}/{phenotype}/formated_ss/{covar}_{contrasts}.all-PC{pc}.betas.gz"
-    output:
-        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/plink_format/{covar}_{contrasts}.all-PC{pc}.betas"
-    shell:
-        """
-        Rscript code/prs/format_ss_for_plink.R {input} {output}
-        """
-
-rule pgs_sscore:
-    input:
-        betas="output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/plink_format/{covar}_{contrasts}.all-PC{pc}.betas",
-        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-        IDs="data/ukbb/nonWBS-White.ids"
-    output:
-        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.{chr}-PC{pc}.sscore"
-    params:
-        prefix_out="output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.{chr}-PC{pc}",
-        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
-    threads: 16
-    shell:
-        """
-        plink2 --pfile {params.prefix_in} \
-        --keep {input.IDs} \
-        --score {input.betas} center cols=dosagesum,scoresums  \
-        --out {params.prefix_out}
-        """
-
-rule combine_pgs:
-    input:
-        expand("output/prs/{{dataset}}/{{subdataset}}/{{gwas}}/{{phenotype}}/pgs_europeans/{{covar}}_{{contrasts}}.{chr}-PC{{pc}}.sscore", chr=CHR)
-    output:
-        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.sscore"
-    params:
-        all_chrs = CHR,
-        num_chr = len(CHR),
-        prefix_one = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}",
-        prefix_two = "-PC{pc}.sscore"
-    shell:
-        """
-        Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
-	      rm {input}
-	      rm {params.prefix_one}*.log
-        """
-
-rule calculate_r2:
-    input:
-        phenotype = "data/phenotypes/normalized/{phenotype}.txt",
-        pgs = "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.sscore"
-    output:
-        "output/prs/{dataset}/{subdataset}/{gwas}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.r2"
-    shell:
-        """
-        Rscript code/prs/compute_r2.R {input.phenotype} {input.pgs} {output}
-        """
-
-rule concat_r2:
-    input:
-        expand("output/prs/{{dataset}}/{{subdataset}}/{{gwas}}/{phenotype}/pgs_europeans/{covar}_{contrasts}.all-PC{pc}.r2", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
-    output:
-        "plots/{dataset}/{subdataset}/{gwas}/r2_results.txt"
-    shell:
-        """
-        Rscript code/prs/concat_r2.R {output} {input}
-        """
-
-
-# Compute FGr vs PCs
+## Compute FGr vs PCs
 
 rule compute_PC_FGr:
     input:
-        Fgr=expand("output/calculate_FGr/{{dataset}}/{{subdataset}}/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
-        PCs = "data/phenotypes/genetic_PC_22009.txt"
+        Fgr=expand("output/calculate_FGr/SS/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+        PCs = "data/SS/{gwas}/pca.eigenvec"
     output:
-        "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt"
+        "output/calculate_FGr/SS/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt"
     params:
-        prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/SS/{subdataset}/{gwas}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output}

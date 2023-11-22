@@ -33,6 +33,7 @@ df$FGr <- scale(df$FGr)
 # Join with PCs
 PCs <- fread(PC_file)
 dfCombine <- inner_join(PCs, df)
+print(nrow(dfCombine))
 print(head(dfCombine[,3]))
 print(head(dfCombine[,42]))
 
@@ -48,7 +49,7 @@ for (i in 1:nrow(dfOut)) {
   mod <- lm(dfCombine$FGr ~ . ,data=dfCombine[,3:(i+2)])
   r2 <- cor(dfCombine$FGr, fitted(mod))^2
   print(r2)
-  
+
   # Compute correlation
   name <- paste0("PC_", i)
   print(name)
