@@ -1,0 +1,31 @@
+PLINK v2.00a3.7LM AVX2 Intel (24 Oct 2022)
+Options in effect:
+  --out data/SS/g50000/pca
+  --pca 40 approx
+  --pmerge-list tmp_chrm_list.txt
+
+Hostname: cri22cn104.cri.uchicago.edu
+Working directory: /gpfs/data/berg-lab/jgblanc/stratification-data_analysis
+Start time: Mon Nov 20 11:23:08 2023
+
+Random number seed: 1700500988
+128533 MiB RAM detected; reserving 64266 MiB for main workspace.
+Using up to 16 threads (change this with --threads).
+--pmerge-list: 22 filesets specified.
+--pmerge-list: 50000 samples present.
+--pmerge-list: Merged .psam written to data/SS/g50000/pca.psam .
+--pmerge-list: 22 .pvar files scanned.
+Concatenation job detected.
+Concatenating... 145331/145331 variants complete.
+Results written to data/SS/g50000/pca.pgen + data/SS/g50000/pca.pvar .
+50000 samples (28091 females, 21909 males; 50000 founders) loaded from
+data/SS/g50000/pca.psam.
+145331 variants loaded from data/SS/g50000/pca.pvar.
+Note: No phenotype data present.
+Calculating allele frequencies... done.
+Computing SVD of Krylov matrix... done.
+Recovering top PCs from range approximation... done.
+--pca approx: Eigenvectors written to data/SS/g50000/pca.eigenvec , and
+eigenvalues written to data/SS/g50000/pca.eigenval .
+
+End time: Mon Nov 20 11:31:28 2023
