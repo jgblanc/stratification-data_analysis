@@ -17,8 +17,8 @@ PVALUE_THRESHOLD = "1e-5"
 
 
 wildcard_constraints:
-    subdataset="t[0-9]*",
-    gwas="g[0-9]*"
+    subdataset="eur[0-9]*",
+    gwas="wbs[0-9]*"
 
 
 def get_chr_num(x):
@@ -45,7 +45,7 @@ rule get_overlapping_snps:
 # Test panel PCA
 
 
-rule make_tmp_plink2:
+rule make_tmp_plink2_test:
     input:
         gp="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/ukbb/ukbb_pc_snps.txt",
@@ -71,7 +71,7 @@ rule make_tmp_plink2:
         """
 
 
-rule merge_GWAS_PCA:
+rule merge_Test_PCA:
     input:
         gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{{subdataset}}/tmp_{chr}.pgen", chr=CHR)
     output:
