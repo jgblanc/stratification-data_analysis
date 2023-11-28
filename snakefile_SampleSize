@@ -3,11 +3,11 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["SS"]
-SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
+SUBDATASET = ["eur50000"]
 #SUBDATASET = ["t100"]
-CONTRASTS = ["north", "east"]
+CONTRASTS = ["pc1", "pc2"]
 PC = [0, 10, 40]
-GWAS=["g5000", "g50000"]
+GWAS=["wbs50000", "wbs100000", "wbs300000"]
 #GWAS = ["g5000"]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=[ "StandingHeight_Normalized_50"]
@@ -27,7 +27,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("plots/SS/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt", chr=CHR, subdataset=SUBDATASET,gwas=GWAS,phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("data/SS/{subdataset}/pca.eigenvec", chr=CHR, subdataset=SUBDATASET)
 
 
 # Get final set of SNP (White MAF > 1%)
@@ -40,6 +40,61 @@ rule get_overlapping_snps:
     shell:
         """
         cut -f2,3 {input} > {output}
+        """
+
+# Test panel PCA
+
+
+rule make_tmp_plink2:
+    input:
+        gp="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
+        overlap_snps="data/ukbb/ukbb_pc_snps.txt",
+        IDs="data/ukbb/SS/tp/{subdataset}.txt"
+    output:
+        "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/tmp_{chr}.pgen",
+        "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/tmp_{chr}.pvar",
+        "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/tmp_{chr}.psam"
+    params:
+        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/tmp_{chr}",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3"
+    threads: 16
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_plink} \
+        --keep {input.IDs} \
+        --extract {input.overlap_snps} \
+	--make-pgen \
+        --out {params.prefix_out}
+        """
+
+
+rule merge_GWAS_PCA:
+    input:
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{{subdataset}}/tmp_{chr}.pgen", chr=CHR)
+    output:
+        vec="data/SS/{subdataset}/pca.eigenvec",
+        val="data/SS/{subdataset}/pca.eigenval"
+    params:
+        prefix_out = "data/SS/{subdataset}/pca",
+        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/White/{{subdataset}}/tmp_{chr}", chr=CHR, newline="\n"),
+	remove_path = "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/"
+    threads: 16
+    resources:
+        mem_mb=38000,
+        time="03:00:00"
+    shell:
+        """
+	echo {params.merge_prefix} > tmp.txt
+        tr ' ' '\n' < "tmp.txt" > "tmp_chrm_list.txt"
+        plink2 --pmerge-list  tmp_chrm_list.txt \
+        --pca 40 approx \
+        --out {params.prefix_out}
+        rm tmp*
+	rm {params.remove_path}*
+	rm {params.prefix_out}.p*
         """
 
 

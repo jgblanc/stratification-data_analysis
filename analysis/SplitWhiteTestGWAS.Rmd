@@ -18,7 +18,7 @@ ALL <- fread("~/Downloads/EthnicBackground_21000.txt")
 df <- ALL %>% filter(!IID %in% WBS$IID) %>% filter(EthnicBackground_21000 %in% c(1, 1001, 1002, 1003))
 dfOut <- df[,1:2]
 
-fwrite(dfOut,"~/Downloads/nonWBS-White.ids", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfOut,"~/Downloads/nonWBS-White.ids", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
 ## Get GWAS and Test panels 
@@ -48,6 +48,7 @@ geno$IID <- as.character(geno$IID)
 dfGWAS <- inner_join(dfGWAS, geno)
 ```
 
+## WBS Test panel (tp)
 
 ```{r}
 set.seed(1212)
@@ -65,6 +66,7 @@ for (i in 1:length(n)) {
 }
 ```
 
+## EUR GWAS panel (gp)
 
 ```{r}
 set.seed(1313)
@@ -81,6 +83,48 @@ for (i in 1:length(n)) {
   
 }
 ```
+
+
+## WBS GWAS panel (wbs)
+
+```{r}
+set.seed(1414)
+
+# Sample random subsets of test panel size
+n <- c(50000, 100000, 300000)
+
+for (i in 1:length(n)) {
+  
+  df <- dfWBS %>% sample_n(n[i]) %>% select("#FID", "IID")
+  
+  name <- paste0("../data/ukbb/gp/wbs", format(n[i], scientific=F), ".txt")
+  fwrite(df, name ,row.names=F,quote=F,sep="\t", col.names = T)
+  
+}
+```
+
+
+## EUR Test panel (eur)
+
+```{r}
+set.seed(1515)
+
+# Sample random subsets of test panel size
+n <- c(50000)
+
+for (i in 1:length(n)) {
+  
+  df <- dfGWAS %>% sample_n(n[i]) %>% select("#FID", "IID")
+  
+  name <- paste0("../data/ukbb/tp/eur", n[i], ".txt")
+  fwrite(df, name ,row.names=F,quote=F,sep="\t", col.names = T)
+  
+}
+```
+
+
+
+
 
 
 

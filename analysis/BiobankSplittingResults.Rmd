@@ -7,10 +7,147 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(tidyverse)
+library(ggpubr)
 ```
 
 
 ```{r}
-df <- fread("")
+read_in_df <- function(filename, test_num, gwas_num) {
+  
+  df <- fread(filename)
+  df <- df %>% separate(contrast, c("contrast"), ".all")
+  df$tp <- test_num
+  df$gp <- gwas_num
+  
+  return(df)
+}
+
+
+df <- read_in_df("../plots/SS/t100/g5000/results_NorthEast.txt", 100, 5000)
+df <- rbind(df, read_in_df("../plots/SS/t1000/g5000/results_NorthEast.txt", 1000, 5000))
+df <- rbind(df, read_in_df("../plots/SS/t100000/g5000/results_NorthEast.txt", 100000, 5000))
+df <- rbind(df, read_in_df("../plots/SS/t5000/g5000/results_NorthEast.txt", 5000, 5000))
+df <- rbind(df, read_in_df("../plots/SS/t50000/g5000/results_NorthEast.txt", 50000, 5000))
+df <- rbind(df, read_in_df("../plots/SS/t1000/g50000/results_NorthEast.txt", 1000, 50000))
+df <- rbind(df, read_in_df("../plots/SS/t100000/g50000/results_NorthEast.txt", 100000, 50000))
+df <- rbind(df, read_in_df("../plots/SS/t5000/g50000/results_NorthEast.txt", 5000, 50000))
+df <- rbind(df, read_in_df("../plots/SS/t50000/g50000/results_NorthEast.txt", 50000, 50000))
+df <- rbind(df, read_in_df("../plots/SS/t100/g50000/results_NorthEast.txt", 100, 50000))
 ```
+
+```{r}
+# Get bonferonni correction column wise  
+df <- df %>% group_by(covar, pc, contrast) %>% mutate(p.adjust = p.adjust(p))
+df <- df %>% mutate(sig2 = case_when(p.adjust <= 0.05 ~ "*", p.adjust > 0.05 ~ ""))
+df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
+
+df_North <- df %>% filter(contrast == "north")
+df_East <- df %>% filter(contrast == "east")
+```
+
+```{r}
+df_North$tp <- factor(df_North$tp)
+df_North$gp <- factor(df_North$gp)
+
+pl_North <- ggplot(data = df_North, aes( x = gp, y = tp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(pc)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + xlab("GWAS panel size") + ylab("Test panel size")
+pl_North
+#ggsave("~/Desktop/North.png", pl_North)
+```
+
+```{r}
+df_East$tp <- factor(df_East$tp)
+df_East$gp <- factor(df_East$gp)
+
+pl_East <- ggplot(data = df_East, aes( x = gp, y = tp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(pc)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + xlab("GWAS panel size") + ylab("Test panel size")
+pl_East
+#ggsave("~/Desktop/East.png", pl_East)
+```
+
+
+```{r}
+make_plots <- function(filename, test, gwas) {
+  
+  df <- fread(filename)
+  
+  title <- paste0("Test Panel: ", test, " ", "GWAS Panel: ", gwas)
+  print(title)
+  p1 <- ggplot(df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 8) + ylim(0,1) + ggtitle(title)
+
+  p2 <-ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 8)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) + ylim(-1,1)
+
+  out <- ggarrange(p1,p2)
+  return(out)
+}
+
+```
+
+```{r}
+p1 <- make_plots("../plots/SS/t100/g5000/east_PCs_FGr.txt", 100, 5000)
+p2 <- make_plots("../plots/SS/t1000/g5000/east_PCs_FGr.txt", 1000, 5000)
+p3 <- make_plots("../plots/SS/t5000/g5000/east_PCs_FGr.txt", 5000, 5000)
+p4 <- make_plots("../plots/SS/t50000/g5000/east_PCs_FGr.txt", 50000, 5000)
+p5 <- make_plots("../plots/SS/t100000/g5000/east_PCs_FGr.txt", 100000, 5000)
+
+pl_East_small <- ggarrange(p1,p2,p3,p4,p5, nrow = 5)
+ggsave("~/Desktop/East_Small.png", pl_East_small, height = 9, width = 7)
+```
+
+
+```{r}
+p1 <- make_plots("../plots/SS/t100/g50000/east_PCs_FGr.txt", 100, 50000)
+p2 <- make_plots("../plots/SS/t1000/g50000/east_PCs_FGr.txt", 1000, 50000)
+p3 <- make_plots("../plots/SS/t5000/g50000/east_PCs_FGr.txt", 5000, 50000)
+p4 <- make_plots("../plots/SS/t50000/g50000/east_PCs_FGr.txt", 50000, 50000)
+p5 <- make_plots("../plots/SS/t100000/g50000/east_PCs_FGr.txt", 100000, 50000)
+
+pl_East_big <- ggarrange(p1,p2,p3,p4,p5, nrow = 5)
+ggsave("~/Desktop/East_Big.png", pl_East_big, height = 9, width = 7)
+```
+
+
+```{r}
+p1 <- make_plots("../plots/SS/t100/g5000/north_PCs_FGr.txt", 100, 5000)
+p2 <- make_plots("../plots/SS/t1000/g5000/north_PCs_FGr.txt", 1000, 5000)
+p3 <- make_plots("../plots/SS/t5000/g5000/north_PCs_FGr.txt", 5000, 5000)
+p4 <- make_plots("../plots/SS/t50000/g5000/north_PCs_FGr.txt", 50000, 5000)
+p5 <- make_plots("../plots/SS/t100000/g5000/north_PCs_FGr.txt", 100000, 5000)
+
+pl_north_small <- ggarrange(p1,p2,p3,p4,p5, nrow = 5)
+ggsave("~/Desktop/north_Small.png", pl_north_small, height = 9, width = 7 )
+```
+```{r}
+p1 <- make_plots("../plots/SS/t100/g50000/north_PCs_FGr.txt", 100, 50000)
+p2 <- make_plots("../plots/SS/t1000/g50000/north_PCs_FGr.txt", 1000, 50000)
+p3 <- make_plots("../plots/SS/t5000/g50000/north_PCs_FGr.txt", 5000, 50000)
+p4 <- make_plots("../plots/SS/t50000/g50000/north_PCs_FGr.txt", 50000, 50000)
+p5 <- make_plots("../plots/SS/t100000/g50000/north_PCs_FGr.txt", 100000, 50000)
+
+pl_north_big <- ggarrange(p1,p2,p3,p4,p5, nrow = 5)
+ggsave("~/Desktop/north_Big.png", pl_north_big, height = 9, width = 7)
+```
+
+```{r}
+df5k <- fread("../plots/SS/g5000/pca.eigenval")
+df5k$PC <- seq(1,40)
+
+pl <- ggplot(df5k, aes(x=PC, y=V1)) + geom_bar(stat = "identity") + ylab("Eigenvalue") + ggtitle("GWAS = 5,000") + theme_bw()
+ggsave("~/Desktop/gwas_small.png", pl)
+
+df50k <- fread("../plots/SS/g50000/pca.eigenval")
+df50k$PC <- seq(1,40)
+
+pl <- ggplot(df50k, aes(x=PC, y=V1)) + geom_bar(stat = "identity") + ylab("Eigenvalue") + ggtitle("GWAS = 50,000") + theme_bw()
+ggsave("~/Desktop/gwas_big.png", pl)
+```
+
+```{r}
+df5k <- fread("../plots/SS/g5000/pca.eigenvec")
+df50k <- fread("../plots/SS/g50000/pca.eigenvec")
+
+plot(df5k$PC5, df5k$PC6)
+plot(df50k$PC15, df50k$PC16)
+```
+
 
