@@ -112,7 +112,7 @@ rule get_TestVector_PCA:
         prefix_out = "data/SS/{subdataset}/TestVecs/"
     shell:
         """
-        Rscript code/SS/get_Tvec_PCs.R {input.pcs} {params.prefix_out} 1 2 3 10 20
+        Rscript code/SS/get_Tvec_PCs.R {input.pca} {params.prefix_out} 1 2 3 10 20
         """
 
 
