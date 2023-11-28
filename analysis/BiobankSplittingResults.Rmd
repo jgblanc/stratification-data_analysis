@@ -147,7 +147,13 @@ df5k <- fread("../plots/SS/g5000/pca.eigenvec")
 df50k <- fread("../plots/SS/g50000/pca.eigenvec")
 
 plot(df5k$PC5, df5k$PC6)
-plot(df50k$PC15, df50k$PC16)
+plot(df50k$PC1, df50k$PC2)
 ```
 
+
+```{r}
+df <- fread("~/Downloads/pca.eigenvec")
+
+plot(df$PC9, df$PC10)
+```
 

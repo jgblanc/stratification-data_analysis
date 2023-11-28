@@ -5,7 +5,7 @@ for i in range(1, 23):
 DATASET = ["SS"]
 SUBDATASET = ["eur50000"]
 #SUBDATASET = ["t100"]
-CONTRASTS = ["pc1", "pc2"]
+CONTRASTS = ["pc1", "pc2", "pc3", "pc10", "pc20"]
 PC = [0, 10, 40]
 GWAS=["wbs50000", "wbs100000", "wbs300000"]
 #GWAS = ["g5000"]
@@ -27,10 +27,10 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/SS/{subdataset}/pca.eigenvec", chr=CHR, subdataset=SUBDATASET)
+        expand("data/SS/{subdataset}/TestVecs/pc1.txt", chr=CHR, subdataset=SUBDATASET)
 
 
-# Get final set of SNP (White MAF > 1%)
+## Get final set of SNP (White MAF > 1%)
 
 rule get_overlapping_snps:
     input:
@@ -42,8 +42,7 @@ rule get_overlapping_snps:
         cut -f2,3 {input} > {output}
         """
 
-# Test panel PCA
-
+## Test panel PCA
 
 rule make_tmp_plink2_test:
     input:
@@ -98,38 +97,24 @@ rule merge_Test_PCA:
         """
 
 
-# Make Birth Coordinates Test Vector
+## Make PCs Test Vector
 
-rule get_TestVector:
+rule get_TestVector_PCA:
     input:
-        North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-        East = "data/phenotypes/PlaceOfBirthEastCord_130.txt",
-        ids="data/ukbb/SS/tp/{subdataset}.txt"
+        pca="data/SS/{subdataset}/pca.eigenvec"
     output:
-        north = "data/SS/{subdataset}/TestVecs/north.txt",
-        east = "data/SS/{subdataset}/TestVecs/east.txt"
-    shell:
-        """
-        Rscript code/SS/get_Tvec.R {input.North} {input.East} {input.ids} {output.north} {output.east}
-        """
-
-rule compute_r:
-    input:
-        TvecNorth="data/SS/{subdataset}/TestVecs/north.txt",
-        TvecEast="data/SS/{subdataset}/TestVecs/east.txt",
-        IDs="data/ukbb/SS/tp/{subdataset}.txt",
-        snps="data/SS/variants/overlappingSNPs_chr{chr}.txt"
-    output:
-        North="data/SS/{subdataset}/r/north_chr{chr}.rvec",
-        East="data/SS/{subdataset}/r/east_chr{chr}.rvec"
+        pc1 = "data/SS/{subdataset}/TestVecs/pc1.txt",
+        pc2 = "data/SS/{subdataset}/TestVecs/pc2.txt",
+        pc3 = "data/SS/{subdataset}/TestVecs/pc3.txt",
+        pc10 = "data/SS/{subdataset}/TestVecs/pc10.txt",
+        pc20 = "data/SS/{subdataset}/TestVecs/pc20.txt"
     params:
-        prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
-        prefix_out = "data/SS/{subdataset}/r/"
+        prefix_out = "data/SS/{subdataset}/TestVecs/"
     shell:
         """
-        Rscript code/SS/compute_cord_r.R {params.prefix_tp} {input.TvecNorth} {input.TvecEast} {params.prefix_out} {input.snps} {output.North} {output.East} {input.IDs}
-        rm {params.prefix_out}xt_temp.*
+        Rscript code/SS/get_Tvec_PCs.R {input.pcs} {params.prefix_out} 1 2 3 10 20
         """
+
 
 ## Compute FGr
 
@@ -360,4 +345,38 @@ rule compute_PC_FGr:
     shell:
         """
         Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output}
+        """
+
+
+# Make Birth Coordinates Test Vector
+
+rule get_TestVector:
+    input:
+        North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
+        East = "data/phenotypes/PlaceOfBirthEastCord_130.txt",
+        ids="data/ukbb/SS/tp/{subdataset}.txt"
+    output:
+        north = "data/SS/{subdataset}/TestVecs/north.txt",
+        east = "data/SS/{subdataset}/TestVecs/east.txt"
+    shell:
+        """
+        Rscript code/SS/get_Tvec.R {input.North} {input.East} {input.ids} {output.north} {output.east}
+        """
+
+rule compute_r:
+    input:
+        TvecNorth="data/SS/{subdataset}/TestVecs/north.txt",
+        TvecEast="data/SS/{subdataset}/TestVecs/east.txt",
+        IDs="data/ukbb/SS/tp/{subdataset}.txt",
+        snps="data/SS/variants/overlappingSNPs_chr{chr}.txt"
+    output:
+        North="data/SS/{subdataset}/r/north_chr{chr}.rvec",
+        East="data/SS/{subdataset}/r/east_chr{chr}.rvec"
+    params:
+        prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
+        prefix_out = "data/SS/{subdataset}/r/"
+    shell:
+        """
+        Rscript code/SS/compute_cord_r.R {params.prefix_tp} {input.TvecNorth} {input.TvecEast} {params.prefix_out} {input.snps} {output.North} {output.East} {input.IDs}
+        rm {params.prefix_out}xt_temp.*
         """
