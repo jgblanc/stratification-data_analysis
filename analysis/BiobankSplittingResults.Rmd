@@ -157,3 +157,25 @@ df <- fread("~/Downloads/pca.eigenvec")
 plot(df$PC9, df$PC10)
 ```
 
+
+```{r}
+df <- fread("../plots/SS/eur50000/wbs300000/results_PCs.txt")
+colnames(df)[7] <- "contrast"
+colnames(df)[8] <- "pc"
+
+# Get bonferonni correction column wise  
+df <- df %>% group_by(covar, pc, contrast) %>% mutate(p.adjust = p.adjust(p))
+df <- df %>% mutate(sig2 = case_when(p.adjust <= 0.05 ~ "*", p.adjust > 0.05 ~ ""))
+df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
+
+
+```
+
+```{r}
+df$contrast <- as.factor(df$contrast)
+df$pc <- as.factor(df$pc)
+ggplot(data = df, aes( x = contrast, y = pc, fill = q)) + geom_tile() + facet_wrap(~covar) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) 
+#ggsave("~/Desktop/North.png", pl_North)
+```
+```
+
