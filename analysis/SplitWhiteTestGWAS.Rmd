@@ -123,8 +123,36 @@ for (i in 1:length(n)) {
 ```
 
 
+## Splitting WBS 
 
+```{r}
+set.seed(1616)
 
+height <- fread("../data/phenotypes/StandingHeight_Normalized_50.txt")
+dfWBS <- inner_join(dfWBS, height)
+
+df_test <- dfWBS %>% sample_n(50000) %>% select("#FID", "IID")
+name <- paste0("../data/ukbb/tp/sim", format(50000, scientific=F), ".txt")
+fwrite(df_test, name ,row.names=F,quote=F,sep="\t", col.names = T)
+
+df_GWAS <- dfWBS %>% filter(!IID %in% df_test$IID) %>% sample_n(300000) %>% select("#FID", "IID")
+name <- paste0("../data/ukbb/gp/sim", format(300000, scientific=F), ".txt")
+fwrite(df_GWAS, name ,row.names=F,quote=F,sep="\t", col.names = T)
+```
+
+```{r}
+mod <- lm(df_GWAS$Height ~ df_GWAS$SEX)
+df_GWAS$HeightResidual <- mod$residuals
+
+ggplot(df_GWAS, aes(y = PlaceOfBirthNorthCord_129, x = PlaceOfBirthEastCord_130, color = HeightResidual)) + geom_point()
+
+mod2 <- lm(df_GWAS$HeightResidual ~ df_GWAS$PlaceOfBirthNorthCord_129)
+summary(mod2)
+```
+
+```{r}
+ggplot(df, aes(x = PlaceOfBirthNorthCord_129, y = pheno)) + geom_point()
+```
 
 
 

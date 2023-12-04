@@ -158,24 +158,65 @@ plot(df$PC9, df$PC10)
 ```
 
 
+
 ```{r}
-df <- fread("../plots/SS/eur50000/wbs300000/results_PCs.txt")
-colnames(df)[7] <- "contrast"
-colnames(df)[8] <- "pc"
+read_in_df <- function(filename, test_num, gwas_num) {
+  
+  df <- fread(filename)
+  colnames(df)[7] <- "contrast"
+  colnames(df)[8] <- "pc"
+  df$tp <- test_num
+  df$gp <- gwas_num
+  
+  return(df)
+}
+
+
+df <- read_in_df("../plots/SS/eur50000/wbs300000/results_PCs.txt", 50000, 300000)
+df <- rbind(df, read_in_df("../plots/SS/eur50000/wbs100000/results_PCs.txt", 50000, 100000))
+df <- rbind(df, read_in_df("../plots/SS/eur50000/wbs50000/results_PCs.txt", 50000, 50000))
 
 # Get bonferonni correction column wise  
 df <- df %>% group_by(covar, pc, contrast) %>% mutate(p.adjust = p.adjust(p))
 df <- df %>% mutate(sig2 = case_when(p.adjust <= 0.05 ~ "*", p.adjust > 0.05 ~ ""))
 df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
 
+df$contrast <- as.factor(df$contrast)
+df$pc <- as.factor(df$pc)
+df$gp <- as.factor(df$gp)
+```
+
+
+```{r}
+pl <- ggplot(data = df, aes(x = gp, y = contrast, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(pc)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + xlab("GWAS Panel") + ylab("PC in Test Panel")
+ggsave("~/Desktop/pl.png", pl)
+```
+
+```{r}
+make_plots <- function(filename, test, gwas, name) {
+  
+  df <- fread(filename)
+  
+  title <- paste0("Test Vector: ",name, " ", "GWAS Panel: ", gwas)
+  print(title)
+  p1 <- ggplot(df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 8) + ylim(0,1) + ggtitle(title)
+
+  p2 <-ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 8)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) + ylim(-1,1)
+
+  out <- ggarrange(p1,p2)
+  return(out)
+}
 
 ```
 
 ```{r}
-df$contrast <- as.factor(df$contrast)
-df$pc <- as.factor(df$pc)
-ggplot(data = df, aes( x = contrast, y = pc, fill = q)) + geom_tile() + facet_wrap(~covar) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) 
-#ggsave("~/Desktop/North.png", pl_North)
-```
+p1 <- make_plots("../plots/SS/eur50000/wbs50000/pc1_PCs_FGr.txt", 50000, 50000, "PC 1")
+p2 <- make_plots("../plots/SS/eur50000/wbs50000/pc2_PCs_FGr.txt", 50000, 50000, "PC 2")
+p3 <-  make_plots("../plots/SS/eur50000/wbs50000/pc3_PCs_FGr.txt", 50000, 50000, "PC 3")
+p4 <-  make_plots("../plots/SS/eur50000/wbs50000/pc10_PCs_FGr.txt", 50000, 50000, "PC 10")
+p5 <-  make_plots("../plots/SS/eur50000/wbs50000/pc20_PCs_FGr.txt", 50000, 50000, "PC 20")
+
+pl <- ggarrange(p1,p2,p3,p4,p5, nrow = 5)
+ggsave("~/Desktop/PC_50K.png", pl, height = 9, width = 7)
 ```
 
