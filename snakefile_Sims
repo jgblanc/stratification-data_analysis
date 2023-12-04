@@ -59,7 +59,7 @@ rule simulate_phenotypes_smooth:
 
 rule get_TestVector:
     input:
-        North="data/phenotypes/PlaceOfBirthNorthCord_129.txt"
+        North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
         ids="data/ukbb/Sims/tp/{subdataset}.txt"
     output:
         north = "data/Sims/{subdataset}/TestVecs/smooth.txt"
@@ -70,7 +70,7 @@ rule get_TestVector:
 
 rule compute_r:
     input:
-        TvecNorth="data/Sims/{subdataset}/TestVecs/north.txt"
+        TvecNorth="data/Sims/{subdataset}/TestVecs/smooth.txt",
         IDs="data/ukbb/Sims/tp/{subdataset}.txt",
         snps="data/Sims/variants/overlappingSNPs_chr{chr}.txt"
     output:
@@ -315,36 +315,3 @@ rule compute_PC_FGr:
         Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output}
         """
 
-
-# Make Birth Coordinates Test Vector
-
-rule get_TestVector:
-    input:
-        North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-        East = "data/phenotypes/PlaceOfBirthEastCord_130.txt",
-        ids="data/ukbb/SS/tp/{subdataset}.txt"
-    output:
-        north = "data/SS/{subdataset}/TestVecs/north.txt",
-        east = "data/SS/{subdataset}/TestVecs/east.txt"
-    shell:
-        """
-        Rscript code/SS/get_Tvec.R {input.North} {input.East} {input.ids} {output.north} {output.east}
-        """
-
-rule compute_r:
-    input:
-        TvecNorth="data/SS/{subdataset}/TestVecs/north.txt",
-        TvecEast="data/SS/{subdataset}/TestVecs/east.txt",
-        IDs="data/ukbb/SS/tp/{subdataset}.txt",
-        snps="data/SS/variants/overlappingSNPs_chr{chr}.txt"
-    output:
-        North="data/SS/{subdataset}/r/north_chr{chr}.rvec",
-        East="data/SS/{subdataset}/r/east_chr{chr}.rvec"
-    params:
-        prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
-        prefix_out = "data/SS/{subdataset}/r/"
-    shell:
-        """
-        Rscript code/SS/compute_cord_r.R {params.prefix_tp} {input.TvecNorth} {input.TvecEast} {params.prefix_out} {input.snps} {output.North} {output.East} {input.IDs}
-        rm {params.prefix_out}xt_temp.*
-        """
