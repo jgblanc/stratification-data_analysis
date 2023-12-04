@@ -45,8 +45,8 @@ rule get_overlapping_snps:
 
 rule simulate_phenotypes_smooth:
     input:
-        north = "data/phenotypes/PlaceOfBirthNorthCord_129.txt"
-        gwas_ids = "data/ukbb/gp/{gwas}.txt"
+        north = "data/phenotypes/PlaceOfBirthNorthCord_129.txt",
+        gwas_ids = "data/ukbb/Sims/gp/{gwas}.txt"
     output:
         "output/simulate_phenotypes/Sims/{gwas}/{phenotype}/smooth.txt"
     params:
