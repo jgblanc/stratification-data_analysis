@@ -25,7 +25,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/Sims/{subdataset}/r/smooth_chr{chr}.rvec", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -88,19 +88,19 @@ rule compute_r:
 
 rule compute_FGr_chr:
     input:
-        r="data/SS/{subdataset}/r/{contrasts}_chr{chr}.rvec",
+        r="data/Sims/{subdataset}/r/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/SS/variants/overlappingSNPs_chr{chr}.txt",
-        IDs="data/ukbb/SS/tp/{subdataset}.txt"
+        overlap_snps="data/Sims/variants/overlappingSNPs_chr{chr}.txt",
+        IDs="data/ukbb/Sims/tp/{subdataset}.txt"
     output:
-        "output/calculate_FGr/SS/{subdataset}/FGr_{contrasts}_{chr}.txt"
+        "output/calculate_FGr/Sims/{subdataset}/FGr_{contrasts}_{chr}.txt"
     resources:
         mem_mb=38000,
 	time="03:00:00"
     threads: 8
     params:
         gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
-        out_prefix = "output/calculate_FGr/SS/{subdataset}/{contrasts}_{chr}"
+        out_prefix = "output/calculate_FGr/Sims/{subdataset}/{contrasts}_{chr}"
     shell:
         """
         Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output}
@@ -110,12 +110,12 @@ rule compute_FGr_chr:
 
 rule concat_chr_FGr:
     input:
-        expand("output/calculate_FGr/SS/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+        expand("output/calculate_FGr/Sims/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
     output:
-        "output/calculate_FGr/SS/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
+        "output/calculate_FGr/Sims/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
     params:
         chrNum = lambda wildcards: get_chr_num(wildcards.chr),
-        prefix_in = "output/calculate_FGr/SS/{subdataset}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/Sims/{subdataset}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
@@ -127,7 +127,7 @@ rule make_tmp_plink2:
     input:
         gp="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/ukbb/ukbb_pc_snps.txt",
-        IDs="data/ukbb/SS/gp/{gwas}.txt"
+        IDs="data/ukbb/Sims/gp/{gwas}.txt"
     output:
         "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen",
         "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pvar",
@@ -153,10 +153,10 @@ rule merge_GWAS_PCA:
     input:
         gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{{gwas}}/tmp_{chr}.pgen", chr=CHR)
     output:
-        vec="data/SS/{gwas}/pca.eigenvec",
-        val="data/SS/{gwas}/pca.eigenval"
+        vec="data/Sims/{gwas}/pca.eigenvec",
+        val="data/Sims/{gwas}/pca.eigenval"
     params:
-        prefix_out = "data/SS/{gwas}/pca",
+        prefix_out = "data/Sims/{gwas}/pca",
         merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/White/{{gwas}}/tmp_{chr}", chr=CHR, newline="\n"),
 	remove_path = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/"
     threads: 16
@@ -192,10 +192,10 @@ rule assemble_fixed_covars:
 rule assemble_quant_covars_FGr:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
-        covar="output/calculate_FGr/SS/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
-        pcs="data/SS/{gwas}/pca.eigenvec"
+        covar="output/calculate_FGr/Sims/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
+        pcs="data/Sims/{gwas}/pca.eigenvec"
     output:
-        "output/run_gwas/SS/{subdataset}/{gwas}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
+        "output/run_gwas/Sims/{subdataset}/{gwas}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
     params:
         pcNum = lambda wildcards: get_chr_num(wildcards.pc)
     shell:
@@ -206,9 +206,9 @@ rule assemble_quant_covars_FGr:
 rule assemble_quant_covars:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
-        pcs="data/SS/{gwas}/pca.eigenvec"
+        pcs="data/Sims/{gwas}/pca.eigenvec"
     output:
-        "output/run_gwas/SS/{subdataset}/{gwas}/covariates/no-FGr_{contrasts}_{chr}-PC{pc}.txt"
+        "output/run_gwas/Sims/{subdataset}/{gwas}/covariates/no-FGr_{contrasts}_{chr}-PC{pc}.txt"
     params:
         pcNum = lambda wildcards: get_chr_num(wildcards.pc)
     shell:
@@ -218,16 +218,16 @@ rule assemble_quant_covars:
 
 rule run_fastGWA:
     input:
-        pheno="data/phenotypes/normalized/{phenotype}.txt",
-        qcovar="output/run_gwas/SS/{subdataset}/{gwas}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
+        pheno="output/simulate_phenotypes/Sims/{gwas}/{phenotype}/smooth.txt",
+        qcovar="output/run_gwas/Sims/{subdataset}/{gwas}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/SS/variants/overlappingSNPs_chr{chr}.txt",
+        overlap_snps="data/Sims/variants/overlappingSNPs_chr{chr}.txt",
         covar="output/run_gwas/fixed_covars.txt",
-        IDs="data/ukbb/SS/gp/{gwas}.txt"
+        IDs="data/ukbb/Sims/gp/{gwas}.txt"
     output:
-        "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/SS/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/Sims/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
-        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/SS/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}",
+        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/Sims/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
@@ -251,10 +251,10 @@ rule run_fastGWA:
 rule assign_snps_to_blocks:
     input:
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
-        ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/SS/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
-        r="data/SS/{subdataset}/r/{contrasts}_chr{chr}.rvec",
+        ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/Sims/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+        r="data/Sims/{subdataset}/r/{contrasts}_chr{chr}.rvec",
     output:
-        betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas"
+        betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas"
     params:
         pt = PVALUE_THRESHOLD
     shell:
@@ -267,9 +267,9 @@ rule assign_snps_to_blocks:
 
 rule concat_snps:
     input:
-        expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/SS/{{subdataset}}/{{gwas}}/{{phenotype}}/formated_ss_LR/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.betas", chr=CHR)
+        expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/Sims/{{subdataset}}/{{gwas}}/{{phenotype}}/formated_ss_LR/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.betas", chr=CHR)
     output:
-        "output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
+        "output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
     shell:
         """
         cat {input} > {output}
@@ -278,10 +278,10 @@ rule concat_snps:
 
 rule pga_test:
     input:
-        "output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
+        "output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas"
     output:
-        results="output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results",
-	gzip="output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
+        results="output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results",
+	gzip="output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all-PC{pc}.betas.gz"
     shell:
         """
         Rscript code/pga_test/run_test_jacknife_LR.R {input} {output.results}
@@ -292,9 +292,9 @@ rule pga_test:
 
 rule concat_pga_test:
     input:
-        expand("output/pga_test/SS/{{subdataset}}/{{gwas}}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
+        expand("output/pga_test/Sims/{{subdataset}}/{{gwas}}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
     output:
-        "plots/SS/{subdataset}/{gwas}/results_PCs.txt"
+        "plots/Sims/{subdataset}/{gwas}/results_PCs.txt"
     shell:
         """
         Rscript code/pga_test/concat_results_LR.R {output} {input}
@@ -304,12 +304,12 @@ rule concat_pga_test:
 
 rule compute_PC_FGr:
     input:
-        Fgr=expand("output/calculate_FGr/SS/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
-        PCs = "data/SS/{gwas}/pca.eigenvec"
+        Fgr=expand("output/calculate_FGr/Sims/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+        PCs = "data/Sims/{gwas}/pca.eigenvec"
     output:
-        "plots/SS/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt"
+        "plots/Sims/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt"
     params:
-        prefix_in = "output/calculate_FGr/SS/{subdataset}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/Sims/{subdataset}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output}
