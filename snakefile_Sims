@@ -8,7 +8,7 @@ CONTRASTS = ["smooth"]
 PC = [0, 10, 40]
 GWAS=["sim300000"]
 COVAR = ["no-FGr", "FGr-LOCO"]
-PHENOTYPE=[ "env_2.0"]
+PHENOTYPE=["env_0.05","env_0.5", "env_2.0"]
 PVALUE_THRESHOLD = "1e-5"
 
 wildcard_constraints:

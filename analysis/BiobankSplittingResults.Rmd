@@ -220,3 +220,62 @@ pl <- ggarrange(p1,p2,p3,p4,p5, nrow = 5)
 ggsave("~/Desktop/PC_50K.png", pl, height = 9, width = 7)
 ```
 
+
+
+
+## Simulations 
+
+```{r}
+df <- fread("../plots/Sims/sim50000/sim300000/results_smooth.txt")
+df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
+df$pc <- as.factor(df$pc)
+df <- df %>% separate(contrast, c("contrast"), ".all")
+
+
+ggplot(data = df, aes(x = pc, y = contrast, fill = q)) + geom_tile() + facet_wrap(~covar) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14)
+```
+
+
+
+
+```{r}
+data <- fread("~/Downloads/FGr_smooth_1.txt")[,4]
+colnames(data) <- "1"
+
+for (i in 2:22) {
+  
+  # Read in new chromosome
+  filename <- paste0("~/Downloads/FGr_smooth_", i, ".txt")
+  data$tmp <- fread(filename)[,4]
+  colnames(data)[i] <- as.character(i)
+  
+}
+data <- as.data.frame(data)
+```
+
+```{r}
+# Compute LOCO gamma 
+gammas <- rep(0, 22)
+for (i in 1:22) {
+  
+  # Drop ith  column 
+  loco <- data[,-i]
+  
+  # Compute variance across entries 
+  vars <- apply(loco, 1, var)
+  
+  # Compute average variance across entries 
+  gammas[i] <- mean(vars)
+
+}
+```
+
+```{r}
+varG <- (21/22) * sum((gammas -  mean(gammas))^2)
+sqrt(varG)
+```
+
+
+
+
+
