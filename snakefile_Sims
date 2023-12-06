@@ -94,7 +94,7 @@ rule get_TestVector_sharp:
         Rscript code/Sims/get_Tvec_Sharp.R {input.North} {input.East} {input.ids} {sharp.north}
         """
 
-rule compute_r:
+rule compute_r_North:
     input:
         TvecNorth="data/Sims/{subdataset}/TestVecs/smooth.txt",
         IDs="data/ukbb/Sims/tp/{subdataset}.txt",
@@ -107,6 +107,22 @@ rule compute_r:
     shell:
         """
         Rscript code/Sims/compute_North_r.R {params.prefix_tp} {input.TvecNorth}  {params.prefix_out} {input.snps} {output.North} {input.IDs}
+        rm {params.prefix_out}xt_temp.*
+        """
+
+rule compute_r_Sharp:
+    input:
+        TvecSharp="data/Sims/{subdataset}/TestVecs/sharp.txt",
+        IDs="data/ukbb/Sims/tp/{subdataset}.txt",
+        snps="data/Sims/variants/overlappingSNPs_chr{chr}.txt"
+    output:
+        Sharp="data/Sims/{subdataset}/r/sharp_chr{chr}.rvec"
+    params:
+        prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
+        prefix_out = "data/Sims/{subdataset}/r/{chr}"
+    shell:
+        """
+        Rscript code/Sims/compute_Sharp_r.R {params.prefix_tp} {input.TvecSharp}  {params.prefix_out} {input.snps} {output.Sharp} {input.IDs}
         rm {params.prefix_out}xt_temp.*
         """
 
