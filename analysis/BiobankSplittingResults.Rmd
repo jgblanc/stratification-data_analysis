@@ -232,7 +232,7 @@ df$pc <- as.factor(df$pc)
 df <- df %>% separate(contrast, c("contrast"), ".all")
 
 
-ggplot(data = df, aes(x = pc, y = contrast, fill = q)) + geom_tile() + facet_wrap(~covar) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14)
+ggplot(data = df, aes(x = pc, y = phenotype, fill = q)) + geom_tile() + facet_wrap(~covar) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14)
 ```
 
 
@@ -255,24 +255,33 @@ data <- as.data.frame(data)
 
 ```{r}
 # Compute LOCO gamma 
-gammas <- rep(0, 22)
+gammas <- matrix(NA, nrow = nrow(data), ncol = 22)
 for (i in 1:22) {
   
   # Drop ith  column 
   loco <- data[,-i]
   
   # Compute variance across entries 
-  vars <- apply(loco, 1, var)
+  means <- apply(loco, 1, mean)
   
   # Compute average variance across entries 
-  gammas[i] <- mean(vars)
+  gammas[,i] <- means
 
 }
 ```
 
 ```{r}
-varG <- (21/22) * sum((gammas -  mean(gammas))^2)
-sqrt(varG)
+Fbar <- apply(gammas, 1, mean)
+
+sigmas2 <- rep(0, nrow(data))
+for (i in 1:nrow(data)) {
+  
+  sigmas2[i] <- (21/22) * sum((gammas[1,] - Fbar[1])^2)
+  
+}
+
+FGr_hat <- apply(data, 1, sum)
+mean(sigmas2) / var(FGr_hat)
 ```
 
 

@@ -5,10 +5,10 @@ for i in range(1, 23):
 DATASET = ["Sims"]
 SUBDATASET = ["sim50000"]
 CONTRASTS = ["smooth"]
-PC = [0, 10, 40]
+PC = [0, 10]
 GWAS=["sim300000"]
 COVAR = ["no-FGr", "FGr-LOCO"]
-PHENOTYPE=["env_0.05","env_0.5", "env_2.0"]
+PHENOTYPE=["env_2.0"]
 PVALUE_THRESHOLD = "1e-5"
 
 wildcard_constraints:
@@ -55,9 +55,23 @@ rule simulate_phenotypes_smooth:
         Rscript code/simulate_phenotypes/simulate_smooth.R {input.north} {input.gwas_ids} {output} {params.shift}
         """
 
+rule simulate_phenotypes_sharp:
+    input:
+        north = "data/phenotypes/PlaceOfBirthNorthCord_129.txt",
+        east = "data/phenotypes/PlaceOfBirthEastCord_130.txt"
+        gwas_ids = "data/ukbb/Sims/gp/{gwas}.txt"
+    output:
+        "output/simulate_phenotypes/Sims/{gwas}/{phenotype}/sharp.txt"
+    params:
+        shift = lambda wildcards: get_params(wildcards.phenotype)
+    shell:
+        """
+        Rscript code/simulate_phenotypes/simulate_sharp.R {input.north} {input.east} {input.gwas_ids} {output} {params.shift}
+        """
+
 ## Get test vector contrasts
 
-rule get_TestVector:
+rule get_TestVector_smooth:
     input:
         North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
         ids="data/ukbb/Sims/tp/{subdataset}.txt"
@@ -66,6 +80,18 @@ rule get_TestVector:
     shell:
         """
         Rscript code/Sims/get_Tvec_North.R {input.North}  {input.ids} {output.north}
+        """
+
+rule get_TestVector_sharp:
+    input:
+        North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
+        East="data/phenotypes/PlaceOfBirthEastCord_130.txt"
+        ids="data/ukbb/Sims/tp/{subdataset}.txt"
+    output:
+        sharp = "data/Sims/{subdataset}/TestVecs/sharp.txt"
+    shell:
+        """
+        Rscript code/Sims/get_Tvec_Sharp.R {input.North} {input.East} {input.ids} {sharp.north}
         """
 
 rule compute_r:
@@ -218,7 +244,7 @@ rule assemble_quant_covars:
 
 rule run_fastGWA:
     input:
-        pheno="output/simulate_phenotypes/Sims/{gwas}/{phenotype}/smooth.txt",
+        pheno="output/simulate_phenotypes/Sims/{gwas}/{phenotype}/{contrasts}.txt",
         qcovar="output/run_gwas/Sims/{subdataset}/{gwas}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/Sims/variants/overlappingSNPs_chr{chr}.txt",
@@ -294,7 +320,7 @@ rule concat_pga_test:
     input:
         expand("output/pga_test/Sims/{{subdataset}}/{{gwas}}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
     output:
-        "plots/Sims/{subdataset}/{gwas}/results_smooth.txt"
+        "plots/Sims/{subdataset}/{gwas}/results_sharp.txt"
     shell:
         """
         Rscript code/pga_test/concat_results_LR.R {output} {input}
