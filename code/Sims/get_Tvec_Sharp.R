@@ -32,6 +32,8 @@ df <- df %>% mutate(sharp = case_when(
    & PlaceOfBirthEastCord_130 < 540034 & PlaceOfBirthEastCord_130 > 520034) ~ 1 ,
   TRUE ~  0))
 
+df$sharp <- df$sharp - mean(df$sharp)
+
 # Set up outfiles
 df <- df %>% select("#FID","IID", "sharp")
 

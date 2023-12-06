@@ -8,7 +8,7 @@ CONTRASTS = ["sharp"]
 PC = [0, 10,40]
 GWAS=["sim300000"]
 COVAR = ["no-FGr", "FGr-LOCO"]
-PHENOTYPE=["env_2.0"]
+PHENOTYPE=["env_1.9","env_2.0"]
 PVALUE_THRESHOLD = "1e-5"
 
 wildcard_constraints:
@@ -91,7 +91,7 @@ rule get_TestVector_sharp:
         sharp = "data/Sims/{subdataset}/TestVecs/sharp.txt"
     shell:
         """
-        Rscript code/Sims/get_Tvec_Sharp.R {input.North} {input.East} {input.ids} {sharp.north}
+        Rscript code/Sims/get_Tvec_Sharp.R {input.North} {input.East} {input.ids} {output.sharp}
         """
 
 rule compute_r_North:
