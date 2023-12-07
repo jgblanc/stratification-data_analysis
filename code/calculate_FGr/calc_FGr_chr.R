@@ -3,7 +3,7 @@
 
 args=commandArgs(TRUE)
 
-if(length(args)<5){stop("Rscript calc_FGr_chr.R <gwas panel prefix> <output directory> <contrasts> <overlap snps> <output file>")}
+if(length(args)<6){stop("Rscript calc_FGr_chr.R <gwas panel prefix> <output directory> <contrasts> <overlap snps> <output file>")}
 
 suppressWarnings(suppressMessages({
   library(data.table)
@@ -15,10 +15,10 @@ out_prefix = args[2]
 r_file = args[3]
 snps_file = args[4]
 outfile = args[5]
+id_file = args[6]
 
 # Read in GWAS individuals
-gwasID <- fread(paste0(gwas_prefix, ".psam"))
-colnames(gwasID) <- c("FID", "IID",  "Sex")
+gwasID <- fread(id_file)
 m <- nrow(gwasID)
 
 # Read in and format r
@@ -31,7 +31,7 @@ print(nrow(r))
 
 # Compute GWAS genotype counts
 outfile_count <- paste0(out_prefix, "G_count")
-cmd_count <- paste("sh code/calculate_FGr/compute_GWAS_count.sh", gwas_prefix, outfile_count, snps_file, sep = " ")
+cmd_count <- paste("sh code/calculate_FGr/compute_GWAS_count_ID.sh", gwas_prefix, outfile_count, snps_file, id_file, sep = " ")
 print(cmd_count)
 system(cmd_count)
 
@@ -54,7 +54,7 @@ fwrite(r, paste0(out_prefix, ".xt_temp.glm.linear"), sep = "\t")
 cmd_b <- paste("sh code/calculate_FGr/GWAS_score.sh",
                gwas_prefix,
                paste0(out_prefix, ".xt_temp.glm.linear"),
-               paste0(out_prefix,".gxt_tmp"), snps_file, sep = " ")
+               paste0(out_prefix,".gxt_tmp"), snps_file, id_file, sep = " ")
 print(cmd_b)
 system(cmd_b)
 
