@@ -28,7 +28,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/Sims/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("output/calculate_FGr/Sims/{subdataset}/{gwas}/FGr-LOCO_{contrasts}_{chr}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -177,12 +177,12 @@ rule compute_FGr_chr:
 
 rule concat_chr_FGr:
     input:
-        expand("output/calculate_FGr/Sims/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+        expand("output/calculate_FGr/Sims/{{subdataset}}/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
     output:
-        "output/calculate_FGr/Sims/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt"
+        "output/calculate_FGr/Sims/{subdataset}/{gwas}/FGr-LOCO_{contrasts}_{chr}.txt"
     params:
         chrNum = lambda wildcards: get_chr_num(wildcards.chr),
-        prefix_in = "output/calculate_FGr/Sims/{subdataset}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/Sims/{subdataset}/{gwas}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
@@ -194,13 +194,13 @@ rule make_tmp_plink2:
     input:
         gp="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/ukbb/ukbb_pc_snps.txt",
-        IDs="data/ukbb/Sims/gp/{gwas}.txt"
+        IDs="data/Sims/ids/{subdataset}/{gwas}/gwas.ids"
     output:
-        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pgen",
-        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.pvar",
-        "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}.psam"
+        "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/{gwas}/tmp_{chr}.pgen",
+        "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/{gwas}/tmp_{chr}.pvar",
+        "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/{gwas}/tmp_{chr}.psam"
     params:
-        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/tmp_{chr}",
+        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/{gwas}/tmp_{chr}",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
@@ -218,14 +218,14 @@ rule make_tmp_plink2:
 
 rule merge_GWAS_PCA:
     input:
-        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{{gwas}}/tmp_{chr}.pgen", chr=CHR)
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{{subdataset}}/{{gwas}}/tmp_{chr}.pgen", chr=CHR)
     output:
-        vec="data/Sims/{gwas}/pca.eigenvec",
-        val="data/Sims/{gwas}/pca.eigenval"
+        vec="data/Sims/{subdataset}/{gwas}/pca.eigenvec",
+        val="data/Sims/{subdataset}/{gwas}/pca.eigenval"
     params:
-        prefix_out = "data/Sims/{gwas}/pca",
-        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/White/{{gwas}}/tmp_{chr}", chr=CHR, newline="\n"),
-	remove_path = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/"
+        prefix_out = "data/Sims/{subdataset}/{gwas}/pca",
+        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/White/{{subdataset}}/{{gwas}}/tmp_{chr}", chr=CHR, newline="\n"),
+	remove_path = "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/{gwas}/"
     threads: 16
     resources:
         mem_mb=38000,
