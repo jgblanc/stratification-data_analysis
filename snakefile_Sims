@@ -28,7 +28,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/Sims/TestVecs/{subdataset}/{gwas}/sharp.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("data/Sims/TestVecs/{subdataset}/{gwas}/{contrasts}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
