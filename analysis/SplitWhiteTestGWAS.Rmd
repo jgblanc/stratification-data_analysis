@@ -154,6 +154,9 @@ summary(mod2)
 ggplot(df, aes(x = PlaceOfBirthNorthCord_129, y = pheno)) + geom_point()
 ```
 
+```{r}
+df <- fread("../plots/Sims/sim50000/sim300000/results_sharp.txt")
+```
 
 
 ```{r}
