@@ -28,7 +28,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("output/simulate_phenotypes/Sims/{subdataset}/{gwas}/{phenotype}-{contrasts}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("data/Sims/TestVecs/{subdataset}/{gwas}/sharp.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -99,9 +99,9 @@ rule simulate_phenotypes_sharp:
 rule get_TestVector_smooth:
     input:
         North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-        ids="data/ukbb/Sims/tp/{subdataset}.txt"
+        ids="data/Sims/ids/{subdataset}/{gwas}/test.ids"
     output:
-        north = "data/Sims/{subdataset}/TestVecs/smooth.txt"
+        north = "data/Sims/TestVecs/{subdataset}/{gwas}/smooth.txt"
     shell:
         """
         Rscript code/Sims/get_Tvec_North.R {input.North}  {input.ids} {output.north}
@@ -111,9 +111,9 @@ rule get_TestVector_sharp:
     input:
         North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
         East="data/phenotypes/PlaceOfBirthEastCord_130.txt",
-        ids="data/ukbb/Sims/tp/{subdataset}.txt"
+        ids="data/Sims/ids/{subdataset}/{gwas}/test.ids"
     output:
-        sharp = "data/Sims/{subdataset}/TestVecs/sharp.txt"
+        sharp = "data/Sims/TestVecs/{subdataset}/{gwas}/sharp.txt"
     shell:
         """
         Rscript code/Sims/get_Tvec_Sharp.R {input.North} {input.East} {input.ids} {output.sharp}
