@@ -28,7 +28,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/Sims/ids/{subdataset}/{gwas}/gwas.ids", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("output/simulate_phenotypes/Sims/{subdataset}/{gwas}/{phenotype}-{contrasts}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -70,9 +70,9 @@ rule get_ID_lists:
 rule simulate_phenotypes_smooth:
     input:
         north = "data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-        gwas_ids = "data/ukbb/Sims/gp/{gwas}.txt"
+        gwas_ids = "data/Sims/ids/{subdataset}/{gwas}/gwas.ids"
     output:
-        "output/simulate_phenotypes/Sims/{gwas}/{phenotype}/smooth.txt"
+        "output/simulate_phenotypes/Sims/{subdataset}/{gwas}/{phenotype}-smooth.txt"
     params:
         shift = lambda wildcards: get_params(wildcards.phenotype)
     shell:
@@ -80,19 +80,19 @@ rule simulate_phenotypes_smooth:
         Rscript code/simulate_phenotypes/simulate_smooth.R {input.north} {input.gwas_ids} {output} {params.shift}
         """
 
-#rule simulate_phenotypes_sharp:
-#    input:
-#        north = "data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-#        east = "data/phenotypes/PlaceOfBirthEastCord_130.txt",
-#        gwas_ids = "data/ukbb/Sims/gp/{gwas}.txt"
-#    output:
-#        "output/simulate_phenotypes/Sims/{gwas}/{phenotype}/sharp.txt"
-#    params:
-#        shift = lambda wildcards: get_params(wildcards.phenotype)
-#    shell:
-#        """
-#        Rscript code/simulate_phenotypes/simulate_sharp.R {input.north} {input.east} {input.gwas_ids} {output} {params.shift}
-#        """
+rule simulate_phenotypes_sharp:
+    input:
+        north = "data/phenotypes/PlaceOfBirthNorthCord_129.txt",
+        east = "data/phenotypes/PlaceOfBirthEastCord_130.txt",
+        gwas_ids = "data/Sims/ids/{subdataset}/{gwas}/gwas.ids"
+    output:
+        "output/simulate_phenotypes/Sims/{subdataset}/{gwas}/{phenotype}-sharp.txt"
+    params:
+        shift = lambda wildcards: get_params(wildcards.phenotype)
+    shell:
+        """
+        Rscript code/simulate_phenotypes/simulate_sharp.R {input.north} {input.east} {input.gwas_ids} {output} {params.shift}
+        """
 
 ## Get test vector contrasts
 
