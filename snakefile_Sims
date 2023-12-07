@@ -7,9 +7,7 @@ for i in range(1, 23):
 SUBDATASET = []
 for i in range(1, 101):
   SUBDATASET.append("tp" + str(i) + "_" + tpSize)
-GWAS = []
-for i in range(1, 101):
-  GWAS.append("gp" + str(i) + "_" + gpSize)
+GWAS = ["gp" + str(gpSize)]
 CONTRASTS = ["sharp", "smooth"]
 PC = [0, 10,40]
 COVAR = ["no-FGr", "FGr-LOCO"]
