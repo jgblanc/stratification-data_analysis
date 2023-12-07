@@ -220,10 +220,10 @@ rule merge_GWAS_PCA:
     input:
         gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{{subdataset}}/{{gwas}}/tmp_{chr}.pgen", chr=CHR)
     output:
-        vec="data/Sims/{subdataset}/{gwas}/pca.eigenvec",
-        val="data/Sims/{subdataset}/{gwas}/pca.eigenval"
+        vec="data/Sims/pca/{subdataset}/{gwas}/pca.eigenvec",
+        val="data/Sims/pca/{subdataset}/{gwas}/pca.eigenval"
     params:
-        prefix_out = "data/Sims/{subdataset}/{gwas}/pca",
+        prefix_out = "data/Sims/pca/{subdataset}/{gwas}/pca",
         merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/White/{{subdataset}}/{{gwas}}/tmp_{chr}", chr=CHR, newline="\n"),
 	remove_path = "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/{gwas}/"
     threads: 16
@@ -232,12 +232,12 @@ rule merge_GWAS_PCA:
         time="03:00:00"
     shell:
         """
-	echo {params.merge_prefix} > tmp.txt
-        tr ' ' '\n' < "tmp.txt" > "tmp_chrm_list.txt"
-        plink2 --pmerge-list  tmp_chrm_list.txt \
+	echo {params.merge_prefix} > {wilcards.subdataset}-tmp.txt
+        tr ' ' '\n' < "{wilcards.subdataset}-tmp.txt" > "{wildcards.subdataset}-tmp_chrm_list.txt"
+        plink2 --pmerge-list {wildcards.subdataset}-tmp_chrm_list.txt \
         --pca 40 approx \
         --out {params.prefix_out}
-        rm tmp*
+        rm {wilcards.subdataset}-tmp*
 	rm {params.remove_path}*
 	rm {params.prefix_out}.p*
         """
