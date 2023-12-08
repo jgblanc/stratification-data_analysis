@@ -10,4 +10,6 @@ plink2 \
   --extract $overlap_snps \
   --score $beta_path center header-read cols=dosagesum,scoresums \
   --keep $id \
+  --memory 50000 \
+  --threads 8 \
   --out $outfile

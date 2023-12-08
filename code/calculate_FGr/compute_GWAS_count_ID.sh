@@ -9,4 +9,6 @@ plink2 \
     --extract $overlap_snps \
     --geno-counts \
     --keep $id \
+    --memory 50000 \
+    --threads 8 \
     --out $outfile
