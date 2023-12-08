@@ -276,7 +276,7 @@ Fbar <- apply(gammas, 1, mean)
 sigmas2 <- rep(0, nrow(data))
 for (i in 1:nrow(data)) {
   
-  sigmas2[i] <- (21/22) * sum((gammas[1,] - Fbar[1])^2)
+  sigmas2[i] <- (21/22) * sum((gammas[i,] - Fbar[i])^2)
   
 }
 
@@ -286,5 +286,8 @@ mean(sigmas2) / var(FGr_hat)
 
 
 
+```{r}
+r <- fread("~/Downloads/sharp_chr22.rvec")
+```
 
 
