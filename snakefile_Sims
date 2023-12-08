@@ -5,7 +5,7 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 SUBDATASET = []
-for i in range(1, 3):
+for i in range(1, 1):
   SUBDATASET.append("tp" + str(i) + "_" + tpSize)
 GWAS = ["gp" + str(gpSize)]
 CONTRASTS = ["sharp", "smooth"]
@@ -28,7 +28,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/Sims/pca/{subdataset}/{gwas}/pca.eigenvec", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/Sims/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -261,8 +261,8 @@ rule assemble_fixed_covars:
 rule assemble_quant_covars_FGr:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
-        covar="output/calculate_FGr/Sims/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
-        pcs="data/Sims/{gwas}/pca.eigenvec"
+        covar="output/calculate_FGr/Sims/{subdataset}/{gwas}/FGr-LOCO_{contrasts}_{chr}.txt",
+        pcs="data/Sims/pca/{subdataset}/{gwas}/pca.eigenvec"
     output:
         "output/run_gwas/Sims/{subdataset}/{gwas}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
     params:
@@ -275,7 +275,7 @@ rule assemble_quant_covars_FGr:
 rule assemble_quant_covars:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
-        pcs="data/Sims/{gwas}/pca.eigenvec"
+        pcs="data/Sims/pca/{subdataset}/{gwas}/pca.eigenvec"
     output:
         "output/run_gwas/Sims/{subdataset}/{gwas}/covariates/no-FGr_{contrasts}_{chr}-PC{pc}.txt"
     params:
@@ -287,12 +287,12 @@ rule assemble_quant_covars:
 
 rule run_fastGWA:
     input:
-        pheno="output/simulate_phenotypes/Sims/{gwas}/{phenotype}/{contrasts}.txt",
+        pheno="output/simulate_phenotypes/Sims/{subdataset}/{gwas}/{phenotype}-{contrasts}.txt",
         qcovar="output/run_gwas/Sims/{subdataset}/{gwas}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/Sims/variants/overlappingSNPs_chr{chr}.txt",
         covar="output/run_gwas/fixed_covars.txt",
-        IDs="data/ukbb/Sims/gp/{gwas}.txt"
+        IDs="data/Sims/ids/{subdataset}/{gwas}/gwas.ids"
     output:
         "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/Sims/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
