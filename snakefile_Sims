@@ -28,7 +28,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/Sims/{subdataset}/{gwas}/pca.eigenvec", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("data/Sims/pca/{subdataset}/{gwas}/pca.eigenvec", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -228,16 +228,18 @@ rule merge_GWAS_PCA:
 	remove_path = "/scratch/jgblanc/ukbb/plink2-files/White/{subdataset}/{gwas}/"
     threads: 16
     resources:
-        mem_mb=38000,
+        mem_mb=50000,
         time="03:00:00"
     shell:
         """
-	echo {params.merge_prefix} > {wilcards.subdataset}-tmp.txt
-        tr ' ' '\n' < "{wilcards.subdataset}-tmp.txt" > "{wildcards.subdataset}-tmp_chrm_list.txt"
+	echo {params.merge_prefix} > {wildcards.subdataset}-tmp.txt
+        tr ' ' '\n' < "{wildcards.subdataset}-tmp.txt" > "{wildcards.subdataset}-tmp_chrm_list.txt"
         plink2 --pmerge-list {wildcards.subdataset}-tmp_chrm_list.txt \
         --pca 40 approx \
+	--memory 50000 \
+	--threads 16 \
         --out {params.prefix_out}
-        rm {wilcards.subdataset}-tmp*
+        rm {wildcards.subdataset}-tmp*
 	rm {params.remove_path}*
 	rm {params.prefix_out}.p*
         """
