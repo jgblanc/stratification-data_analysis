@@ -19,9 +19,10 @@ outfile = args[5]
 dfAge <- fread(age)
 dfPc <- fread(pc)
 dfFgr <- fread(fgr)
-colnames(dfFgr) <- c("#FID" ,"IID", "Sex","FGr")
+print(head(dfFgr))
+colnames(dfFgr) <- c("#FID" ,"IID","FGr")
 dfFgr <- dfFgr %>% select("#FID" ,"IID", "FGr")
-#print(head(dfFgr))
+print(head(dfFgr))
 
 
 # Subset to correct number of PCs
