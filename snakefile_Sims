@@ -5,7 +5,7 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 SUBDATASET = []
-for i in range(1, 11):
+for i in range(1, 101):
   SUBDATASET.append("tp" + str(i) + "_" + tpSize)
 GWAS = ["gp" + str(gpSize)]
 CONTRASTS = ["sharp", "smooth"]
@@ -28,7 +28,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("output/calculate_FGr/Sims/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -126,6 +126,10 @@ rule compute_r_North:
         snps="data/Sims/variants/overlappingSNPs_chr{chr}.txt"
     output:
         North="data/Sims/r/{subdataset}/{gwas}/smooth_chr{chr}.rvec"
+    resources:
+        mem_mb=50000,
+	time="03:00:00"
+    threads: 16
     params:
         prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
         prefix_out = "data/Sims/r/{subdataset}/{gwas}/{chr}-smooth"
@@ -142,6 +146,10 @@ rule compute_r_Sharp:
         snps="data/Sims/variants/overlappingSNPs_chr{chr}.txt"
     output:
         Sharp="data/Sims/r/{subdataset}/{gwas}/sharp_chr{chr}.rvec"
+    resources:
+        mem_mb=50000,
+	time="03:00:00"
+    threads: 16
     params:
         prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
         prefix_out = "data/Sims/r/{subdataset}/{gwas}/{chr}-sharp"
@@ -162,9 +170,9 @@ rule compute_FGr_chr:
     output:
         "output/calculate_FGr/Sims/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt"
     resources:
-        mem_mb=50000,
+        mem_mb=100000,
 	time="03:00:00"
-    threads: 8
+    threads: 16
     params:
         gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
         out_prefix = "output/calculate_FGr/Sims/{subdataset}/{gwas}/{contrasts}_{chr}"

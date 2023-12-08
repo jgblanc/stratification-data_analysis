@@ -14,4 +14,6 @@ plink2 \
   --pheno-name $test_type \
   --geno-counts \
   --keep $ids \
+  --memory 100000 \
+  --threads 16 \
   --out $outfile
