@@ -28,7 +28,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/Sims/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -321,7 +321,7 @@ rule assign_snps_to_blocks:
     input:
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
         ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/Sims/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
-        r="data/Sims/{subdataset}/r/{contrasts}_chr{chr}.rvec",
+        r="data/Sims/r/{subdataset}/{contrasts}_chr{chr}.rvec",
     output:
         betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas"
     params:
