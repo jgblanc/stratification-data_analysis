@@ -27,7 +27,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/SS/{subdataset}/{gwas}/FGr-LOCO_{contrasts}_{chr}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -184,7 +184,7 @@ rule assemble_fixed_covars:
 rule assemble_quant_covars_FGr:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
-        covar="output/calculate_FGr/SS/{subdataset}/FGr-LOCO_{contrasts}_{chr}.txt",
+        covar="output/calculate_FGr/SS/{subdataset}/{gwas}/FGr-LOCO_{contrasts}_{chr}.txt",
         pcs="data/SS/{gwas}/pca.eigenvec"
     output:
         "output/run_gwas/SS/{subdataset}/{gwas}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
@@ -210,7 +210,7 @@ rule assemble_quant_covars:
 
 rule run_fastGWA:
     input:
-        pheno="data/phenotypes/normalized/{phenotype}.txt",
+        pheno="data/phenotypes/{phenotype}.txt",
         qcovar="output/run_gwas/SS/{subdataset}/{gwas}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/SS/variants/overlappingSNPs_chr{chr}.txt",
