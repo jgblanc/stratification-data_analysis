@@ -1,11 +1,11 @@
 # Snakefile to run full data analysis with any set of constrasts
 tpSize = "50000"
-gpSize = "300000"
+gpSize = "50000"
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 SUBDATASET = []
-for i in range(1, 11):
+for i in range(51, 101):
   SUBDATASET.append("tp" + str(i) + "_" + tpSize)
 GWAS = ["gp" + str(gpSize)]
 CONTRASTS = ["sharp", "smooth"]
