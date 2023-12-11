@@ -3,7 +3,7 @@
 #SBATCH --output=logs/main.out
 #SBATCH --error=logs/main.err
 #SBATCH --time=24:00:00
-#SBATCH --nodes=8
+#SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem-per-cpu=2000
 #SBATCH --partition=tier1q
@@ -17,7 +17,7 @@ source ../myVilma/bin/activate
 
 echo "SLURM_JOBID="$SLURM_JOBID
 cat snakefile_UKBB
-snakemake --profile cluster-setup/ -s snakefile_Sims --rerun-incomplete
+snakemake --profile cluster-setup/ -s snakefile_SampleSize --rerun-incomplete
 #snakemake -j1 --rerun-incomplete -s snakefile_main 
 
 #snakemake --cores all --rerun-incomplete -s snakefile_UKBB    
