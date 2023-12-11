@@ -171,5 +171,53 @@ df <- df %>% select("ID",  "allele1_ref")
 colnames(df) <- c("ID", "REF")
 
 fwrite(df,"~/stratification-data_analysis/output/transfer/ukbb_pc_snps.txt", row.names = F, col.names = T, quote = F, sep = "\t")
-s```
+```
+
+
+
+
+
+```{r}
+df <- fread("~/Downloads/qualifications_6138.txt")
+dfAge <- fread("~/Downloads/age-finished-education_845.txt")
+
+# Drop first column 
+df <- df[,-1]
+dfAge <- dfAge[,-1]
+
+# Get max years of education 
+maxEdu <- apply(df[, 2:ncol(df)], 1, function(x) ifelse(all(is.na(x)), NA, max(x, na.rm = TRUE)))
+maxAge <- apply(dfAge[, 2:ncol(dfAge)], 1, function(x) ifelse(all(is.na(x)), NA, max(x, na.rm = TRUE)))
+
+# Make dataframe
+dfEdu <- cbind(df[,1],df[,1], maxEdu, maxAge)
+colnames(dfEdu)[1] <- "#FID"
+colnames(dfEdu)[2] <- "IID"
+
+# Get rid of codes we don't want 
+dfEdu <- dfEdu %>% filter(maxEdu %in% c(1,2,3,4,5,6, -7)) 
+
+# Convert to years 
+dfEdu <-dfEdu %>% mutate(years = case_when(maxEdu == 1 ~ 20,
+                                           maxEdu == 2 ~ 13,
+                                           maxEdu == 3 ~ 10,
+                                           maxEdu == 4 ~ 10,
+                                           maxEdu == 5 ~ (maxAge-5),
+                                           maxEdu == 6 ~ 15,
+                                           maxEdu == -7 ~ 7))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
