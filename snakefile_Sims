@@ -369,7 +369,7 @@ rule pga_test:
 
 rule concat_pga_test:
     input:
-        expand("output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
+        expand("output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE, gwas=GWAS, subdataset=SUBDATASET)
     output:
         "plots/Sims/results.txt"
     shell:
