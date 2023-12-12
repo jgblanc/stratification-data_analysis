@@ -13,7 +13,7 @@ suppressWarnings(suppressMessages({
 
 outfile = args[1]
 
-dfOut <- matrix(NA, nrow = 1, ncol = 8)
+dfOut <- matrix(NA, nrow = 1, ncol = 11)
 
 for (i in 2:length(args)) {
 
@@ -26,7 +26,7 @@ for (i in 2:length(args)) {
   # Extract which covariate was used
   tmp <- strsplit(filename, "/")[[1]][8]
   covar <- strsplit(tmp, "_")[[1]][1]
-  contrast <- strsplit(tmp, "_")[[1]][2]
+  contrast <- strsplit(strsplit(tmp, "_")[[1]][2], ".all")[[1]][1]
   if (covar == "FGr-LOCO") {
     covar <- TRUE
   } else if (covar == "no-FGr") {
@@ -38,6 +38,15 @@ for (i in 2:length(args)) {
   # Extract number of PCs used
   pc <- regmatches(tmp, gregexpr("([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])", tmp))[[1]]
 
+  # Test replicate
+  tmp2 <- strsplit(filename, "/")[[1]][4]
+  test <- strsplit(tmp2, "_")[[1]][1]
+  testSize <- as.numeric(strsplit(tmp2, "_")[[1]][2])
+
+  # Gwas size
+  tmp3 <- strsplit(filename, "/")[[1]][5]
+  gwasSize <- as.numeric(strsplit(tmp3, "gp")[[1]][2])
+
   # Read in results
   dfTmp <- fread(filename)
   q <- dfTmp[1,1]
@@ -46,14 +55,14 @@ for (i in 2:length(args)) {
   p_NS <- dfTmp[1,4]
 
   # Save results in table
-  x <- c(q, p, q_NS, p_NS, phenotype, covar, pc, contrast)
+  x <- c(q, p, q_NS, p_NS, phenotype, covar, pc, contrast, test, testSize, gwasSize)
   dfOut <- rbind(dfOut, x)
 
 }
 
 # Remove first row
 dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
-colnames(dfOut) <- c("q", "p", "q_NoSign", "p_NoSign", "phenotype", "covar", "pc", "contrast")
+colnames(dfOut) <- c("q", "p", "q_NoSign", "p_NoSign", "phenotype", "covar", "pc", "contrast", "rep", "testSize", "gwasSize")
 
 # Save file
 print(dfOut)

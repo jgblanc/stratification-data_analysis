@@ -2,7 +2,7 @@
 tpSize = "50000"
 gpSize = "300000"
 CHR =[]
-for i in range(1, 23):
+for i in range(1, 41):
   CHR.append(str(i))
 SUBDATASET = []
 for i in range(21, 31):
@@ -28,7 +28,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("plots/Sims/results.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -369,12 +369,12 @@ rule pga_test:
 
 rule concat_pga_test:
     input:
-        expand("output/pga_test/Sims/{{subdataset}}/{{gwas}}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
+        expand("output/pga_test/Sims/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
     output:
-        "plots/Sims/{subdataset}/{gwas}/results_sharp.txt"
+        "plots/Sims/results.txt"
     shell:
         """
-        Rscript code/pga_test/concat_results_LR.R {output} {input}
+        Rscript code/pga_test/concat_results_Sims.R {output} {input}
         """
 
 ## Compute FGr vs PCs
