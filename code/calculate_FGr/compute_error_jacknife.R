@@ -17,14 +17,14 @@ outfile = args[2]
 chrs <- seq(1,22)
 
 # Add Tm for each chromosome to each other
-data <- fread(paste0(Tm_prefix, "_1.txt"))[,4]
+data <- fread(paste0(Tm_prefix, "_1.txt"))[,3]
 colnames(data) <- "1"
 
 for (i in 2:22) {
 
   # Read in new chromosome
   filename <- paste0(Tm_prefix,"_", i, ".txt")
-  data$tmp <- fread(filename)[,4]
+  data$tmp <- fread(filename)[,3]
   colnames(data)[i] <- as.character(i)
 
 }
