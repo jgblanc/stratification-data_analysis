@@ -28,8 +28,8 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
-        expand("output/calculate_FGr/SS/{subdataset}/{gwas}/Var_{contrasts}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("plots/SS/{subdataset}/{gwas}/results_EA.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
+        expand("plots/SS/{subdataset}/{gwas}/FGrError_NorthEast.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -288,7 +288,7 @@ rule concat_pga_test:
     input:
         expand("output/pga_test/SS/{{subdataset}}/{{gwas}}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
     output:
-        "plots/SS/{subdataset}/{gwas}/results_PCs.txt"
+        "plots/SS/{subdataset}/{gwas}/results_EA.txt"
     shell:
         """
         Rscript code/pga_test/concat_results_LR.R {output} {input}
@@ -306,6 +306,16 @@ rule compute_FGr_error:
     shell:
         """
         Rscript code/calculate_FGr/compute_error_jacknife.R {params.prefix_in} {output}
+        """
+
+rule concat_FGr_error:
+    input:
+        expand("output/calculate_FGr/SS/{subdataset}/{gwas}/Var_{contrasts}.txt", subdataset = SUBDATASET, gwas = GWAS, contrasts=CONSTRASTS)
+    output:
+        "plots/SS/{subdataset}/{gwas}/FGrError_NorthEast.txt"
+    shell:
+        """
+        Rscript code/calculate_FGr/concat_error.R {output} {input}
         """
 
 ## Compute FGr vs PCs
