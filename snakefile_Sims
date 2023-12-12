@@ -2,10 +2,10 @@
 tpSize = "50000"
 gpSize = "300000"
 CHR =[]
-for i in range(1, 41):
+for i in range(1, 23):
   CHR.append(str(i))
 SUBDATASET = []
-for i in range(21, 31):
+for i in range(1, 21):
   SUBDATASET.append("tp" + str(i) + "_" + tpSize)
 GWAS = ["gp" + str(gpSize)]
 CONTRASTS = ["sharp", "smooth"]
