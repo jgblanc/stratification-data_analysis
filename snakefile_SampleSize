@@ -310,7 +310,7 @@ rule compute_FGr_error:
 
 rule concat_FGr_error:
     input:
-        expand("output/calculate_FGr/SS/{subdataset}/{gwas}/Var_{contrasts}.txt", subdataset = SUBDATASET, gwas = GWAS, contrasts=CONSTRASTS)
+        expand("output/calculate_FGr/SS/{subdataset}/{gwas}/Var_{contrasts}.txt", subdataset = SUBDATASET, gwas = GWAS, contrasts=CONTRASTS)
     output:
         "plots/SS/{subdataset}/{gwas}/FGrError_NorthEast.txt"
     shell:
