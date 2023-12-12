@@ -5,7 +5,7 @@ for i in range(1, 23):
 DATASET = ["SS"]
 #SUBDATASET = ["t100"]
 SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
-CONTRASTS = ["east"]
+CONTRASTS = ["east", "north"]
 PC = [0, 10, 40]
 #GWAS=["wbs50000", "wbs100000", "wbs300000"]
 GWAS = ["g50000"]
@@ -312,7 +312,7 @@ rule concat_FGr_error:
     input:
         expand("output/calculate_FGr/SS/{subdataset}/{gwas}/Var_{contrasts}.txt", subdataset = SUBDATASET, gwas = GWAS, contrasts=CONTRASTS)
     output:
-        "plots/SS/{subdataset}/{gwas}/FGrError_NorthEast.txt"
+        "plots/SS/FGrError_NorthEast.txt"
     shell:
         """
         Rscript code/calculate_FGr/concat_error.R {output} {input}

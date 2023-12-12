@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(data.table)
 library(tidyverse)
 library(ggpubr)
+library(latex2exp)
 ```
 
 
@@ -25,16 +26,11 @@ read_in_df <- function(filename, test_num, gwas_num) {
 }
 
 
-df <- read_in_df("../plots/SS/t100/g5000/results_NorthEast.txt", 100, 5000)
-df <- rbind(df, read_in_df("../plots/SS/t1000/g5000/results_NorthEast.txt", 1000, 5000))
-df <- rbind(df, read_in_df("../plots/SS/t100000/g5000/results_NorthEast.txt", 100000, 5000))
-df <- rbind(df, read_in_df("../plots/SS/t5000/g5000/results_NorthEast.txt", 5000, 5000))
-df <- rbind(df, read_in_df("../plots/SS/t50000/g5000/results_NorthEast.txt", 50000, 5000))
-df <- rbind(df, read_in_df("../plots/SS/t1000/g50000/results_NorthEast.txt", 1000, 50000))
-df <- rbind(df, read_in_df("../plots/SS/t100000/g50000/results_NorthEast.txt", 100000, 50000))
-df <- rbind(df, read_in_df("../plots/SS/t5000/g50000/results_NorthEast.txt", 5000, 50000))
-df <- rbind(df, read_in_df("../plots/SS/t50000/g50000/results_NorthEast.txt", 50000, 50000))
-df <- rbind(df, read_in_df("../plots/SS/t100/g50000/results_NorthEast.txt", 100, 50000))
+df <- read_in_df("../plots/SS/t1000/g50000/results_EA.txt", 1000, 50000)
+df <- rbind(df, read_in_df("../plots/SS/t100000/g50000/results_EA.txt", 100000, 50000))
+df <- rbind(df, read_in_df("../plots/SS/t5000/g50000/results_EA.txt", 5000, 50000))
+df <- rbind(df, read_in_df("../plots/SS/t50000/g50000/results_EA.txt", 50000, 50000))
+df <- rbind(df, read_in_df("../plots/SS/t100/g50000/results_EA.txt", 100, 50000))
 ```
 
 ```{r}
@@ -60,10 +56,21 @@ pl_North
 df_East$tp <- factor(df_East$tp)
 df_East$gp <- factor(df_East$gp)
 
-pl_East <- ggplot(data = df_East, aes( x = gp, y = tp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(pc)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + xlab("GWAS panel size") + ylab("Test panel size")
+pl_East <- ggplot(data = df_East, aes( x = gp, y = tp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(pc)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + xlab("") + ylab("Test panel size") + ggtitle("Education Attainment: Test = East")
 pl_East
-#ggsave("~/Desktop/East.png", pl_East)
+ggsave("~/Desktop/East.png", pl_East)
 ```
+
+```{r}
+df <- fread("../plots/SS/t1000/g50000/FGrError_NorthEast.txt")
+df <- df %>% separate(testSize, into = c("tmp", "testSize"),sep =  "t")
+df$testSize <-as.numeric(df$testSize)
+
+ggplot(df, aes(x = testSize, y  = varE))  + geom_point()
+```
+
+
+
 
 
 ```{r}
@@ -234,6 +241,22 @@ df <- df %>% separate(contrast, c("contrast"), ".all")
 
 ggplot(data = df, aes(x = pc, y = phenotype, fill = q)) + geom_tile() + facet_wrap(~covar) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14)
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
