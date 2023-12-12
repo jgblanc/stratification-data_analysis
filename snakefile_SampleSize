@@ -29,7 +29,7 @@ def get_chr_num(x):
 rule all:
     input:
         expand("plots/SS/{subdataset}/{gwas}/results_EA.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
-        expand("plots/SS/{subdataset}/{gwas}/FGrError_NorthEast.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("plots/SS/FGrError_NorthEast.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
