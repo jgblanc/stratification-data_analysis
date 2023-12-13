@@ -34,7 +34,7 @@ colnames(dfEast)[3] <- "east"
 print(head(dfEast))
 
 # Set up outfiles
-dfNorth <- dfNorth %>% select("#FID","IID", "north")
+dfNorth <- dfNorth %>% select("#FID","IID", "north") 
 dfEast <- dfEast %>% select("#FID","IID", "east")
 
 # Get sharp Tvec
@@ -50,6 +50,8 @@ df$sharp <- df$sharp - mean(df$sharp)
 dfSharp <- df %>% select("#FID","IID", "sharp")
 
 # Save output
+dfEast$east <- dfEast$east - mean(dfEast$east)
+dfNorth$north <- dfNorth$north - mean(dfNorth$north)
 fwrite(dfNorth,outfile_north, row.names = F, col.names = T, quote = F, sep = "\t")
 fwrite(dfEast,outfile_east, row.names = F, col.names = T, quote = F, sep = "\t")
-fwrite(dfShar,outfile_sharp, row.names = F, col.names = T, quote = F, sep = "\t")
+fwrite(dfSharp,outfile_sharp, row.names = F, col.names = T, quote = F, sep = "\t")

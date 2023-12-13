@@ -2,7 +2,7 @@
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-SUBSET=["ALL"]
+SUBSET=["WBS"]
 nPART=250
 PARTS = []
 for i in range(1, nPART+1):
