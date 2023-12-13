@@ -25,13 +25,13 @@ wbs= args[11]
 ## Read in all dataframes and join them
 df <- fread(sex)[,1:2]
 df <- inner_join(df, fread(batch)[,1:2])
-df <- inner_join(df, fread(north)[,1:2])
-df <- inner_join(df, fread(east)[,1:2])
 df <- inner_join(df, fread(age)[,1:2])
 df <- inner_join(df, fread(genotyped)[,1:2])
 
 ## Get WBS for test panel
 dfWBS <- inner_join(df, fread(wbs)[,1:2])
+dfWBS <- inner_join(dfWBS, fread(north)[,1:2])
+dfWBS <- inner_join(dfWBS, fread(east)[,1:2])
 
 ## Select test panel
 df_test <- dfWBS %>% sample_n(testSize) %>% select("#FID", "IID")
