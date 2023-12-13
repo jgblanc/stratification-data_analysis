@@ -35,7 +35,7 @@ rule UKBB_begen_to_plink2:
     threads: 16
     resources:
         mem_mb=38000,
-	time="00:06:00:00"
+	time="06:00:00"
     shell:
         """
 	      plink2 --bgen {input.bgen} ref-first \
