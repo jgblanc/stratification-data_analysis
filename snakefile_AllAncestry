@@ -1,17 +1,17 @@
 # Snakefile to run full data analysis with any set of constrasts
-tpSize = "50000"
+tpSize = "100000"
 gpSize = "300000"
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 SUBDATASET = []
-for i in range(1, 51):
+for i in range(1, 2):
   SUBDATASET.append("tp" + str(i) + "_" + tpSize)
 GWAS = ["gp" + str(gpSize)]
 CONTRASTS = ["sharp", "smooth"]
-PC = [0, 10,40]
+PC = [0, 10]
 COVAR = ["no-FGr", "FGr-LOCO"]
-PHENOTYPE=["env_0.5","env_2.0"]
+PHENOTYPE=["Standing_Height_50"]
 PVALUE_THRESHOLD = "1e-5"
 
 #wildcard_constraints:
@@ -28,22 +28,24 @@ def get_params(x):
 
 rule all:
     input:
-        expand("plots/Sims/results.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("data/AA/ids/{subdataset}/{gwas}/gwas.ids", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
-## Get final set of SNP (White MAF > 1%)
+## Get final set of SNPs
 
 rule get_overlapping_snps:
     input:
-        "data/ukbb/variants/White/ukb_imp_chr{chr}_v3.afreq"
+        ALL="data/ukbb/variants/ALL/ukb_imp_chr{chr}_v3.afreq",
+        WBS="data/ukbb/variants/WBS/ukb_imp_chr{chr}_v3.afreq"
     output:
-        "data/Sims/variants/overlappingSNPs_chr{chr}.txt"
+        "data/AA/variants/overlappingSNPs_chr{chr}.txt"
     shell:
         """
-        cut -f2,3 {input} > {output}
+        Rscript code/hgdp/overlapping_snps.R {input.ALL} {input.WBS} {output}
         """
 
 ## Get lists of IDs
+
 rule get_ID_lists:
     input:
         sex="data/phenotypes/genetic_sex_22001.txt",
@@ -51,47 +53,17 @@ rule get_ID_lists:
         north="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
         east="data/phenotypes/PlaceOfBirthEastCord_130.txt",
         age="data/phenotypes/age_at_recruitment_21022.txt",
-        genotyped="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr22_v3.psam",
+        genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
         wbs="data/ukbb/WBS.ids"
     output:
-        gwas="data/Sims/ids/{subdataset}/{gwas}/gwas.ids",
-        test="data/Sims/ids/{subdataset}/{gwas}/test.ids"
+        gwas="data/AA/ids/{subdataset}/{gwas}/gwas.ids",
+        test="data/AA/ids/{subdataset}/{gwas}/test.ids"
     params:
         gs=int(gpSize),
         ts=int(tpSize)
     shell:
         """
-        Rscript code/Sims/get_IDs.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs} {params.ts} {input.wbs}
-        """
-
-
-## Simulate Phenotype in GWAS panel
-
-rule simulate_phenotypes_smooth:
-    input:
-        north = "data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-        gwas_ids = "data/Sims/ids/{subdataset}/{gwas}/gwas.ids"
-    output:
-        "output/simulate_phenotypes/Sims/{subdataset}/{gwas}/{phenotype}-smooth.txt"
-    params:
-        shift = lambda wildcards: get_params(wildcards.phenotype)
-    shell:
-        """
-        Rscript code/simulate_phenotypes/simulate_smooth.R {input.north} {input.gwas_ids} {output} {params.shift}
-        """
-
-rule simulate_phenotypes_sharp:
-    input:
-        north = "data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-        east = "data/phenotypes/PlaceOfBirthEastCord_130.txt",
-        gwas_ids = "data/Sims/ids/{subdataset}/{gwas}/gwas.ids"
-    output:
-        "output/simulate_phenotypes/Sims/{subdataset}/{gwas}/{phenotype}-sharp.txt"
-    params:
-        shift = lambda wildcards: get_params(wildcards.phenotype)
-    shell:
-        """
-        Rscript code/simulate_phenotypes/simulate_sharp.R {input.north} {input.east} {input.gwas_ids} {output} {params.shift}
+        Rscript code/AA/get_IDs.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs} {params.ts} {input.wbs}
         """
 
 ## Get test vector contrasts
@@ -99,9 +71,9 @@ rule simulate_phenotypes_sharp:
 rule get_TestVector_smooth:
     input:
         North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-        ids="data/Sims/ids/{subdataset}/{gwas}/test.ids"
+        ids="data/AA/ids/{subdataset}/{gwas}/test.ids"
     output:
-        north = "data/Sims/TestVecs/{subdataset}/{gwas}/smooth.txt"
+        north = "data/AA/TestVecs/{subdataset}/{gwas}/smooth.txt"
     shell:
         """
         Rscript code/Sims/get_Tvec_North.R {input.North}  {input.ids} {output.north}
@@ -111,15 +83,15 @@ rule get_TestVector_sharp:
     input:
         North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
         East="data/phenotypes/PlaceOfBirthEastCord_130.txt",
-        ids="data/Sims/ids/{subdataset}/{gwas}/test.ids"
+        ids="data/AA/ids/{subdataset}/{gwas}/test.ids"
     output:
-        sharp = "data/Sims/TestVecs/{subdataset}/{gwas}/sharp.txt"
+        sharp = "data/AA/TestVecs/{subdataset}/{gwas}/sharp.txt"
     shell:
         """
         Rscript code/Sims/get_Tvec_Sharp.R {input.North} {input.East} {input.ids} {output.sharp}
         """
 
-rule compute_r_North:
+rule compute_r_smooth:
     input:
         TvecNorth="data/Sims/TestVecs/{subdataset}/{gwas}/smooth.txt",
         IDs="data/Sims/ids/{subdataset}/{gwas}/test.ids",
