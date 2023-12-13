@@ -218,6 +218,9 @@ fwrite(dfOut,"~/Downloads/Educational_Attainment_6138.txt", row.names = F, col.n
 
 
 
+```{r}
+plot(data[,1],data[,2])
+```
 
 
 

@@ -51,7 +51,7 @@ for (i in 1:nrow(data)) {
   sigmas2[i] <- (21/22) * sum((gammas[i,] - Fbar[i])^2)
 
 }
-FGr_hat <- apply(data, 1, sum)
+FGr_hat <- apply(data, 1, mean)
 
 # Find proportion
 error <- mean(sigmas2) / var(FGr_hat)

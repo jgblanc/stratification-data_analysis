@@ -25,7 +25,6 @@ read_in_df <- function(filename, test_num, gwas_num) {
   return(df)
 }
 
-
 df <- read_in_df("../plots/SS/t1000/g50000/results_EA.txt", 1000, 50000)
 df <- rbind(df, read_in_df("../plots/SS/t100000/g50000/results_EA.txt", 100000, 50000))
 df <- rbind(df, read_in_df("../plots/SS/t5000/g50000/results_EA.txt", 5000, 50000))
@@ -47,9 +46,9 @@ df_East <- df %>% filter(contrast == "east")
 df_North$tp <- factor(df_North$tp)
 df_North$gp <- factor(df_North$gp)
 
-pl_North <- ggplot(data = df_North, aes( x = gp, y = tp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(pc)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + xlab("GWAS panel size") + ylab("Test panel size")
+pl_North <- ggplot(data = df_North, aes( x = gp, y = tp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(pc)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + xlab("") + ylab("Test panel size") + ggtitle("Education Attainment: Test = North")
 pl_North
-#ggsave("~/Desktop/North.png", pl_North)
+ggsave("~/Desktop/North.png", pl_North)
 ```
 
 ```{r}
@@ -62,11 +61,11 @@ ggsave("~/Desktop/East.png", pl_East)
 ```
 
 ```{r}
-df <- fread("../plots/SS/t1000/g50000/FGrError_NorthEast.txt")
+df <- fread("../plots/SS/FGrError_NorthEast.txt")
 df <- df %>% separate(testSize, into = c("tmp", "testSize"),sep =  "t")
 df$testSize <-as.numeric(df$testSize)
 
-ggplot(df, aes(x = testSize, y  = varE))  + geom_point()
+ggplot(df, aes(x = testSize, y  = varE, color = contrast))  + geom_point()
 ```
 
 
@@ -307,10 +306,18 @@ FGr_hat <- apply(data, 1, sum)
 mean(sigmas2) / var(FGr_hat)
 ```
 
-
-
 ```{r}
-r <- fread("~/Downloads/sharp_chr22.rvec")
+df <- fread("../plots/Sims/")
+
+
+res <- df %>% group_by(phenotype, covar, contrast, pc, testSize) %>% summarise(count = n(), fp = sum(`p` < 0.05)/ n(), mean_q = mean(q))
+res$pc <- as.factor(res$pc)
+
+res_smooth <- res %>% filter(contrast == "smooth")
+ggplot(data = res_smooth, aes(x = phenotype, y  = mean_q, color = pc )) + geom_point() + facet_wrap(~covar)
+
+res_sharp <- res %>% filter(contrast == "sharp")
+ggplot(data = res_sharp, aes(x = phenotype, y  = mean_q, color = pc )) + geom_point() + facet_wrap(~covar)
 ```
 
 
