@@ -5,13 +5,13 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 SUBDATASET = []
-for i in range(1, 21):
+for i in range(1, 51):
   SUBDATASET.append("tp" + str(i) + "_" + tpSize)
 GWAS = ["gp" + str(gpSize)]
 CONTRASTS = ["sharp", "smooth"]
 PC = [0, 10,40]
 COVAR = ["no-FGr", "FGr-LOCO"]
-PHENOTYPE=["env_1.0","env_2.0"]
+PHENOTYPE=["env_0.5","env_2.0"]
 PVALUE_THRESHOLD = "1e-5"
 
 #wildcard_constraints:
