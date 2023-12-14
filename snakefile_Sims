@@ -28,7 +28,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("output/run_gwas/Sims/{subdataset}/{gwas}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("plots/Sims/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -406,7 +406,7 @@ rule concat_FGr_error:
 rule compute_PC_FGr:
     input:
         Fgr=expand("output/calculate_FGr/Sims/{{subdataset}}/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
-        PCs = "data/Sims/{gwas}/pca.eigenvec"
+        PCs = "data/Sims/pca/{subdataset}/{gwas}/pca.eigenvec"
     output:
         "plots/Sims/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt"
     params:

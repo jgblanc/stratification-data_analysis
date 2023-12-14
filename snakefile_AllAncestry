@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
 tpSize = "100000"
 gpSize = "300000"
-CHR =["22"]
+CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 SUBDATASET = []
@@ -13,6 +13,8 @@ PC = [0, 10]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=["StandingHeight_Normalized_50"]
 PVALUE_THRESHOLD = "1e-5"
+
+print(CHR)
 
 #wildcard_constraints:
 #    subdataset="tp*",
@@ -174,8 +176,8 @@ rule merge_GWAS_PCA:
         val="data/AA/pca/{subdataset}/{gwas}/pca.eigenval"
     params:
         prefix_out = "data/AA/pca/{subdataset}/{gwas}/pca",
-        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/ALL/{{subdataset}}/{{gwas}}/tmp_{chr}", chr=CHR, newline="\n"),
-	remove_path = "/scratch/jgblanc/ukbb/plink2-files/ALL/{subdataset}/{gwas}/"
+        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/AA/{{subdataset}}/{{gwas}}/tmp_{chr}", chr=CHR, newline="\n"),
+	remove_path = "/scratch/jgblanc/ukbb/plink2-files/AA/{subdataset}/{gwas}/"
     threads: 16
     resources:
         mem_mb=50000,
