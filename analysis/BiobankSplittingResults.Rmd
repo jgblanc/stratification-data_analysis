@@ -254,60 +254,8 @@ ggplot(data = df, aes(x = pc, y = phenotype, fill = q)) + geom_tile() + facet_wr
 
 
 
-
-
-
-
-
-
 ```{r}
-data <- fread("~/Downloads/FGr_smooth_1.txt")[,4]
-colnames(data) <- "1"
-
-for (i in 2:22) {
-  
-  # Read in new chromosome
-  filename <- paste0("~/Downloads/FGr_smooth_", i, ".txt")
-  data$tmp <- fread(filename)[,4]
-  colnames(data)[i] <- as.character(i)
-  
-}
-data <- as.data.frame(data)
-```
-
-```{r}
-# Compute LOCO gamma 
-gammas <- matrix(NA, nrow = nrow(data), ncol = 22)
-for (i in 1:22) {
-  
-  # Drop ith  column 
-  loco <- data[,-i]
-  
-  # Compute variance across entries 
-  means <- apply(loco, 1, mean)
-  
-  # Compute average variance across entries 
-  gammas[,i] <- means
-
-}
-```
-
-```{r}
-Fbar <- apply(gammas, 1, mean)
-
-sigmas2 <- rep(0, nrow(data))
-for (i in 1:nrow(data)) {
-  
-  sigmas2[i] <- (21/22) * sum((gammas[i,] - Fbar[i])^2)
-  
-}
-
-FGr_hat <- apply(data, 1, sum)
-mean(sigmas2) / var(FGr_hat)
-```
-
-```{r}
-df <- fread("../plots/Sims/")
+df <- fread("../plots/Sims/results.txt")
 
 
 res <- df %>% group_by(phenotype, covar, contrast, pc, testSize) %>% summarise(count = n(), fp = sum(`p` < 0.05)/ n(), mean_q = mean(q))
@@ -320,4 +268,11 @@ res_sharp <- res %>% filter(contrast == "sharp")
 ggplot(data = res_sharp, aes(x = phenotype, y  = mean_q, color = pc )) + geom_point() + facet_wrap(~covar)
 ```
 
+
+```{r}
+Var <-  fread("../plots/Sims/FGrError.txt")
+dfVar <- Var %>% group_by(contrast) %>% summarise(meanVar = mean(varE), lc = ) 
+
+ggplot(data = dfVar, aes(x = contrast, y = meanVar)) + geom_point()
+```
 
