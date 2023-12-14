@@ -70,7 +70,7 @@ n <- nrow(testID)
 
 # Compute b for latitude
 r = compute_b(path_to_test = test_prefix, testvec_file = tvec_file, test_type = test_name, outpath = out_prefix)
-r$BETA  <- r_lat$BETA * (1/n)
+r$BETA  <- r$BETA * (1/n)
 colnames(r)[5] <- "r"
 print(head(r))
 fwrite(r, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
