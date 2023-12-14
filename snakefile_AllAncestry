@@ -152,7 +152,7 @@ rule make_tmp_plink2:
         "/scratch/jgblanc/ukbb/plink2-files/AA/{subdataset}/{gwas}/tmp_{chr}.psam"
     params:
         prefix_out = "/scratch/jgblanc/ukbb/plink2-files/AA/{subdataset}/{gwas}/tmp_{chr}",
-        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/AA/ukb_imp_chr{chr}_v3"
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
         mem_mb=38000,
