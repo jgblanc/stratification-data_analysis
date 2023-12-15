@@ -61,19 +61,21 @@ rule get_TestVector:
 
 rule compute_r:
     input:
-        TvecNorth="data/SS/{subdataset}/TestVecs/north.txt",
-        TvecEast="data/SS/{subdataset}/TestVecs/east.txt",
+        Tvec="data/SS/{subdataset}/TestVecs/{contrasts}.txt",
         IDs="data/ukbb/SS/tp/{subdataset}.txt",
         snps="data/SS/variants/overlappingSNPs_chr{chr}.txt"
     output:
-        North="data/SS/r/{subdataset}/north_chr{chr}.rvec",
-        East="data/SS/r/{subdataset}/east_chr{chr}.rvec"
+        "data/SS/r/{subdataset}/{contrasts}_chr{chr}.rvec"
+    resources:
+        mem_mb=50000,
+	time="03:00:00"
+    threads: 16
     params:
         prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
-        prefix_out = "data/SS/r/{subdataset}/{chr}"
+        prefix_out = "data/SS/r/{subdataset}/{chr}-{contrasts}"
     shell:
         """
-        Rscript code/SS/compute_cord_r.R {params.prefix_tp} {input.TvecNorth} {input.TvecEast} {params.prefix_out} {input.snps} {output.North} {output.East} {input.IDs}
+        Rscript code/AA/compute_r.R {params.prefix_tp} {input.Tvec} {params.prefix_out} {input.snps} {output} {input.IDs}
         rm {params.prefix_out}xt_temp.*
         """
 
