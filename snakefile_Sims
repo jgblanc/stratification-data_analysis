@@ -1,14 +1,14 @@
 # Snakefile to run full data analysis with any set of constrasts
 tpSize = "50000"
 gpSize = "300000"
-CHR =["22"]
-#for i in range(1, 23):
-#  CHR.append(str(i))
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
 SUBDATASET = []
-for i in range(1, 2):
+for i in range(1, 51):
   SUBDATASET.append("tp" + str(i) + "_" + tpSize)
 GWAS = ["gp" + str(gpSize)]
-CONTRASTS = ["smooth"]
+CONTRASTS = ["smooth", "sharp"]
 PC = [0, 10]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=["env_0.5","env_2.0"]
@@ -28,7 +28,8 @@ def get_params(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/Sims/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("plots/Sims/results.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
+	expand("plots/Sims/FGrError.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)

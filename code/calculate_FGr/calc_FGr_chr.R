@@ -63,11 +63,14 @@ system(cmd_b)
 dfFGr = fread(paste0(out_prefix, ".gxt_tmp.sscore"))
 print(head(dfFGr))
 print(nrow(dfFGr))
-FGr = as.matrix(FGr$BETA_SUM)
+FGr = as.matrix(dfFGr$BETA_SUM)
 
 # Format output
-gwasID <- dfFGr %>% select("#FID", "IID")
+gwasID <- dfFGr %>% select("#IID")
+colnames(gwasID) <- "#FID"
+gwasID$IID <- gwasID$`#FID`
 gwasID$FGr <- FGr
+print(head(gwasID))
 
 # Save output
 fwrite(gwasID, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
