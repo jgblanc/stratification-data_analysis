@@ -271,8 +271,16 @@ ggplot(data = res_sharp, aes(x = phenotype, y  = mean_q, color = pc )) + geom_po
 
 ```{r}
 Var <-  fread("../plots/Sims/FGrError.txt")
-dfVar <- Var %>% group_by(contrast) %>% summarise(meanVar = mean(varE), lc = ) 
+dfVar <- Var %>% group_by(contrast) %>% summarise(meanVar = mean(varE)) 
 
 ggplot(data = dfVar, aes(x = contrast, y = meanVar)) + geom_point()
+```
+
+```{r}
+df <- fread("../plots/Sims/tp10_50000/gp300000/smooth_PCs_FGr.txt")
+
+ggplot(df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 8) + ylim(0,1) 
+
+ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 8)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) + ylim(-1,1)
 ```
 
