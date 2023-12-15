@@ -28,7 +28,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("plots/SS/{subdataset}/{gwas}/results_EA.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
+        expand("plots/SS/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
         expand("plots/SS/FGrError_NorthEast.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
@@ -320,18 +320,38 @@ rule concat_FGr_error:
 
 ## Compute FGr vs PCs
 
+#rule compute_PC_FGr:
+#    input:
+#        Fgr=expand("output/calculate_FGr/SS/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+#        PCs = "data/SS/{gwas}/pca.eigenvec"
+#    output:
+#        "plots/SS/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt"
+#    params:
+#        prefix_in = "output/calculate_FGr/SS/{subdataset}/FGr_{contrasts}"
+#    shell:
+#        """
+#        Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output}
+#        """
+
+
+## Compute FGr vs PCs
+
 rule compute_PC_FGr:
     input:
-        Fgr=expand("output/calculate_FGr/SS/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+        Fgr=expand("output/calculate_FGr/SS/{{subdataset}}/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
         PCs = "data/SS/{gwas}/pca.eigenvec"
     output:
         "plots/SS/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt"
     params:
-        prefix_in = "output/calculate_FGr/SS/{subdataset}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/SS/{subdataset}/{gwas}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output}
         """
+
+
+
+
 
 ## Test panel PCA
 

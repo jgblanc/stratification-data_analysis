@@ -30,7 +30,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("plots/AA/results.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("plots/AA/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNPs
@@ -325,12 +325,12 @@ rule concat_pga_test:
 
 rule compute_PC_FGr:
     input:
-        Fgr=expand("output/calculate_FGr/AA/{{subdataset}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
-        PCs = "data/AA/{gwas}/pca.eigenvec"
+        Fgr=expand("output/calculate_FGr/AA/{{subdataset}}/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+        PCs = "data/AA/pca/{subdataset}/{gwas}/pca.eigenvec"
     output:
         "plots/AA/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt"
     params:
-        prefix_in = "output/calculate_FGr/AA/{subdataset}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/AA/{subdataset}/{gwas}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output}
