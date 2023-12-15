@@ -3,14 +3,14 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["SS"]
-#SUBDATASET = ["t100"]
-SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
+SUBDATASET = ["t100"]
+#SUBDATASET = ["t100000", "t1000", "t100", "t50000", "t5000"]
 CONTRASTS = ["east", "north"]
-PC = [0, 10, 40]
+PC = [0, 10]
 #GWAS=["wbs50000", "wbs100000", "wbs300000"]
 GWAS = ["g50000"]
 COVAR = ["no-FGr", "FGr-LOCO"]
-PHENOTYPE=[ "Educational_Attainment_6138"]
+PHENOTYPE=[ "Educational_Attainment_6138", "StandingHeight_50"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 PVALUE_THRESHOLD = "1e-5"
 #print(CONTRASTS)
@@ -28,8 +28,8 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("plots/SS/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
-        expand("plots/SS/FGrError_NorthEast.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("plots/SS/results_WBStest.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
+        expand("plots/SS/FGrError_WBStest.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNP (White MAF > 1%)
@@ -66,11 +66,11 @@ rule compute_r:
         IDs="data/ukbb/SS/tp/{subdataset}.txt",
         snps="data/SS/variants/overlappingSNPs_chr{chr}.txt"
     output:
-        North="data/SS/{subdataset}/r/north_chr{chr}.rvec",
-        East="data/SS/{subdataset}/r/east_chr{chr}.rvec"
+        North="data/SS/r/{subdataset}/north_chr{chr}.rvec",
+        East="data/SS/r/{subdataset}/east_chr{chr}.rvec"
     params:
         prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
-        prefix_out = "data/SS/{subdataset}/r/"
+        prefix_out = "data/SS/r/{subdataset}/"
     shell:
         """
         Rscript code/SS/compute_cord_r.R {params.prefix_tp} {input.TvecNorth} {input.TvecEast} {params.prefix_out} {input.snps} {output.North} {output.East} {input.IDs}
@@ -81,7 +81,7 @@ rule compute_r:
 
 rule compute_FGr_chr:
     input:
-        r="data/SS/{subdataset}/r/{contrasts}_chr{chr}.rvec",
+        r="data/SS/r/{subdataset}/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/SS/variants/overlappingSNPs_chr{chr}.txt",
         IDs="data/ukbb/SS/gp/{gwas}.txt"
@@ -147,10 +147,10 @@ rule merge_GWAS_PCA:
     input:
         gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{{gwas}}/tmp_{chr}.pgen", chr=CHR)
     output:
-        vec="data/SS/{gwas}/pca.eigenvec",
-        val="data/SS/{gwas}/pca.eigenval"
+        vec="data/SS/pca/{gwas}/pca.eigenvec",
+        val="data/SS/pca/{gwas}/pca.eigenvec"
     params:
-        prefix_out = "data/SS/{gwas}/pca",
+        prefix_out = "data/SS/pca/{gwas}/pca",
         merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/White/{{gwas}}/tmp_{chr}", chr=CHR, newline="\n"),
 	remove_path = "/scratch/jgblanc/ukbb/plink2-files/White/{gwas}/"
     threads: 16
@@ -159,12 +159,14 @@ rule merge_GWAS_PCA:
         time="03:00:00"
     shell:
         """
-	echo {params.merge_prefix} > tmp.txt
-        tr ' ' '\n' < "tmp.txt" > "tmp_chrm_list.txt"
-        plink2 --pmerge-list  tmp_chrm_list.txt \
+	echo {params.merge_prefix} > {wildcards.subdataset}-tmp.txt
+        tr ' ' '\n' < "{wildcards.subdataset}-tmp.txt" > "{wildcards.subdataset}-tmp_chrm_list.txt"
+        plink2 --pmerge-list {wildcards.subdataset}-tmp_chrm_list.txt \
         --pca 40 approx \
+	--memory 50000 \
+	--threads 16 \
         --out {params.prefix_out}
-        rm tmp*
+        rm {wildcards.subdataset}-tmp*
 	rm {params.remove_path}*
 	rm {params.prefix_out}.p*
         """
@@ -187,7 +189,7 @@ rule assemble_quant_covars_FGr:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
         covar="output/calculate_FGr/SS/{subdataset}/{gwas}/FGr-LOCO_{contrasts}_{chr}.txt",
-        pcs="data/SS/{gwas}/pca.eigenvec"
+        pcs="data/SS/pca/{gwas}/pca.eigenvec"
     output:
         "output/run_gwas/SS/{subdataset}/{gwas}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
     params:
@@ -200,7 +202,7 @@ rule assemble_quant_covars_FGr:
 rule assemble_quant_covars:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
-        pcs="data/SS/{gwas}/pca.eigenvec"
+        pcs="data/SS/pca/{gwas}/pca.eigenvec"
     output:
         "output/run_gwas/SS/{subdataset}/{gwas}/covariates/no-FGr_{contrasts}_{chr}-PC{pc}.txt"
     params:
@@ -246,7 +248,7 @@ rule assign_snps_to_blocks:
     input:
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
         ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/SS/{subdataset}/{gwas}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
-        r="data/SS/{subdataset}/r/{contrasts}_chr{chr}.rvec",
+        r="data/SS/r/{subdataset}/{contrasts}_chr{chr}.rvec",
     output:
         betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.betas"
     params:
@@ -286,12 +288,12 @@ rule pga_test:
 
 rule concat_pga_test:
     input:
-        expand("output/pga_test/SS/{{subdataset}}/{{gwas}}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE)
+        expand("output/pga_test/SS/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE, gwas=GWAS, subdataset=SUBDATASET)
     output:
-        "plots/SS/{subdataset}/{gwas}/results_EA.txt"
+        "plots/SS/results_WBStest.txt"
     shell:
         """
-        Rscript code/pga_test/concat_results_LR.R {output} {input}
+        Rscript code/pga_test/concat_results_SS.R {output} {input}
         """
 
 ## Compute error in FGr
@@ -312,7 +314,7 @@ rule concat_FGr_error:
     input:
         expand("output/calculate_FGr/SS/{subdataset}/{gwas}/Var_{contrasts}.txt", subdataset = SUBDATASET, gwas = GWAS, contrasts=CONTRASTS)
     output:
-        "plots/SS/FGrError_NorthEast.txt"
+        "plots/SS/FGrError_WBStest.txt"
     shell:
         """
         Rscript code/calculate_FGr/concat_error.R {output} {input}
