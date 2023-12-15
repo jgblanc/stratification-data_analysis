@@ -28,7 +28,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("plots/SS/results_WBStest.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
+        expand("output/calculate_FGr/SS/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
         expand("plots/SS/FGrError_WBStest.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
@@ -70,7 +70,7 @@ rule compute_r:
         East="data/SS/r/{subdataset}/east_chr{chr}.rvec"
     params:
         prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/White/ukb_imp_chr{chr}_v3",
-        prefix_out = "data/SS/r/{subdataset}/"
+        prefix_out = "data/SS/r/{subdataset}/{chr}"
     shell:
         """
         Rscript code/SS/compute_cord_r.R {params.prefix_tp} {input.TvecNorth} {input.TvecEast} {params.prefix_out} {input.snps} {output.North} {output.East} {input.IDs}
@@ -148,7 +148,7 @@ rule merge_GWAS_PCA:
         gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/White/{{gwas}}/tmp_{chr}.pgen", chr=CHR)
     output:
         vec="data/SS/pca/{gwas}/pca.eigenvec",
-        val="data/SS/pca/{gwas}/pca.eigenvec"
+        val="data/SS/pca/{gwas}/pca.eigenval"
     params:
         prefix_out = "data/SS/pca/{gwas}/pca",
         merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/White/{{gwas}}/tmp_{chr}", chr=CHR, newline="\n"),
@@ -159,14 +159,14 @@ rule merge_GWAS_PCA:
         time="03:00:00"
     shell:
         """
-	echo {params.merge_prefix} > {wildcards.subdataset}-tmp.txt
-        tr ' ' '\n' < "{wildcards.subdataset}-tmp.txt" > "{wildcards.subdataset}-tmp_chrm_list.txt"
-        plink2 --pmerge-list {wildcards.subdataset}-tmp_chrm_list.txt \
+	echo {params.merge_prefix} > {wildcards.gwas}-tmp.txt
+        tr ' ' '\n' < "{wildcards.gwas}-tmp.txt" > "{wildcards.gwas}-tmp_chrm_list.txt"
+        plink2 --pmerge-list {wildcards.gwas}-tmp_chrm_list.txt \
         --pca 40 approx \
 	--memory 50000 \
 	--threads 16 \
         --out {params.prefix_out}
-        rm {wildcards.subdataset}-tmp*
+        rm {wildcards.gwas}-tmp*
 	rm {params.remove_path}*
 	rm {params.prefix_out}.p*
         """
