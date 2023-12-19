@@ -262,10 +262,10 @@ res <- df %>% group_by(phenotype, covar, contrast, pc, testSize) %>% summarise(c
 res$pc <- as.factor(res$pc)
 
 res_smooth <- res %>% filter(contrast == "smooth")
-ggplot(data = res_smooth, aes(x = phenotype, y  = mean_q, color = pc )) + geom_point() + facet_wrap(~covar)
+ggplot(data = res_smooth, aes(x = phenotype, y  = fp, color = pc )) + geom_point() + facet_wrap(~covar)
 
 res_sharp <- res %>% filter(contrast == "sharp")
-ggplot(data = res_sharp, aes(x = phenotype, y  = mean_q, color = pc )) + geom_point() + facet_wrap(~covar)
+ggplot(data = res_sharp, aes(x = phenotype, y  = fp, color = pc )) + geom_point() + facet_wrap(~covar)
 ```
 
 
@@ -283,4 +283,38 @@ ggplot(df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine
 
 ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 8)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) + ylim(-1,1)
 ```
+
+
+
+
+
+
+
+
+
+```{r}
+df  <- fread("../plots/SS/FGrError_WBStest.txt")
+df$testSize <- as.numeric(gsub('t', '', df$testSize))
+
+ggplot(data = df, aes(x = testSize, y = varE, color = contrast)) + geom_point()
+```
+
+
+
+```{r}
+df <- fread("../plots/SS/results_WBStest.txt")
+df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
+df$pc <- as.factor(df$pc)
+df$testSize <- as.factor(df$testSize)
+EA <- df %>% filter(phenotype == "Educational_Attainment_6138")
+Ht <- df %>% filter(phenotype == "StandingHeight_50")
+
+ggplot(data = Ht, aes(x = pc, y = testSize, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(contrast)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14)
+
+```
+
+
+
+
+
 

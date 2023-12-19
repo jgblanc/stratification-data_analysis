@@ -30,7 +30,8 @@ def get_params(x):
 
 rule all:
     input:
-        expand("plots/AA/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
+        expand("plots/AA/results.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
+        expand("plots/AA/FGrError.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
 ## Get final set of SNPs
@@ -320,6 +321,34 @@ rule concat_pga_test:
         """
         Rscript code/pga_test/concat_results_Sims.R {output} {input}
         """
+
+## Compute error in FGr
+
+rule compute_FGr_error:
+    input:
+        Fgr=expand("output/calculate_FGr/AA/{{subdataset}}/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+    output:
+        "output/calculate_FGr/AA/{subdataset}/{gwas}/Var_{contrasts}.txt"
+    params:
+        prefix_in = "output/calculate_FGr/AA/{subdataset}/{gwas}/FGr_{contrasts}"
+    shell:
+        """
+        Rscript code/calculate_FGr/compute_error_jacknife.R {params.prefix_in} {output}
+        """
+
+rule concat_FGr_error:
+    input:
+        expand("output/calculate_FGr/AA/{subdataset}/{gwas}/Var_{contrasts}.txt", subdataset = SUBDATASET, gwas = GWAS, contrasts=CONTRASTS)
+    output:
+        "plots/AA/FGrError.txt"
+    shell:
+        """
+        Rscript code/calculate_FGr/concat_error.R {output} {input}
+        """
+
+
+
+
 
 ## Compute FGr vs PCs
 
