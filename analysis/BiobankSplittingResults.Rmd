@@ -314,7 +314,24 @@ ggplot(data = Ht, aes(x = pc, y = testSize, fill = q)) + geom_tile() + facet_gri
 ```
 
 
+```{r}
+df <- fread("../plots/AA/results.txt")
+df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
+df$pc <- as.factor(df$pc)
+df$testSize <- as.factor(df$testSize)
+#EA <- df %>% filter(phenotype == "Educational_Attainment_6138")
+#Ht <- df %>% filter(phenotype == "StandingHeight_50")
 
+ggplot(data = df, aes(x = pc, y = testSize, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(contrast)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14)
 
+```
+
+```{r}
+df <- fread("../plots/AA/tp1_100000/gp300000/sharp_PCs_FGr.txt")
+
+ggplot(df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 8) + ylim(0,1) 
+
+ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 8)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) + ylim(-1,1)
+```
 
 
