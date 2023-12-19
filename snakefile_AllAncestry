@@ -9,7 +9,7 @@ for i in range(1, 2):
   SUBDATASET.append("tp" + str(i) + "_" + tpSize)
 GWAS = ["gp" + str(gpSize)]
 CONTRASTS = ["sharp", "north", "east"]
-PC = [0, 10]
+PC = [0, 10, 40]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=["StandingHeight_Normalized_50"]
 PVALUE_THRESHOLD = "1e-5"
