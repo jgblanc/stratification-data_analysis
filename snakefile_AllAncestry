@@ -1,6 +1,6 @@
 # Snakefile to run full data analysis with any set of constrasts
-tpSize = "100000"
-gpSize = "300000"
+tpSize = "50000"
+gpSize = "50000"
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
@@ -30,8 +30,8 @@ def get_params(x):
 
 rule all:
     input:
-        expand("plots/AA/results.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
-#        expand("plots/AA/FGrError2.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
+        expand("data/AA/ids/{subdataset}/{gwas}/gwas.ids", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
+#        expand("plots/AA/FGrErrorEur.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC),
 #	expand("plots/AA/{subdataset}/{gwas}/{contrasts}_PCs_FGr.txt", chr=CHR, subdataset=SUBDATASET, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, contrasts=CONTRASTS, pc=PC)
 
 
@@ -58,7 +58,8 @@ rule get_ID_lists:
         east="data/phenotypes/PlaceOfBirthEastCord_130.txt",
         age="data/phenotypes/age_at_recruitment_21022.txt",
         genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
-        wbs="data/ukbb/WBS.ids"
+        wbs="data/ukbb/WBS.ids",
+        white="data/ukbb/White.ids"
     output:
         gwas="data/AA/ids/{subdataset}/{gwas}/gwas.ids",
         test="data/AA/ids/{subdataset}/{gwas}/test.ids"
@@ -67,7 +68,7 @@ rule get_ID_lists:
         ts=int(tpSize)
     shell:
         """
-        Rscript code/AA/get_IDs.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs} {params.ts} {input.wbs}
+        Rscript code/AA/get_IDs.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs} {params.ts} {input.wbs} {input.white}
         """
 
 ## Get test vector contrasts
@@ -317,7 +318,7 @@ rule concat_pga_test:
     input:
         expand("output/pga_test/AA/{subdataset}/{gwas}/{phenotype}/results_LR/{covar}_{contrasts}.all-PC{pc}.results", covar = COVAR, contrasts = CONTRASTS, pc = PC, phenotype = PHENOTYPE, gwas=GWAS, subdataset=SUBDATASET)
     output:
-        "plots/AA/results.txt"
+        "plots/AA/resultsEur.txt"
     shell:
         """
         Rscript code/pga_test/concat_results_Sims.R {output} {input}
@@ -341,7 +342,7 @@ rule concat_FGr_error:
     input:
         expand("output/calculate_FGr/AA/{subdataset}/{gwas}/Var_{contrasts}.txt", subdataset = SUBDATASET, gwas = GWAS, contrasts=CONTRASTS)
     output:
-        "plots/AA/FGrError2.txt"
+        "plots/AA/FGrErrorEur.txt"
     shell:
         """
         Rscript code/calculate_FGr/concat_error.R {output} {input}

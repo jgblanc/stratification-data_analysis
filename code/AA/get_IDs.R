@@ -20,6 +20,7 @@ outTest = args[8]
 gwasSize = as.numeric(args[9])
 testSize = as.numeric(args[10])
 wbs= args[11]
+white = args[12]
 
 
 ## Read in all dataframes and join them
@@ -32,19 +33,37 @@ df <- inner_join(df, fread(genotyped)[,1:2])
 dfWBS <- inner_join(df, fread(wbs)[,1:2])
 dfWBS <- inner_join(dfWBS, fread(north)[,1:2])
 dfWBS <- inner_join(dfWBS, fread(east)[,1:2])
+print("The WBS total size is ", nrow(dfWBS))
+
+## Get White
+dfWhite <- inner_join(df, fread(white)[,1:2])
+dfWhite <- dfWhite %>% filter(!IID %in% dfWBS$IID)
+print("The White total size is ", nrow(dfWhite))
+
+## Other ancestries
+dfOther <- df %>% filter(!IID %in% dfWBS$IID) %>% filter(!IID %in% dfWhiteS$IID)  %>% select("#FID", "IID")
+print("The other total size is ", nrow(dfOther))
 
 ## Select test panel
 df_test <- dfWBS %>% sample_n(testSize) %>% select("#FID", "IID")
 fwrite(df_test, outTest ,row.names=F,quote=F,sep="\t", col.names = T)
 
 ## Select gwas panel
-df_GWAS_other <- df %>% filter(!IID %in% dfWBS$IID) %>% select("#FID", "IID")
-nOther <- nrow(df_GWAS_other)
-print(paste0("The number of other ancestries is ", nOther))
-df_GWAS_WBS <- dfWBS  %>% filter(!IID %in% df_test$IID) %>% sample_n(gwasSize - nOther) %>% select("#FID", "IID")
-df_GWAS <- rbind(df_GWAS_other, df_GWAS_WBS)
-print(paste0("The total number in the GWAS is ", nrow(df_GWAS)))
 
+# Get 50K "white"
+dfGWAS_white <- dfWhite %>% sample_n(50000) %>% select("#FID", "IID")
+
+# Calculate the number of other ancestries we need
+nOther <- gwasSize - 50000
+print(paste0("The number of other ancestries is ", nOther))
+
+# Select other
+dfGWAS_other <- dfOther %>% sample_n(nOther) %>% select("#FID", "IID")
+
+# Combine GWAS panel
+df_GWAS <- rbind(df_GWAS_white, df_GWAS_other)
+
+# Save output
 fwrite(df_GWAS, outGWAS ,row.names=F,quote=F,sep="\t", col.names = T)
 
 
