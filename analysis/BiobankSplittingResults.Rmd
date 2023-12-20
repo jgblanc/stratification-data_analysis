@@ -315,11 +315,11 @@ ggplot(data = Ht, aes(x = pc, y = testSize, fill = q)) + geom_tile() + facet_gri
 
 
 ```{r}
-df1 <- fread("../plots/AA/results.txt")
-df1$exp <- paste0("Test ", df1$testSize, " GWAS ", df1$gwasSize)
-df2 <- fread("../plots/AA/results2.txt")
-df2$exp <- paste0("Test ", df2$testSize, " GWAS ", df2$gwasSize)
-df <- rbind(df1, df2)
+df <- fread("../plots/AA/resultsEur.txt")
+df$exp <- paste0("Test ", df$testSize, " GWAS ", df$gwasSize)
+#df2 <- fread("../plots/AA/results2.txt")
+#df2$exp <- paste0("Test ", df2$testSize, " GWAS ", df2$gwasSize)
+#df <- rbind(df1, df2)
 df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
 df$pc <- as.factor(df$pc)
 df$testSize <- as.factor(df$testSize)
