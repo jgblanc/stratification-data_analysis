@@ -331,14 +331,16 @@ ggplot(data = df, aes(x = pc, y = exp, fill = q)) + geom_tile() + facet_grid(var
 ```
 
 ```{r}
-df <- fread("../plots/AA/tp1_200000/gp200000/north_PCs_FGr.txt")
+df <- fread("../plots/AA/tp1_50000/gp50000/north_PCs_FGr.txt")
 
 p1 <- ggplot(df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 12) + ylim(0,1) + ggtitle("North")
 
 p2 <- ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 12)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) + ylim(-1,1) + ggtitle("North")
 
 out <- ggarrange(p1,p2)
-ggsave("~/Desktop/north.png", out, height = 6, width = 10)
+p1
+p2
+#ggsave("~/Desktop/north.png", out, height = 6, width = 10)
 ```
 
 
