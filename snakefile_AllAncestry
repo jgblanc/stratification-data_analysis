@@ -5,13 +5,13 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 SUBDATASET = []
-for i in range(1, 5):
+for i in range(1, 2):
   SUBDATASET.append("tp" + str(i) + "_" + tpSize)
 GWAS = ["gp" + str(gpSize)]
 CONTRASTS = ["sharp", "north", "east"]
 PC = [0, 10,40]
 COVAR = ["no-FGr", "FGr-LOCO"]
-PHENOTYPE=["StandingHeight_Normalized_50"]
+PHENOTYPE=["StandingHeight_50"]
 PVALUE_THRESHOLD = "1e-5"
 
 print(CHR)
@@ -242,7 +242,7 @@ rule assemble_quant_covars:
 
 rule run_fastGWA:
     input:
-        pheno="data/phenotypes/normalized/{phenotype}.txt",
+        pheno="data/phenotypes/{phenotype}.txt",
         qcovar="output/run_gwas/AA/{subdataset}/{gwas}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/AA/variants/overlappingSNPs_chr{chr}.txt",
