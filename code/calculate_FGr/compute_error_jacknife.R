@@ -29,6 +29,7 @@ for (i in 2:22) {
 
 }
 data <- as.data.frame(data)
+print(head(data))
 
 # Compute LOCO gamma
 gammas <- matrix(NA, nrow = nrow(data), ncol = 22)
@@ -51,10 +52,13 @@ for (i in 1:nrow(data)) {
   sigmas2[i] <- (21/22) * sum((gammas[i,] - Fbar[i])^2)
 
 }
+print(mean(sigmas2, na.rm = TRUE))
+
 FGr_hat <- apply(data, 1, mean)
+print(var(FGr_hat, na.rm = TRUE))
 
 # Find proportion
-error <- mean(sigmas2) / var(FGr_hat)
+error <- mean(sigmas2, na.rm = TRUE) / var(FGr_hat, na.rm = TRUE)
 
 # Make output table
 dfOut <- as.data.frame(error)

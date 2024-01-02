@@ -9,7 +9,7 @@ SUBDATASET = ["UK10K"]
 #CONTRASTS = ["French-Sardinian", "BergamoItalian-Basque"]
 CONTRASTS = ["sds"]
 PC = [0,10,40]
-GWAS=["WBS"]
+GWAS=["ALL"]
 COVAR = ["FGr-LOCO", "no-FGr"]
 #PHENOTYPE=['MeanCorpuscularHaemoglobinConcentration_Normalized_30060']
 PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
@@ -32,7 +32,7 @@ rule compute_FGr_error:
     output:
         "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/Var_{contrasts}.txt"
     params:
-        prefix_in = "output/calculate_FGr/{{dataset}}/{subdataset}/{gwas}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/compute_error_jacknife.R {params.prefix_in} {output}
