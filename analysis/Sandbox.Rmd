@@ -340,13 +340,15 @@ ggsave("~/Desktop/r2.png",pl, height = 5, width= 7)
 
 
 ```{r}
-df <- fread("../plots/sds/UK10K/WBS/sds_PCs_FGr.txt")
+df <- fread("../plots/sds/UK10K/ALL/sds_PCs_FGr.txt")
 
 pl <- ggplot(df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 14) 
+pl
 ggsave("~/Desktop/var.png",pl, height = 3, width= 7)
 
 
 pl2 <- ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 14)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) 
+pl2
 ggsave("~/Desktop/rho.png",pl2, height = 3, width= 7)
 ```
 

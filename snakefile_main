@@ -21,7 +21,24 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("plots/{dataset}/{subdataset}/{gwas}/results.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/Var_{contrasts}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
+
+
+## Compute error in FGr
+
+rule compute_FGr_error:
+    input:
+        Fgr=expand("output/calculate_FGr/{{dataset}}/{{subdataset}}/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+    output:
+        "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/Var_{contrasts}.txt"
+    params:
+        prefix_in = "output/calculate_FGr/{{dataset}}/{subdataset}/{gwas}/FGr_{contrasts}"
+    shell:
+        """
+        Rscript code/calculate_FGr/compute_error_jacknife.R {params.prefix_in} {output}
+        """
+
+
 
 
 ## Compute FGr

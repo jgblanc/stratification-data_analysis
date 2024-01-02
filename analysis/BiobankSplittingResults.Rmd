@@ -315,24 +315,24 @@ ggplot(data = Ht, aes(x = pc, y = testSize, fill = q)) + geom_tile() + facet_gri
 
 
 ```{r}
-df <- fread("../plots/AA/resultsEur.txt")
+df <- fread("../plots/AA/resultsEur3.txt")
 df$exp <- paste0("Test ", df$testSize, " GWAS ", df$gwasSize)
-#df2 <- fread("../plots/AA/results2.txt")
-#df2$exp <- paste0("Test ", df2$testSize, " GWAS ", df2$gwasSize)
-#df <- rbind(df1, df2)
+df2 <- fread("../plots/AA/resultsEur3.txt")
+df2$exp <- paste0("Test ", df2$testSize, " GWAS ", df2$gwasSize)
+df <- rbind(df1, df2)
 df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
 df$pc <- as.factor(df$pc)
 df$testSize <- as.factor(df$testSize)
-df_plot <- df %>% filter(rep == "tp4")
-#EA <- df %>% filter(phenotype == "Educational_Attainment_6138")
-#Ht <- df %>% filter(phenotype == "StandingHeight_50")
+df_plot <- df %>% filter(rep == "tp3s")
+EA <- df_plot %>% filter(phenotype == "Educational_Attainment_6138")
+Ht <- df_plot %>% filter(phenotype == "StandingHeight_50")
 
-ggplot(data = df_plot, aes(x = pc, y = exp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(contrast)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + ylab(" ")
+ggplot(data = EA, aes(x = pc, y = exp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(contrast)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + ylab(" ")
 
 ```
 
 ```{r}
-df <- fread("../plots/AA/tp1_50000/gp60000/north_PCs_FGr.txt")
+df <- fread("../plots/AA/tp4_50000/gp80000/sharp_PCs_FGr.txt")
 
 p1 <- ggplot(df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 12) + ylim(0,1) + ggtitle("North")
 
