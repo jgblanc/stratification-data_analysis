@@ -3,9 +3,9 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["pga_paper"]
-REP = "A1"
-#for i in range(1,101):
-#  REP.append("A"+str(i))
+REP = []
+for i in range(1,101):
+  REP.append("A"+str(i))
 
 CONTRASTS = ["east", "north"]
 #PC = [0, 10, 100]
@@ -29,7 +29,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/pga_paper/{rep}/ids/gwas.ids", rep=REP)
+        expand("data/pga_paper/{rep}/TestVecs/north.txt", rep=REP)
 
 
 # Sample 100K WBS and  individuals for test panel
@@ -47,7 +47,7 @@ rule get_ID_lists:
         gwas="data/pga_paper/{rep}/ids/gwas.ids",
         test="data/pga_paper/{rep}/ids/test.ids"
     params:
-        gs=20000
+        gs=20000,
         ts=10000
     shell:
         """
@@ -66,7 +66,7 @@ rule get_TestVector:
         east = "data/pga_paper/{rep}/TestVecs/east.txt"
     shell:
         """
-        Rscript code/SS/get_Tvec.R {input.North} {input.East} {input.ids} {output.north} {output.east}
+        Rscript code/PGA_paper/get_Tvec.R {input.North} {input.East} {input.ids} {output.north} {output.east}
         """
 
 
