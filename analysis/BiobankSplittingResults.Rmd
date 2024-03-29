@@ -296,7 +296,10 @@ ggplot(df, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarin
 df  <- fread("../plots/SS/FGrError_WBStest.txt")
 df$testSize <- as.numeric(gsub('t', '', df$testSize))
 
-ggplot(data = df, aes(x = testSize, y = varE, color = contrast)) + geom_point()
+pl <- ggplot(data = df, aes(x = testSize, y = varE, color = contrast)) + geom_point(size = 5) + xlab("Test Panel Size") + 
+  ylab("Jackknife Error") + theme_bw(base_size = 16) + scale_color_manual(values = c("darkgreen", "orchid4"), name = "coordinate")
+
+ggsave("~/Desktop/varE.png", pl, width = 10, height = 7)
 ```
 
 
@@ -306,29 +309,58 @@ df <- fread("../plots/SS/results_WBStest.txt")
 df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
 df$pc <- as.factor(df$pc)
 df$testSize <- as.factor(df$testSize)
+df <- df %>% mutate(contrast_name = case_when(contrast == "east" ~ "Easting", contrast == "north" ~ "Northing")) %>%
+  mutate(contrast_name = case_when(contrast == "east" ~ "Easting", contrast == "north" ~ "Northing"))
+
+
+df$covar <- as.factor(df$covar)
+levels(df$covar) <- c("FALSE", "TRUE")
+label_names <- list("FALSE" = TeX("No $\\hat{F}_{Gr}$") , "TRUE" = TeX("$\\hat{F}_{Gr}$") )
+
+hospital_labeller <- function(variable,value){
+    print(value)  
+    if (variable=='contrast_name') {
+    return(value)
+  } else {
+    return(label_names[value])
+  }
+}
+
+
 EA <- df %>% filter(phenotype == "Educational_Attainment_6138")
 Ht <- df %>% filter(phenotype == "StandingHeight_50")
 
-ggplot(data = Ht, aes(x = pc, y = testSize, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(contrast)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14)
+pl <- ggplot(data = EA, aes(x = pc, y = testSize, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(contrast_name),labeller = hospital_labeller) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + ylab("Test Panel Size") + xlab("PCs included") 
 
+
+ggsave("~/Desktop/EA.png", pl, height = 5, width = 8)
 ```
 
 
 ```{r}
-df <- fread("../plots/AA/resultsEur3.txt")
+df <- fread("../plots/AA/results.txt")
+
 df$exp <- paste0("Test ", df$testSize, " GWAS ", df$gwasSize)
-df2 <- fread("../plots/AA/resultsEur3.txt")
-df2$exp <- paste0("Test ", df2$testSize, " GWAS ", df2$gwasSize)
-df <- rbind(df1, df2)
+#df2 <- fread("../plots/AA/resultsEur3.txt")
+#df2$exp <- paste0("Test ", df2$testSize, " GWAS ", df2$gwasSize)
+#df <- rbind(df, df2)
 df <- df %>% mutate(sig = case_when(p <= 0.05 ~ "*", p > 0.05 ~ ""))
 df$pc <- as.factor(df$pc)
 df$testSize <- as.factor(df$testSize)
-df_plot <- df %>% filter(rep == "tp3s")
-EA <- df_plot %>% filter(phenotype == "Educational_Attainment_6138")
-Ht <- df_plot %>% filter(phenotype == "StandingHeight_50")
+#df_plot <- df %>% filter(rep == "tp4")
+EA <- df %>% filter(phenotype == "Educational_Attainment_6138")
+#Ht <- df %>% filter(phenotype == "StandingHeight_50")
+Ht <- df %>% filter(phenotype == "StandingHeight_Normalized_50")
 
-ggplot(data = EA, aes(x = pc, y = exp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(contrast)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + ylab(" ")
+ggplot(data = Ht, aes(x = pc, y = exp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(contrast)) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + ylab(" ")
 
+
+Ht <- Ht %>% mutate(contrast_name = case_when(contrast == "east" ~ "Easting", contrast == "north" ~ "Northing")) %>%
+  mutate(contrast_name = case_when(contrast == "east" ~ "Easting", contrast == "north" ~ "Northing"))
+Ht <- Ht %>% filter(contrast == "east" | contrast == "north")
+Ht$covar <- as.factor(Ht$covar)
+pl <- ggplot(data = Ht, aes(x = pc, y=exp, fill = q)) + geom_tile() + facet_grid(vars(covar), vars(contrast_name), labeller = hospital_labeller) + scale_fill_gradient2(low = "brown4", high = "royalblue4", name = TeX("$\\hat{q}$")) + geom_text(aes(label=sig), color="black", size=7, fontface="bold") + theme_bw(base_size = 14) + ylab(" ")
+ggsave("~/Desktop/AA.png", pl, height = 5, width = 8)
 ```
 
 ```{r}
