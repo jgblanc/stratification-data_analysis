@@ -28,7 +28,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec", rep=REP, contrasts=CONTRASTS, chr=CHR)
+        expand("output/calculate_FGr/pga_paper/{rep}/FGr_{contrasts}_{chr}.txt", rep=REP, contrasts=CONTRASTS, chr=CHR)
 
 
 # Sample 100K WBS and  individuals for test panel
@@ -90,4 +90,25 @@ rule compute_r:
         rm {params.prefix_out}xt_temp.*
         """
 
+# Compute FGr
+
+rule compute_FGr_chr:
+    input:
+        r="data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+        overlap_snps="data/ukbb/ukbb_pc_snps.txt",
+        IDs="data/pga_paper/{rep}/ids/gwas.ids"
+    output:
+        "output/calculate_FGr/pga_paper/{rep}/FGr_{contrasts}_{chr}.txt"
+    resources:
+        mem_mb=100000,
+	time="03:00:00"
+    threads: 16
+    params:
+        gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        out_prefix = "output/calculate_FGr/pga_paper/{rep}/{contrasts}_{chr}"
+    shell:
+        """
+        Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output} {input.IDs}
+        """
 
