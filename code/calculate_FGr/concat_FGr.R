@@ -11,10 +11,7 @@ suppressWarnings(suppressMessages({
 }))
 
 outfile = args[1]
-
-# Get list of all but the focal chromosome
-chrs <- seq(1,22)
-chrs <- chrs[ !chrs == chrNum]
+print(length(args))
 
 # Add Tm for each chromosome to each other
 df <- fread(args[2])
