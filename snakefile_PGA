@@ -28,7 +28,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/pga_paper/{rep}/ids/gwas.ids", rep=REP, contrasts=CONTRASTS, chr=CHR)
+        expand("output/calculate_FGr/pga_paper/{rep}/Var_{contrasts}.txt", rep=REP, contrasts=CONTRASTS, chr=CHR)
 
 
 # Sample individuals for panels
@@ -62,7 +62,7 @@ rule get_ID_lists_B:
         age="data/phenotypes/age_at_recruitment_21022.txt",
         genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
         wbs="data/ukbb/WBS.ids",
-        white="data/ukbbb/White.ids"
+        white="data/ukbb/White.ids"
     output:
         gwas="data/pga_paper/{rep}/ids/gwas.ids",
         test="data/pga_paper/{rep}/ids/test.ids"
