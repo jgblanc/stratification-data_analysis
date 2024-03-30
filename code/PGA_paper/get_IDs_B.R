@@ -27,11 +27,10 @@ white = args[13]
 ## Read in all dataframes and join them
 df <- fread(sex,  colClasses = 'character')[,1:2]
 df <- inner_join(df, fread(batch,  colClasses = 'character')[,1:2])
-df <- inner_join(df, fread(north,  colClasses = 'character')[,1:2])
-df <- inner_join(df, fread(east,  colClasses = 'character')[,1:2])
+#df <- inner_join(df, fread(north,  colClasses = 'character')[,1:2])
+#df <- inner_join(df, fread(east,  colClasses = 'character')[,1:2])
 df <- inner_join(df, fread(age,  colClasses = 'character')[,1:2])
 df <- inner_join(df, fread(genotyped,  colClasses = 'character')[,1:2])
-str(df)
 df_wbs <- inner_join(df, fread(wbs,  colClasses = 'character')[,1:2])
 df_white <- inner_join(df,fread(white,  colClasses = 'character')[,1:2])
 
