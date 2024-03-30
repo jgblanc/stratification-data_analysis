@@ -23,8 +23,9 @@ m <- nrow(gwasID)
 
 # Read in and format r
 r <- fread(r_file)
-dfSnps <- fread(snps_file)
-r <- inner_join(r, dfSnps)
+#dfSnps <- fread(snps_file)
+#r <- inner_join(r, dfSnps)
+#print(nrow(r))
 r <- r %>% dplyr::select("ID", "ALT", "r")
 colnames(r) <- c("ID", "A1", "BETA")
 print(nrow(r))
