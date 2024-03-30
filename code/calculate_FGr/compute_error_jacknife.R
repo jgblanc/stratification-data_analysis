@@ -24,7 +24,7 @@ for (i in 2:22) {
 
   # Read in new chromosome
   filename <- paste0(Tm_prefix,"_", i, ".txt")
-  data$tmp <- fread(filename)[,4]
+  data$tmp <- fread(filename)[,3]
   colnames(data)[i] <- as.character(i)
 
 }

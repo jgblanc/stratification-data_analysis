@@ -166,7 +166,7 @@ rule make_tmp_plink2:
 
 rule merge_GWAS_PCA:
     input:
-        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/tmp/{rep}/tmp_{chr}.pgen", chr=CHR)
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/tmp/{{rep}}/tmp_{chr}.pgen", chr=CHR)
     output:
         vec="data/pga_paper/{rep}/pca/pca.eigenvec",
         val="data/pga_paper/{rep}/pca/pca.eigenval"
@@ -180,14 +180,14 @@ rule merge_GWAS_PCA:
         time="03:00:00"
     shell:
         """
-	echo {params.merge_prefix} > {wildcards.gwas}-tmp.txt
-        tr ' ' '\n' < "{wildcards.gwas}-tmp.txt" > "{wildcards.gwas}-tmp_chrm_list.txt"
-        plink2 --pmerge-list {wildcards.gwas}-tmp_chrm_list.txt \
+	echo {params.merge_prefix} > {wildcards.rep}-tmp.txt
+        tr ' ' '\n' < "{wildcards.rep}-tmp.txt" > "{wildcards.rep}-tmp_chrm_list.txt"
+        plink2 --pmerge-list {wildcards.rep}-tmp_chrm_list.txt \
         --pca 100 approx \
 	--memory 50000 \
 	--threads 16 \
         --out {params.prefix_out}
-        rm {wildcards.gwas}-tmp*
+        rm {wildcards.rep}-tmp*
 	rm {params.remove_path}*
 	rm {params.prefix_out}.p*
         """
