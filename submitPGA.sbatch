@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=SS
+#SBATCH --job-name=PGA
 #SBATCH --output=logs/pga.out
 #SBATCH --error=logs/pga.err
 #SBATCH --time=24:00:00
@@ -17,8 +17,8 @@ source ../myVilma/bin/activate
 
 echo "SLURM_JOBID="$SLURM_JOBID
 cat snakefilePGA
-snakemake -s snakefilePGA --unlock
-snakemake --profile cluster-setup/ -s snakefilePGA  --rerun-incomplete
+snakemake -s snakefile_PGA --unlock
+snakemake --profile cluster-setup/ -s snakefile_PGA  --rerun-incomplete
 #snakemake -j1 --rerun-incomplete -s snakefile_main 
 
 #snakemake --cores all --rerun-incomplete -s snakefile_UKBB    
