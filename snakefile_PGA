@@ -3,7 +3,7 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["pga_paper"]
-REP = ["B1"]
+REP = ["B2"]
 #for i in range(1,11):
 #  REP.append("A"+str(i))
 CONTRASTS = ["east", "north"]
@@ -68,8 +68,8 @@ rule get_ID_lists_B:
         gwas="data/pga_paper/{rep}/ids/gwas.ids",
         test="data/pga_paper/{rep}/ids/test.ids"
     params:
-        gs_WBS=100000,
-        gs_Other = 100000,
+        gs_WBS=0,
+        gs_Other = 30000,
         ts=100000
     shell:
         """
