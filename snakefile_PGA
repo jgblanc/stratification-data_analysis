@@ -28,7 +28,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/pga_paper/{rep}/ids/gwas.ids", rep=REP, contrasts=CONTRASTS, chr=CHR)
+        expand("output/calculate_FGr/pga_paper/{rep}/Var_{contrasts}.txt", rep=REP, contrasts=CONTRASTS, chr=CHR)
 
 
 # Sample individuals for panels
