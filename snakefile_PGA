@@ -1,19 +1,18 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 DATASET = ["pga_paper"]
 NSNP = ["L-1000","L-10000", "L-100000", "L-all"]
-REP = ["B2"]
+REP = ["A1"]
 #for i in range(1,11):
 #  REP.append("A"+str(i))
 CONTRASTS = ["east", "north"]
-#PC = [0, 10, 100]
-#GWAS = ["g50000"]
-#COVAR = ["no-FGr", "FGr-LOCO"]
-#PHENOTYPE=[ "StandingHeight_50"]
+PC = [0, 10, 100]
+COVAR = ["noFGr", "FGr"]
+PHENOTYPE=[ "StandingHeight_50"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
-#PVALUE_THRESHOLD = "1e-5"
+PVALUE_THRESHOLD = "1"
 #print(CONTRASTS)
 
 
@@ -29,43 +28,45 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/pga_paper/{rep}/{nsnp}/Var_{contrasts}.txt",nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR)
+        expand(""data/pga_paper/{rep}/pruned_snps/{chr}.prune.in",nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR)
 
 
 # Sample individuals for panels
 
-#rule get_ID_lists_A:
-#    input:
-#        sex="data/phenotypes/genetic_sex_22001.txt",
-#        batch="data/phenotypes/genotype_measurement_batch_22000.txt",
-#        north="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-#        east="data/phenotypes/PlaceOfBirthEastCord_130.txt",
-#        age="data/phenotypes/age_at_recruitment_21022.txt",
-#        genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
-#        wbs="data/ukbb/WBS.ids"
-#    output:
-#        gwas="data/pga_paper/{rep}/ids/gwas.ids",
-#        test="data/pga_paper/{rep}/ids/test.ids"
-#    params:
-#        gs=100000,
-#        ts=100000
-#    shell:
-#        """
-#        Rscript code/PGA_paper/get_IDs_A.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs} {params.ts} {input.wbs}
-#        """
+rule get_ID_lists:
+    input:
+        sex="data/phenotypes/genetic_sex_22001.txt",
+        batch="data/phenotypes/genotype_measurement_batch_22000.txt",
+        north="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
+        east="data/phenotypes/PlaceOfBirthEastCord_130.txt",
+        age="data/phenotypes/age_at_recruitment_21022.txt",
+        genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
+        wbs="data/ukbb/WBS.ids",
+        white="data/ukbb/nonWBS-White.ids",
+        all = "data/ukbb/ALL.ids"
+    output:
+        gwas="data/pga_paper/{rep}/ids/gwas.ids",
+        test="data/pga_paper/{rep}/ids/test.ids"
+    params:
+        gs_WBS=0,
+        gs_Other = 50000,
+        ts=100000
+    shell:
+        """
+        Rscript code/PGA_paper/get_IDs_B.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs_WBS} {params.gs_Other} {params.ts} {input.wbs} {input.white} {input.all}
+        """
 
-# Get overlapping SNPs and downsample to L
+# Get overlapping SNPs
 
 rule get_overlapping_snps:
     input:
         "data/ukbb/variants/White/ukb_imp_chr{chr}_v3.afreq"
     output:
-        "data/pga_paper/{rep}/{nsnp}/variants/overlappingSNPs_chr{chr}.txt"
+        "data/pga_paper/variants/overlappingSNPs_chr{chr}.txt"
     shell:
         """
-        Rscript code/PGA_paper/sample_snps.R {input} {wildcards.nsnp} {output}
+        cut -f2,3 {input} > {output}
         """
-
 
 # Make birth coordinates test vector
 
@@ -88,114 +89,40 @@ rule compute_r:
     input:
         Tvec="data/pga_paper/{rep}/TestVecs/{contrasts}.txt",
         IDs="data/pga_paper/{rep}/ids/test.ids",
-        snps="data/pga_paper/{rep}/{nsnp}/variants/overlappingSNPs_chr{chr}.txt"
+        snps="data/pga_paper/variants/overlappingSNPs_chr{chr}.txt"
     output:
-        "data/pga_paper/{rep}/{nsnp}/r/{contrasts}_chr{chr}.rvec"
+        "data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec"
     resources:
         mem_mb=50000,
 	time="03:00:00"
     threads: 1
     params:
         prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        prefix_out = "data/pga_paper/{rep}/{nsnp}/r/{chr}-{contrasts}"
+        prefix_out = "data/pga_paper/{rep}/r/{chr}-{contrasts}"
     shell:
         """
         Rscript code/PGA_paper/compute_r.R {params.prefix_tp} {input.Tvec} {params.prefix_out} {input.snps} {output} {input.IDs}
         rm {params.prefix_out}xt_temp.*
         """
 
-# Compute FGr
+# Downsample SNPs for correction
 
-rule compute_FGr_chr:
+rule prune_SNPs:
     input:
-        r="data/pga_paper/{rep}/{nsnp}/r/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/pga_paper/{rep}/{nsnp}/variants/overlappingSNPs_chr{chr}.txt",
-        IDs="data/pga_paper/{rep}/ids/gwas.ids"
+        IDs="data/pga_paper/{rep}/ids/gwas.ids",
+        snps="data/pga_paper/variants/overlappingSNPs_chr{chr}.txt"
     output:
-        "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}_{chr}.txt"
-    resources:
-        mem_mb=100000,
-	time="03:00:00"
-    threads: 16
+        "data/pga_paper/{rep}/pruned_snps/{chr}.prune.in"
     params:
-        gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        out_prefix = "output/calculate_FGr/pga_paper/{rep}/{nsnp}/{contrasts}_{chr}"
-    shell:
-        """
-        Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output} {input.IDs}
-        """
-
-rule concat_chr_FGr:
-    input:
-        expand("output/calculate_FGr/pga_paper/{{rep}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
-    output:
-        "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}.txt"
-    shell:
-        """
-        Rscript code/calculate_FGr/concat_FGr.R {output} {input}
-        """
-
-# Calculate Error in FGr
-
-rule compute_FGr_error:
-    input:
-        expand("output/calculate_FGr/pga_paper/{{rep}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
-    output:
-        "output/calculate_FGr/pga_paper/{rep}/{nsnp}/Var_{contrasts}.txt"
-    params:
-        prefix_in = "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}"
-    shell:
-        """
-        Rscript code/calculate_FGr/compute_error_jacknife.R {params.prefix_in} {output}
-        """
-
-# GWAS panel PCA
-
-rule make_tmp_plink2:
-    input:
-        gp="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/ukbb/ukbb_pc_snps.txt",
-        IDs="data/pga_paper/{rep}/ids/gwas.ids"
-    output:
-        "/scratch/jgblanc/ukbb/plink2-files/tmp/{rep}/tmp_{chr}.pgen",
-        "/scratch/jgblanc/ukbb/plink2-files/tmp/{rep}/tmp_{chr}.pvar",
-        "/scratch/jgblanc/ukbb/plink2-files/tmp/{rep}/tmp_{chr}.psam"
-    params:
-        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/tmp/{rep}/tmp_{chr}",
-        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
-    threads: 16
-    resources:
-        mem_mb=38000,
-        time="00:30:00"
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out = "data/pga_paper/{rep}/pruned_snps/{chr}"
     shell:
         """
         plink2 --pfile {params.prefix_plink} \
         --keep {input.IDs} \
-        --extract {input.overlap_snps} \
-	--make-pgen \
+        --extract {input.snps}
+        --indep-pairwise 200kb 0.5 \
         --out {params.prefix_out}
         """
 
-rule get_ID_lists_B:
-    input:
-        sex="data/phenotypes/genetic_sex_22001.txt",
-        batch="data/phenotypes/genotype_measurement_batch_22000.txt",
-        north="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-        east="data/phenotypes/PlaceOfBirthEastCord_130.txt",
-        age="data/phenotypes/age_at_recruitment_21022.txt",
-        genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
-        wbs="data/ukbb/WBS.ids",
-        white="data/ukbb/nonWBS-White.ids",
-        all = "data/ukbb/ALL.ids"
-    output:
-        gwas="data/pga_paper/{rep}/ids/gwas.ids",
-        test="data/pga_paper/{rep}/ids/test.ids"
-    params:
-        gs_WBS=0,
-        gs_Other = 50000,
-        ts=100000
-    shell:
-        """
-        Rscript code/PGA_paper/get_IDs_B.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs_WBS} {params.gs_Other} {params.ts} {input.wbs} {input.white} {input.all}
-        """
