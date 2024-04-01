@@ -29,7 +29,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/pga_paper/{rep}/{nsnp}/variants/overlappingSNPs_chr{chr}.txt",nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR)
+        expand("output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}",nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR)
 
 
 # Sample individuals for panels
@@ -88,16 +88,16 @@ rule compute_r:
     input:
         Tvec="data/pga_paper/{rep}/TestVecs/{contrasts}.txt",
         IDs="data/pga_paper/{rep}/ids/test.ids",
-        snps="data/ukbb/ukbb_pc_snps.txt"
+        snps="data/pga_paper/{rep}/{nsnp}/variants/overlappingSNPs_chr{chr}.txt"
     output:
-        "data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec"
+        "data/pga_paper/{rep}/{nsnp}/r/{contrasts}_chr{chr}.rvec"
     resources:
         mem_mb=50000,
 	time="03:00:00"
     threads: 16
     params:
         prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        prefix_out = "data/pga_paper/{rep}/r/{chr}-{contrasts}"
+        prefix_out = "data/pga_paper/{rep}/{nsnp}/r/{chr}-{contrasts}"
     shell:
         """
         Rscript code/PGA_paper/compute_r.R {params.prefix_tp} {input.Tvec} {params.prefix_out} {input.snps} {output} {input.IDs}
@@ -108,19 +108,19 @@ rule compute_r:
 
 rule compute_FGr_chr:
     input:
-        r="data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec",
+        r="data/pga_paper/{rep}/{nsnp}/r/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/ukbb/ukbb_pc_snps.txt",
+        overlap_snps="data/pga_paper/{rep}/{nsnp}/variants/overlappingSNPs_chr{chr}.txt",
         IDs="data/pga_paper/{rep}/ids/gwas.ids"
     output:
-        "output/calculate_FGr/pga_paper/{rep}/FGr_{contrasts}_{chr}.txt"
+        "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}_{chr}.txt"
     resources:
         mem_mb=100000,
 	time="03:00:00"
     threads: 16
     params:
         gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        out_prefix = "output/calculate_FGr/pga_paper/{rep}/{contrasts}_{chr}"
+        out_prefix = "output/calculate_FGr/pga_paper/{rep}/{nsnp}/{contrasts}_{chr}"
     shell:
         """
         Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output} {input.IDs}
@@ -128,9 +128,9 @@ rule compute_FGr_chr:
 
 rule concat_chr_FGr:
     input:
-        expand("output/calculate_FGr/pga_paper/{{rep}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+        expand("output/calculate_FGr/pga_paper/{{rep}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
     output:
-        "output/calculate_FGr/pga_paper/{rep}/FGr_{contrasts}.txt"
+        "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}.txt"
     shell:
         """
         Rscript code/calculate_FGr/concat_FGr.R {output} {input}
@@ -140,11 +140,11 @@ rule concat_chr_FGr:
 
 rule compute_FGr_error:
     input:
-        expand("output/calculate_FGr/pga_paper/{{rep}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+        expand("output/calculate_FGr/pga_paper/{{rep}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
     output:
-        "output/calculate_FGr/pga_paper/{rep}/Var_{contrasts}.txt"
+        "output/calculate_FGr/pga_paper/{rep}/{nsnp}/Var_{contrasts}.txt"
     params:
-        prefix_in = "output/calculate_FGr/pga_paper/{rep}/FGr_{contrasts}"
+        prefix_in = "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}"
     shell:
         """
         Rscript code/calculate_FGr/compute_error_jacknife.R {params.prefix_in} {output}
