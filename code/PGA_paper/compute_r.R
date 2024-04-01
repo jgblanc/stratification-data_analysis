@@ -17,7 +17,7 @@ outfile = args[5]
 id_file = args[6]
 
 # Get test type name
-test_name <- strsplit(out_prefix, "-")[[1]][3]
+test_name <- strsplit(out_prefix, "-")[[1]][2]
 print(test_name)
 
 ####################
