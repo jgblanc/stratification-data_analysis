@@ -31,7 +31,7 @@ df <- inner_join(df, fread(age,  colClasses = 'character')[,1:2])
 df <- inner_join(df, fread(genotyped,  colClasses = 'character')[,1:2])
 df_wbs <- inner_join(df, fread(wbs,  colClasses = 'character')[,1:2])
 df_white <- inner_join(df,fread(white,  colClasses = 'character')[,1:2])
-df_all <- inner_join(df,fread(all,  colClasses = 'character')[,1:2])
+#df_all <- inner_join(df,fread(all,  colClasses = 'character')[,1:2])
 #df_other <- df_all %>% filter(!IID %in% df_wbs$IID)
 
 ## Select test panel

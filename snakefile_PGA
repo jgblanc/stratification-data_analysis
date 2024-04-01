@@ -186,7 +186,7 @@ rule get_ID_lists_B:
         age="data/phenotypes/age_at_recruitment_21022.txt",
         genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
         wbs="data/ukbb/WBS.ids",
-        white="data/ukbb/White.ids",
+        white="data/ukbb/nonWBS-White.ids",
         all = "data/ukbb/ALL.ids"
     output:
         gwas="data/pga_paper/{rep}/ids/gwas.ids",
