@@ -32,7 +32,7 @@ df <- inner_join(df, fread(genotyped,  colClasses = 'character')[,1:2])
 df_wbs <- inner_join(df, fread(wbs,  colClasses = 'character')[,1:2])
 df_white <- inner_join(df,fread(white,  colClasses = 'character')[,1:2])
 df_all <- inner_join(df,fread(all,  colClasses = 'character')[,1:2])
-df_other <- df_all %>% filter(!IID %in% df_wbs$IID)
+#df_other <- df_all %>% filter(!IID %in% df_wbs$IID)
 
 ## Select test panel
 df_test <- df_wbs %>% sample_n(testSize) %>% select("#FID", "IID")
@@ -40,7 +40,7 @@ fwrite(df_test, outTest ,row.names=F,quote=F,sep="\t", col.names = T)
 
 ## Select gwas panel
 df_GWAS1 <- df_wbs %>% filter(!IID %in% df_test$IID) %>% sample_n(gwasSizeWBS) %>% select("#FID", "IID")
-df_GWAS2 <- df_other %>% filter(!IID %in% df_test$IID) %>% sample_n(gwasSizeOther) %>% select("#FID", "IID")
+df_GWAS2 <- df_white %>% filter(!IID %in% df_test$IID) %>% sample_n(gwasSizeOther) %>% select("#FID", "IID")
 df_GWAS <- rbind(df_GWAS1, df_GWAS2)
 fwrite(df_GWAS, outGWAS ,row.names=F,quote=F,sep="\t", col.names = T)
 
