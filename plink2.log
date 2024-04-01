@@ -1,17 +1,14 @@
-PLINK v2.00a3.7LM AVX2 Intel (24 Oct 2022)
+PLINK v2.00a5.8LM AVX2 Intel (21 Nov 2023)
 Options in effect:
-  --extract data/ukbb/ukbb_pc_snps.txt
-  --keep data/ukbb/SS/gp/g5000.txt
-  --pmerge-list /scratch/jgblanc/ukbb/plink2-files/White/all_chrms.txt
+  --extract data/pga_paper/variants/overlappingSNPs_chr22.txt
+  --keep data/pga_paper/A1/ids/gwas.ids
+  --pfile /scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3
 
-Hostname: cri22in001
+Hostname: cri22in002
 Working directory: /gpfs/data/berg-lab/jgblanc/stratification-data_analysis
-Start time: Sat Nov 18 14:21:14 2023
+Start time: Mon Apr  1 16:01:28 2024
 
-Random number seed: 1700338874
-257555 MiB RAM detected; reserving 128777 MiB for main workspace.
-Using up to 32 threads (change this with --threads).
-Error: Basic file conversions do not support regular filter or transform
-operations.  Rerun your command with --make-bed/--make-[b]pgen.
+Warning: No output requested.  (Did you forget --make-bed/--make-[b]pgen?)
+Exiting.
 
-End time: Sat Nov 18 14:21:14 2023
+End time: Mon Apr  1 16:01:28 2024
