@@ -9,19 +9,19 @@ suppressWarnings(suppressMessages({
   library(dplyr)
 }))
 
-infile = args[1]
-nsnp = strsplit(args[2], "L-")[[1]][2]
-outfile = args[3]
+outAll = args[1]
+outSample = args[2]
+nsnp = as.numeric(strsplit(args[3], "L-")[[1]][2])
 
-if (nsnp != "all") {
-  nsnp = as.numeric(nsnp)
-  df <- fread(infile)[,2:3]
-  df <- df %>% sample_n(nsnp)
-  fwrite(df, outfile ,row.names=F,quote=F,sep="\t", col.names = T)
-} else {
-  df <- fread(infile)[,2:3]
-  fwrite(df, outfile ,row.names=F,quote=F,sep="\t", col.names = T)
+df <- fread(args[4])[,2:3]
+for (i in 5:length(args)) {
+  tmp <- fread(args[i])[,2:3]
+  df <- rbind(df, tmp)
 }
+fwrite(df, outAll ,row.names=F,quote=F,sep="\t", col.names = T)
+
+df <- df %>% sample_n(nsnp)
+fwrite(df, outSample ,row.names=F,quote=F,sep="\t", col.names = T)
 
 
 
