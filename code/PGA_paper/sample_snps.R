@@ -13,12 +13,14 @@ outAll = args[1]
 outSample = args[2]
 nsnp = as.numeric(strsplit(args[3], "L-")[[1]][2])
 
-df <- fread(args[4])[,2:3]
+df <- fread(args[4], header=FALSE)
+print(df)
 for (i in 5:length(args)) {
-  tmp <- fread(args[i])[,2:3]
+  tmp <- fread(args[i], header=FALSE)
   df <- rbind(df, tmp)
 }
 fwrite(df, outAll ,row.names=F,quote=F,sep="\t", col.names = T)
+print(nrow(df))
 
 df <- df %>% sample_n(nsnp)
 fwrite(df, outSample ,row.names=F,quote=F,sep="\t", col.names = T)
