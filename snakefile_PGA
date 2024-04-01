@@ -29,7 +29,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}",nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR)
+        expand("output/calculate_FGr/pga_paper/{rep}/{nsnp}/Var_{contrasts}.txt",nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR)
 
 
 # Sample individuals for panels
@@ -94,7 +94,7 @@ rule compute_r:
     resources:
         mem_mb=50000,
 	time="03:00:00"
-    threads: 16
+    threads: 1
     params:
         prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
         prefix_out = "data/pga_paper/{rep}/{nsnp}/r/{chr}-{contrasts}"
