@@ -10,7 +10,10 @@ suppressWarnings(suppressMessages({
 }))
 
 infile = args[1]
-nsnp = as.numeric(strsplit(args[2], "L-")[[1]][2])
+nsnp = strsplit(args[2], "L-")[[1]][2]
+if (nsnp != "all") {
+  nsnp = as.numeric(nsnp)
+}
 outfile = args[3]
 
 
