@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
 CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+#for i in range(1, 23):
+#  CHR.append(str(i))
 DATASET = ["pga_paper"]
 NSNP = ["L-1000","L-10000", "L-100000", "L-1000000"]
 REP = ["A1"]
@@ -28,7 +28,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/FGr-LOCO_{contrasts}_{chr}.txt",nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR)
+        expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR)
 
 
 # Sample individuals for panels
@@ -209,3 +209,35 @@ rule assemble_quant_covars_FGr:
       """
       Rscript code/PGA_paper/assemble_quant_covar.R {input.age} {input.covar} {output}
       """
+
+# Run GWAS
+
+rule run_fastGWA:
+    input:
+      pheno="data/phenotypes/{phenotype}.txt",
+      qcovar="output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/FGr-LOCO_{contrasts}_{chr}.txt",
+      gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+      overlap_snps="data/pga_paper/variants/overlappingSNPs_chr{chr}.txt",
+      covar="output/run_gwas/fixed_covars.txt",
+      IDs="data/pga_paper/{rep}/ids/gwas.ids
+    output:
+      "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+    params:
+        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
+    threads: 16
+    resources:
+        mem_mb=100,
+        time="00:30:00"
+    shell:
+        """
+        gcta  --pheno {input.pheno} \
+        --keep {input.IDs} \
+        --qcovar {input.qcovar} \
+        --covar {input.covar} \
+        --extract {input.overlap_snps} \
+        --fastGWA-lr \
+        --threads {threads} \
+        --pfile {params.prefix_plink} \
+        --out {params.prefix_out}
+        """
