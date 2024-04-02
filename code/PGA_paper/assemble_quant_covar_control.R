@@ -13,7 +13,7 @@ age = args[1]
 outfile = args[2]
 
 # Read in dataframes
-dfAge <- fread(age)
+df <- fread(age)
 
 
 # Drop rows with NA
