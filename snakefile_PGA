@@ -42,7 +42,7 @@ rule make_tmp_plink2:
         "/scratch/jgblanc/ukbb/plink2-files/ALL/{rep}/tmp_{chr}.pvar",
         "/scratch/jgblanc/ukbb/plink2-files/ALL/{rep}/tmp_{chr}.psam"
     params:
-        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/ALL/{gwas}/tmp_{chr}",
+        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/ALL/{rep}/tmp_{chr}",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
@@ -60,28 +60,28 @@ rule make_tmp_plink2:
 
 rule merge_GWAS_PCA:
     input:
-        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/ALL/{{gwas}}/tmp_{chr}.pgen", chr=CHR)
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/ALL/{{rep}}/tmp_{chr}.pgen", chr=CHR)
     output:
         vec="data/pga_paper/pca/{rep}/pca.eigenvec",
         val="data/pga_paper/pca/{rep}/pca.eigenval"
     params:
-        prefix_out = "data/pga_paper/pca/{gwas}/pca",
-        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/ALL/{rep}/tmp_{chr}", chr=CHR, newline="\n"),
+        prefix_out = "data/pga_paper/pca/{rep}/pca",
+        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/ALL/{{rep}}/tmp_{chr}", chr=CHR, newline="\n"),
 	remove_path = "/scratch/jgblanc/ukbb/plink2-files/ALL/{rep}/"
     threads: 16
     resources:
-        mem_mb=38000,
+        mem_mb=60000,
         time="03:00:00"
     shell:
         """
 	echo {params.merge_prefix} > {wildcards.rep}-tmp.txt
         tr ' ' '\n' < "{wildcards.rep}-tmp.txt" > "{wildcards.rep}-tmp_chrm_list.txt"
         plink2 --pmerge-list {wildcards.rep}-tmp_chrm_list.txt \
-        --pca 40 approx \
+        --pca 20 approx \
 	--memory 50000 \
 	--threads 16 \
         --out {params.prefix_out}
-        rm {wildcards.gwas}-tmp*
+        rm {wildcards.rep}-tmp*
 	rm {params.remove_path}*
 	rm {params.prefix_out}.p*
         """
