@@ -8,7 +8,7 @@ REP = ["A1"]
 #for i in range(1,11):
 #  REP.append("A"+str(i))
 CONTRASTS = ["east", "north"]
-#PC = [0, 10, 100]
+PC = [20]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=[ "StandingHeight_50"]
 #PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
@@ -28,7 +28,53 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/pga_paper/pca/{rep}/pca.eigenvec",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE)
+        expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{phenotype}/raw_LR/{chr}-PC{pc}.fastGWA",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
+
+
+# Run GWAS
+
+rule run_fastGWA:
+    input:
+      pheno="data/phenotypes/{phenotype}.txt",
+      qcovar="output/run_gwas/pga_paper/{rep}/covariates/{chr}-PC{pc}.txt",
+      gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+      overlap_snps="data/pga_paper/variants/overlappingSNPs_chr{chr}.txt",
+      covar="output/run_gwas/fixed_covars.txt",
+      IDs="data/pga_paper/{rep}/ids/gwas.ids"
+    output:
+      "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{phenotype}/raw_LR/{chr}-PC{pc}.fastGWA",
+    params:
+        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{chr}-PC{pc}",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
+    threads: 16
+    resources:
+        mem_mb=100,
+        time="00:30:00"
+    shell:
+        """
+        gcta  --pheno {input.pheno} \
+        --keep {input.IDs} \
+        --qcovar {input.qcovar} \
+        --covar {input.covar} \
+        --extract {input.overlap_snps} \
+        --fastGWA-lr \
+        --threads {threads} \
+        --pfile {params.prefix_plink} \
+        --out {params.prefix_out}
+        """
+
+rule assemble_quant_covars:
+    input:
+        age="data/phenotypes/age_at_recruitment_21022.txt",
+        pcs="data/pga_paper/pca/{rep}/pca.eigenvec"
+    output:
+        "output/run_gwas/pga_paper/{rep}/covariates/{chr}-PC{pc}.txt"
+    params:
+        pcNum = lambda wildcards: get_chr_num(wildcards.pc)
+    shell:
+        """
+        Rscript code/run_gwas/assemble_quant_covar_control.R {input.age} {input.pcs} {params.pcNum} {output}
+        """
 
 
 
@@ -86,13 +132,6 @@ rule merge_GWAS_PCA:
 	rm {params.prefix_out}.p*
         """
 
-
-
-
-
-
-
-
 # Sample individuals for panels
 
 rule get_ID_lists:
@@ -117,6 +156,7 @@ rule get_ID_lists:
         """
         Rscript code/PGA_paper/get_IDs_B.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs_WBS} {params.gs_Other} {params.ts} {input.wbs} {input.white} {input.all}
         """
+
 
 # Get overlapping SNPs
 
