@@ -33,7 +33,7 @@ rule all:
 
 # Run GWAS
 
-rule run_fastGWA:
+rule run_fastGWA_PCA:
     input:
       pheno="data/phenotypes/{phenotype}.txt",
       qcovar="output/run_gwas/pga_paper/{rep}/covariates/{chr}-PC{pc}.txt",
@@ -44,7 +44,7 @@ rule run_fastGWA:
     output:
       "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{phenotype}/raw_LR/{chr}-PC{pc}.fastGWA",
     params:
-        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{chr}-PC{pc}",
+        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{phenotype}/raw_LR/{chr}-PC{pc}",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
@@ -63,7 +63,7 @@ rule run_fastGWA:
         --out {params.prefix_out}
         """
 
-rule assemble_quant_covars:
+rule assemble_quant_covars_PCA:
     input:
         age="data/phenotypes/age_at_recruitment_21022.txt",
         pcs="data/pga_paper/pca/{rep}/pca.eigenvec"
