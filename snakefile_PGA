@@ -3,7 +3,8 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["pga_paper"]
-NSNP = ["L-1000", "L-3162" ,"L-10000","L-31623", "L-100000","L-316228", "L-1000000"]
+#NSNP = ["L-1000", "L-3162" ,"L-10000","L-31623", "L-100000","L-316228", "L-1000000"]
+NSNP = ["L-1000000"]
 REP = ["A1"]
 #for i in range(1,11):
 #  REP.append("A"+str(i))
@@ -28,7 +29,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/pga_test/pga_paper/{rep}/{phenotype}/results_LR/{chr}-PC{pc}.all.results",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
+        expand("output/pga_test/pga_paper/{rep}/{phenotype}/results_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}.all.results",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
 
 
 # Pick minimum p-value per block
@@ -36,10 +37,10 @@ rule all:
 rule assign_snps_to_blocks_pca:
     input:
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
-        ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{phenotype}/raw_LR/{chr}-PC{pc}.fastGWA",
+        ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}{chr}.fastGWA",
         r="data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec",
     output:
-        betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{rep}/{phenotype}/formated_ss_LR/{chr}-PC{pc}.betas"
+        betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}.fastGWA"
     params:
         pt = PVALUE_THRESHOLD
     shell:
@@ -50,9 +51,9 @@ rule assign_snps_to_blocks_pca:
 
 rule concat_snps_pca:
     input:
-        expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{{rep}}/{{phenotype}}/formated_ss_LR/{chr}-PC{{pc}}.betas", chr=CHR)
+        expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{{rep}}/{{nsnp}}/{{phenotype}}/formated_ss_LR/FGr-LOCO_{{contrasts}}_{chr}-PC{{pc}}.fastGWA", chr=CHR)
     output:
-        "output/pga_test/pga_paper/{rep}/{phenotype}/formated_ss_LR/{chr}-PC{pc}.all.betas"
+        "output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}.all.betas"
     shell:
         """
         cat {input} > {output}
@@ -63,9 +64,9 @@ rule concat_snps_pca:
 
 rule pga_test_pca:
     input:
-        "output/pga_test/pga_paper/{rep}/{phenotype}/formated_ss_LR/{chr}-PC{pc}.all.betas"
+        "output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}.all.betas"
     output:
-        results="output/pga_test/pga_paper/{rep}/{phenotype}/results_LR/{chr}-PC{pc}.all.results"
+        results="output/pga_test/pga_paper/{rep}/{phenotype}/results_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}.all.results"
     shell:
         """
         Rscript code/PGA_paper/run_test_jacknife_LR.R {input} {output.results}
@@ -76,15 +77,15 @@ rule pga_test_pca:
 rule run_fastGWA_PCA:
     input:
       pheno="data/phenotypes/{phenotype}.txt",
-      qcovar="output/run_gwas/pga_paper/{rep}/covariates/{chr}-PC{pc}.txt",
+      qcovar="output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt",
       gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
       overlap_snps="data/pga_paper/variants/overlappingSNPs_chr{chr}.txt",
       covar="output/run_gwas/fixed_covars.txt",
       IDs="data/pga_paper/{rep}/ids/gwas.ids"
     output:
-      "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{phenotype}/raw_LR/{chr}-PC{pc}.fastGWA",
+      "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
-        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{phenotype}/raw_LR/{chr}-PC{pc}",
+        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
@@ -116,7 +117,19 @@ rule assemble_quant_covars_PCA:
         Rscript code/run_gwas/assemble_quant_covar_control.R {input.age} {input.pcs} {params.pcNum} {output}
         """
 
-
+rule assemble_quant_covars_FGr:
+    input:
+        age="data/phenotypes/age_at_recruitment_21022.txt",
+        covar="output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr-LOCO_{contrasts}_{chr}.txt",
+        pcs="data/pga_paper/pca/{rep}/pca.eigenvec"
+    output:
+        "output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
+    params:
+        pcNum = lambda wildcards: get_chr_num(wildcards.pc)
+    shell:
+        """
+        Rscript code/run_gwas/assemble_quant_covar.R {input.age} {input.covar} {input.pcs} {params.pcNum} {output}
+        """
 
 rule make_tmp_plink2:
     input:
