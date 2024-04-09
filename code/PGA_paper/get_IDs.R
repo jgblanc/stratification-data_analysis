@@ -20,23 +20,31 @@ outTest = args[8]
 gwasSize = as.numeric(args[9])
 testSize = as.numeric(args[10])
 wbs= args[11]
-
+white = args[12]
+phenotyped = args[13]
 
 ## Read in all dataframes and join them
-df <- fread(sex)[,1:2]
-df <- inner_join(df, fread(batch)[,1:2])
-df <- inner_join(df, fread(north)[,1:2])
-df <- inner_join(df, fread(east)[,1:2])
-df <- inner_join(df, fread(age)[,1:2])
-df <- inner_join(df, fread(genotyped)[,1:2])
-df <- inner_join(df, fread(wbs)[,1:2])
+df <- fread(sex,  colClasses = 'character')[,1:2]
+df <- inner_join(df, fread(batch,  colClasses = 'character')[,1:2])
+df <- inner_join(df, fread(age,  colClasses = 'character')[,1:2])
+df <- inner_join(df, fread(genotyped,  colClasses = 'character')[,1:2])
+
+# Get GWAS
+df_white <- inner_join(df,fread(white,  colClasses = 'character')[,1:2])
+df_white <- inner_join(df_white,read(phenotyped,  colClasses = 'character')[,1:2])
+
+# Get test
+df_wbs <- inner_join(df, fread(wbs,  colClasses = 'character')[,1:2])
+df_wbs <- inner_join(df_wbs,read(north,  colClasses = 'character')[,1:2])
+df_wbs <- inner_join(df_wbs,read(east,  colClasses = 'character')[,1:2])
+
 
 ## Select test panel
-df_test <- df %>% sample_n(testSize) %>% select("#FID", "IID")
+df_test <- df_wbs %>% sample_n(testSize) %>% select("#FID", "IID")
 fwrite(df_test, outTest ,row.names=F,quote=F,sep="\t", col.names = T)
 
 ## Select gwas panel
-df_GWAS <- df %>% filter(!IID %in% df_test$IID) %>% sample_n(gwasSize) %>% select("#FID", "IID")
+df_GWAS <- df_white %>% filter(!IID %in% df_test$IID) %>% sample_n(gwasSize) %>% select("#FID", "IID")
 fwrite(df_GWAS, outGWAS ,row.names=F,quote=F,sep="\t", col.names = T)
 
 
