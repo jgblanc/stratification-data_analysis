@@ -31,12 +31,12 @@ df <- inner_join(df, fread(genotyped,  colClasses = 'character')[,1:2])
 
 # Get GWAS
 df_white <- inner_join(df,fread(white,  colClasses = 'character')[,1:2])
-df_white <- inner_join(df_white,read(phenotyped,  colClasses = 'character')[,1:2])
+df_white <- inner_join(df_white,fread(phenotyped,  colClasses = 'character')[,1:2])
 
 # Get test
 df_wbs <- inner_join(df, fread(wbs,  colClasses = 'character')[,1:2])
-df_wbs <- inner_join(df_wbs,read(north,  colClasses = 'character')[,1:2])
-df_wbs <- inner_join(df_wbs,read(east,  colClasses = 'character')[,1:2])
+df_wbs <- inner_join(df_wbs,fread(north,  colClasses = 'character')[,1:2])
+df_wbs <- inner_join(df_wbs,fread(east,  colClasses = 'character')[,1:2])
 
 
 ## Select test panel

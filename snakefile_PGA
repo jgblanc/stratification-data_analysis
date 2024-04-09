@@ -42,7 +42,7 @@ rule get_ID_lists:
         east="data/phenotypes/PlaceOfBirthEastCord_130.txt",
         age="data/phenotypes/age_at_recruitment_21022.txt",
         genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
-        phenotyped = "data/phenotypes/StandingHeight_50.txt "
+        phenotyped = "data/phenotypes/StandingHeight_50.txt",
         wbs="data/ukbb/WBS.ids",
         white="data/ukbb/nonWBS-White.ids",
     output:
@@ -53,7 +53,7 @@ rule get_ID_lists:
         ts=100000
     shell:
         """
-        Rscript code/PGA_paper/get_IDs_B.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs} {params.ts} {input.wbs} {input.white} {input.phenotyped}
+        Rscript code/PGA_paper/get_IDs.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs} {params.ts} {input.wbs} {input.white} {input.phenotyped}
         """
 
 
