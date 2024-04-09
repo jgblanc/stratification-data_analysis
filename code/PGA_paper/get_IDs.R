@@ -22,7 +22,7 @@ testSize = as.numeric(args[10])
 wbs= args[11]
 white = args[12]
 phenotyped = args[13]
-withdraw = args[4]
+withdraw = args[14]
 
 ## Read in all dataframes and join them
 df <- fread(sex,  colClasses = 'character')[,1:2]
@@ -42,7 +42,7 @@ df_wbs <- inner_join(df_wbs,fread(east,  colClasses = 'character')[,1:2])
 # Get withdrawn individuals
 df_wd <- fread(withdraw, header = F)
 colnames(df_wd) <- "IID"
-print(nrow(wd))
+print(nrow(df_wd))
 
 
 
