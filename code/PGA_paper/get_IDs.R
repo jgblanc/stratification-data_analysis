@@ -22,6 +22,7 @@ testSize = as.numeric(args[10])
 wbs= args[11]
 white = args[12]
 phenotyped = args[13]
+withdraw = args[4]
 
 ## Read in all dataframes and join them
 df <- fread(sex,  colClasses = 'character')[,1:2]
@@ -38,13 +39,19 @@ df_wbs <- inner_join(df, fread(wbs,  colClasses = 'character')[,1:2])
 df_wbs <- inner_join(df_wbs,fread(north,  colClasses = 'character')[,1:2])
 df_wbs <- inner_join(df_wbs,fread(east,  colClasses = 'character')[,1:2])
 
+# Get withdrawn individuals
+df_wd <- fread(withdraw, header = F)
+colnames(df_wd) <- "IID"
+print(nrow(wd))
+
+
 
 ## Select test panel
-df_test <- df_wbs %>% sample_n(testSize) %>% select("#FID", "IID")
+df_test <- df_wbs %>% filter(!IID %in% df_wd$IID) %>% sample_n(testSize) %>% select("#FID", "IID")
 fwrite(df_test, outTest ,row.names=F,quote=F,sep="\t", col.names = T)
 
 ## Select gwas panel
-df_GWAS <- df_white %>% filter(!IID %in% df_test$IID) %>% sample_n(gwasSize) %>% select("#FID", "IID")
+df_GWAS <- df_white %>% filter(!IID %in% df_wd$IID) %>% filter(!IID %in% df_test$IID) %>% sample_n(gwasSize) %>% select("#FID", "IID")
 fwrite(df_GWAS, outGWAS ,row.names=F,quote=F,sep="\t", col.names = T)
 
 
