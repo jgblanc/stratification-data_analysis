@@ -29,7 +29,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
+        expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
 
 
 # Sample individuals for panels
@@ -264,7 +264,7 @@ rule assemble_quant_covars_PCA:
         age="data/phenotypes/age_at_recruitment_21022.txt",
         pcs="data/pga_paper/pca/{rep}/pca.eigenvec"
     output:
-        "output/run_gwas/pga_paper/{rep}/covariates/no-FGr_{chr}-PC{pc}.txt"
+        "output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/no-FGr_{chr}-PC{pc}.txt"
     params:
         pcNum = lambda wildcards: get_chr_num(wildcards.pc)
     shell:
