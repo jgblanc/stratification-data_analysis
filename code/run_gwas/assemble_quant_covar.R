@@ -26,7 +26,8 @@ print(head(dfFgr))
 
 
 # Subset to correct number of PCs
-dfPc <- dfPc[,1:22]
+print(dfPc)
+dfPc <- dfPc[,1:(pcNum + 2)]
 print(ncol(dfPc))
 
 # Join files
