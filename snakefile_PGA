@@ -29,7 +29,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
+        expand("output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}-PC{pc}.all.results",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
 
 
 # Sample individuals for panels
@@ -288,9 +288,7 @@ rule assemble_quant_covars_FGr_PCA:
 
 # Run GWAS
 
-# Run GWAS
-
-rule run_fastGWA_PCA:
+rule run_fastGWA:
     input:
       pheno="data/phenotypes/{phenotype}.txt",
       qcovar="output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
@@ -318,4 +316,44 @@ rule run_fastGWA_PCA:
         --threads {threads} \
         --pfile {params.prefix_plink} \
         --out {params.prefix_out}
+        """
+
+# Pick minimum p-value per block
+
+rule assign_snps_to_blocks:
+    input:
+        ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
+        ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/{covar}_{contrasts}_{chr}-PC{pc}{chr}.fastGWA",
+        r="data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec",
+    output:
+        betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"
+    params:
+        pt = PVALUE_THRESHOLD
+    shell:
+        """
+        Rscript code/pga_test/assign_snps_to_blocks_LR.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {params.pt}
+        rm {input.ss}
+        """
+
+rule concat_snps:
+    input:
+        expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{{rep}}/{{nsnp}}/{{phenotype}}/formated_ss_LR/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.fastGWA", chr=CHR)
+    output:
+        "output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}-PC{pc}.all.betas"
+    shell:
+        """
+        cat {input} > {output}
+        rm {input}
+        """
+
+# Calculate q
+
+rule pga_test:
+    input:
+        "output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}-PC{pc}.all.betas"
+    output:
+        results="output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}-PC{pc}.all.results"
+    shell:
+        """
+        Rscript code/PGA_paper/run_test_jacknife_LR.R {input} {output.results}
         """
