@@ -3,8 +3,8 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["pga_paper"]
-#NSNP = ["L-1000", "L-3162" ,"L-10000","L-31623", "L-100000","L-316228", "L-1000000"]
-NSNP = ["L-1000000"]
+NSNP = ["L-1000", "L-3162" ,"L-10000","L-31623", "L-100000","L-316228", "L-1000000"]
+#NSNP = ["L-1000000"]
 REP = ["A2"]
 #for i in range(1,11):
 #  REP.append("A"+str(i))
@@ -45,7 +45,7 @@ rule get_ID_lists:
         phenotyped = "data/phenotypes/StandingHeight_50.txt",
         wbs="data/ukbb/WBS.ids",
         white="data/ukbb/nonWBS-White.ids",
-        withdraw = "data/ukbb/w69046_2023-04-25.csv"
+        withdraw = "data/ukbb/withdraw69046_241_20240328.txt"
     output:
         gwas="data/pga_paper/{rep}/ids/gwas.ids",
         test="data/pga_paper/{rep}/ids/test.ids"
@@ -116,6 +116,8 @@ rule prune_SNPs:
         snps="data/pga_paper/variants/overlappingSNPs_chr{chr}.txt"
     output:
         "data/pga_paper/{rep}/pruned_snps/{chr}.prune.in"
+    resources:
+        time="06:00:00"	
     params:
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
         prefix_out = "data/pga_paper/{rep}/pruned_snps/{chr}"
