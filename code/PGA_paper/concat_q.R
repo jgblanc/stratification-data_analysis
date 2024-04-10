@@ -13,7 +13,7 @@ suppressWarnings(suppressMessages({
 
 outfile = args[1]
 
-dfOut <- matrix(NA, nrow = 1, ncol = 7)
+dfOut <- matrix(NA, nrow = 1, ncol = 8)
 
 for (i in 2:length(args)) {
 
@@ -26,7 +26,8 @@ for (i in 2:length(args)) {
   nsnp <- as.numeric(strsplit(tmp[5], "L-")[[1]][2])
   phenotype <- tmp[6]
   covar <- strsplit(tmp[8], "_")[[1]][1]
-  contrast <- strsplit(strsplit(tmp[8], "_")[[1]][2], ".all.results.txt")[[1]][1]
+  contrast <- strsplit(strsplit(tmp[8], "_")[[1]][2], "-PC")[[1]][1]
+  pcNum <- strsplit(strsplit(strsplit(tmp[8], "_")[[1]][2], "-PC")[[1]][2], "all.results")[[1]][1]
 
   # Read in results
   dfTmp <- fread(filename)
@@ -34,14 +35,14 @@ for (i in 2:length(args)) {
   pval <- dfTmp[1,2]
 
   # Save results in table
-  x <- c(q,pval, rep, nsnp,contrast, phenotype, covar)
+  x <- c(q,pval, rep, nsnp,contrast, phenotype, covar, pcNum)
   dfOut <- rbind(dfOut, x)
 
 }
 
 # Remove first row
 dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
-colnames(dfOut) <- c("q", "pval","rep", "L", "contrast", "phenotype","covar")
+colnames(dfOut) <- c("q", "pval","rep", "L", "contrast", "phenotype","covar", "pc")
 
 # Save file
 print(dfOut)
