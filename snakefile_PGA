@@ -27,8 +27,8 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("data/pga_paper/{rep}/ids/gwas.ids",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC),
-        expand("data/pga_paper/{rep}/ids/test.ids",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
+        expand("plots/pga_paper/{rep}/q.txt",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC),
+        expand("plots/pga_paper/{rep}/error.txt",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
 
 
 # Sample individuals for panels
@@ -358,9 +358,9 @@ rule pga_test:
 
 rule concat_FGr_error:
     input:
-        expand("output/calculate_FGr/pga_paper/{rep}/{nsnp}/Var_{contrasts}.txt", rep = REP, nsnp = NSNP, contrasts=CONTRASTS, covar=COVAR)
+        expand("output/calculate_FGr/pga_paper/{{rep}}/{nsnp}/Var_{contrasts}.txt", nsnp = NSNP, contrasts=CONTRASTS, covar=COVAR)
     output:
-        "plots/pga_paper/error.txt"
+        "plots/pga_paper/{rep}/error.txt"
     shell:
         """
         Rscript code/PGA_paper/concat_error.R {output} {input}
@@ -370,9 +370,9 @@ rule concat_FGr_error:
 
 rule concat_q:
     input:
-        expand("output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}-PC{pc}.all.results",covar=COVAR, rep = REP, nsnp = NSNP,phenotype=PHENOTYPE, contrasts=CONTRASTS, pc=PC)
+        expand("output/pga_test/pga_paper/{{rep}}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}-PC{pc}.all.results",covar=COVAR, nsnp = NSNP,phenotype=PHENOTYPE, contrasts=CONTRASTS, pc=PC)
     output:
-        "plots/pga_paper/q.txt"
+        "plots/pga_paper/{rep}/q.txt"
     shell:
         """
         Rscript code/PGA_paper/concat_q.R {output} {input}
