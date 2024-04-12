@@ -17,7 +17,7 @@ outfile = args[2]
 df <- fread(infile)
 colnames(df) <- c("CHR", "ID", "POS", "REF", "ALT", "r", "BETA","block", "P")
 
-df <- df %>% mutate(block_number = ceiling(block_number / 3))
+df <- df %>% mutate(block = ceiling(block / 3))
 
 # Function to calculate \hat{q}
 calc_q <- function(df) {
