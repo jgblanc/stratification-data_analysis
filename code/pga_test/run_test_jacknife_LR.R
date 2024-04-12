@@ -34,6 +34,7 @@ main <- function(df) {
 
   # Set up output file
   num_blocks <- length(unique(df$block))
+  print(num_blocks)
   jacknives <- rep(0, num_blocks)
 
   # Calculate \hat{q} with LOCO
@@ -58,7 +59,7 @@ main <- function(df) {
   # Compute sigma squared
   sigma2 <- ((num_blocks -  1)/num_blocks) * sum((jacknives - qBar)^2 )
 
-  # Compute full q 
+  # Compute full q
   q <- calc_q(df)
 
   # Compute p-value

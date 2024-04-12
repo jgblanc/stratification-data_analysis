@@ -20,7 +20,6 @@ pt = as.numeric(args[5])
 
 # Read in LD block file
 ld <- fread(ldFile)
-ld <- ld %>% group_by(chr) %>% mutate(block_number = ceiling(block_number / 3))
 
 # Read in summary stats
 ss <- fread(ssFile)

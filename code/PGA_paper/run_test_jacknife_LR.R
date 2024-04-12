@@ -17,6 +17,7 @@ outfile = args[2]
 df <- fread(infile)
 colnames(df) <- c("CHR", "ID", "POS", "REF", "ALT", "r", "BETA","block", "P")
 
+df <- df %>% mutate(block_number = ceiling(block_number / 3))
 
 # Function to calculate \hat{q}
 calc_q <- function(df) {
@@ -35,6 +36,7 @@ main <- function(df) {
   # Set up output file
   num_blocks <- length(unique(df$block))
   jacknives <- rep(0, num_blocks)
+  print(num_blocks)
 
   # Calculate \hat{q} with LOCO
   for (i in 1:num_blocks) {
