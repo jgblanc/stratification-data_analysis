@@ -27,8 +27,7 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("plots/pga_paper/{rep}/q.txt",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC),
-        expand("plots/pga_paper/{rep}/error.txt",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
+        expand("plots/pga_paper/{rep}/q.txt",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
 
 
 # Sample individuals for panels
@@ -351,7 +350,7 @@ rule pga_test:
         results="output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}-PC{pc}.all.results"
     shell:
         """
-        Rscript code/PGA_paper/run_test_jacknife_LR.R {input} {output.results}
+        Rscript code/PGA_paper/run_test_jacknife_signflip.R {input} {output.results}
         """
 
 # Concat error
