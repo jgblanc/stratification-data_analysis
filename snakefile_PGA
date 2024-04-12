@@ -319,16 +319,14 @@ rule assign_snps_to_blocks:
     input:
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
         ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
-        r="data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec",
-        snps = "snpList.txt"
+        r="data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec"
     output:
         betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"
     params:
         pt = PVALUE_THRESHOLD
     shell:
         """
-        Rscript code/pga_test/assign_snps_to_blocks_LR.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {input.snps}
-        rm {input.ss}
+        Rscript code/pga_test/assign_snps_to_blocks_LR.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {params.pt}
         """
 
 rule concat_snps:
@@ -350,7 +348,7 @@ rule pga_test:
         results="output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}-PC{pc}.all.results"
     shell:
         """
-        Rscript code/PGA_paper/run_test_jacknife_signflip.R {input} {output.results}
+        Rscript code/PGA_paper/run_test_signflip.R {input} {output.results}
         """
 
 # Concat error
