@@ -348,7 +348,7 @@ rule pga_test:
         results="output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}-PC{pc}.all.results"
     shell:
         """
-        Rscript code/PGA_paper/run_test_jacknife.R {input} {output.results}
+        Rscript code/PGA_paper/run_test_jacknife_LR.R {input} {output.results}
         """
 
 # Concat error
