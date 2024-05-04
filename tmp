@@ -1,472 +1,246 @@
-# Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
-DATASET = ["pga_paper"]
-#NSNP = ["L-1000", "L-3162" ,"L-10000","L-31623", "L-100000","L-316228", "L-1000000"]
-NSNP = ["L-1000000"]
-REP = ["A1"]
-#for i in range(1,11):
-#  REP.append("A"+str(i))
-CONTRASTS = ["east", "north"]
-PC = [20]
-COVAR = ["no-FGr", "FGr-LOCO"]
-PHENOTYPE=[ "StandingHeight_50"]
-#PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
-PVALUE_THRESHOLD = "1e-5"
-#print(CONTRASTS)
-
-
-wildcard_constraints:
-    subdataset="t[0-9]*",
-    gwas="g[0-9]*"
-
-
-def get_chr_num(x):
-  out = int(x)
-  return out
-
-
-rule all:
+rule HGDP_freq:
     input:
-        expand("output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/results_LR/FGr-LOCO_{contrasts}-PC{pc}.all.results",covar=COVAR, nsnp=NSNP, rep=REP, contrasts=CONTRASTS, chr=CHR, phenotype=PHENOTYPE, pc = PC)
-
-
-# Pick minimum p-value per block
-
-rule assign_snps_to_blocks_pca:
-    input:
-        ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
-        ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}{chr}.fastGWA",
-        r="data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec",
+        psam="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
     output:
-        betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}.fastGWA"
+        freq="data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq"
     params:
-        pt = PVALUE_THRESHOLD
+        prefix_in="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}"
     shell:
         """
-        Rscript code/pga_test/assign_snps_to_blocks_LR.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {params.pt}
-        rm {input.ss}
-        """
-
-rule concat_snps_pca:
-    input:
-        expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{{rep}}/{{nsnp}}/{{phenotype}}/formated_ss_LR/FGr-LOCO_{{contrasts}}_{chr}-PC{{pc}}.fastGWA", chr=CHR)
-    output:
-        "output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/FGr-LOCO_{contrasts}-PC{pc}.all.betas"
-    shell:
-        """
-        cat {input} > {output}
-        rm {input}
-        """
-
-# Calculate q
-
-rule pga_test_pca:
-    input:
-        "output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/FGr-LOCO_{contrasts}-PC{pc}.all.betas"
-    output:
-        results="output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/results_LR/FGr-LOCO_{contrasts}-PC{pc}.all.results"
-    shell:
-        """
-        Rscript code/PGA_paper/run_test_jacknife_LR.R {input} {output.results}
-        """
-
-# Run GWAS
-
-rule run_fastGWA_PCA:
-    input:
-      pheno="data/phenotypes/{phenotype}.txt",
-      qcovar="output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt",
-      gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-      overlap_snps="data/pga_paper/variants/overlappingSNPs_chr{chr}.txt",
-      covar="output/run_gwas/fixed_covars.txt",
-      IDs="data/pga_paper/{rep}/ids/gwas.ids"
-    output:
-      "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}.fastGWA",
-    params:
-        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/FGr-LOCO_{contrasts}_{chr}-PC{pc}",
-        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
-    threads: 16
-    resources:
-        mem_mb=100,
-        time="00:30:00"
-    shell:
-        """
-        gcta  --pheno {input.pheno} \
-        --keep {input.IDs} \
-        --qcovar {input.qcovar} \
-        --covar {input.covar} \
-        --extract {input.overlap_snps} \
-        --fastGWA-lr \
-        --threads {threads} \
-        --pfile {params.prefix_plink} \
+        plink2 --pfile {params.prefix_in} \
+        --freq \
+	      --threads 8 \
+        --memory 38000 \
         --out {params.prefix_out}
         """
 
-#rule assemble_quant_covars_PCA:
-#    input:
-#        age="data/phenotypes/age_at_recruitment_21022.txt",
-#        pcs="data/pga_paper/pca/{rep}/pca.eigenvec"
-#    output:
-#        "output/run_gwas/pga_paper/{rep}/covariates/{chr}-PC{pc}.txt"
-#    params:
-#        pcNum = lambda wildcards: get_chr_num(wildcards.pc)
-#    shell:
-#        """
-#        Rscript code/run_gwas/assemble_quant_covar_control.R {input.age} {input.pcs} {params.pcNum} {output}
-#        """
+## Get list of SNPs to recode
 
-rule assemble_quant_covars_FGr_PCA:
+rule recode_list:
     input:
-        age="data/phenotypes/age_at_recruitment_21022.txt",
-        covar="output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr-LOCO_{contrasts}_{chr}.txt",
-        pcs="data/pga_paper/pca/{rep}/pca.eigenvec"
+        freq_hgdp="data/hgdp/{dataset}/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq",
+        freq_ukbb="data/ukbb/ALL/variants/ukb_imp_chr{chr}_v3.afreq"
     output:
-        "output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/FGr-LOCO_{contrasts}_{chr}-PC{pc}.txt"
-    params:
-        pcNum = lambda wildcards: get_chr_num(wildcards.pc)
+        "data/hgdp/{dataset}/variants-fliped/flipped_snps_{chr}.txt"
     shell:
         """
-        Rscript code/run_gwas/assemble_quant_covar.R {input.age} {input.covar} {input.pcs} {params.pcNum} {output}
+        Rscript code/hgdp/flip_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
         """
 
-rule make_tmp_plink2:
+
+## Recode HGDP with UKBB ref/alt alleles and save to new directory
+
+rule HGDP_recode:
     input:
-        gp="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/ukbb/ukbb_pc_snps.txt",
-        IDs="data/pga_paper/{rep}/ids/gwas.ids"
+        psam="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
+      	snp_list="data/hgdp/{dataset}/variants-fliped/flipped_snps_{chr}.txt"
     output:
-        "/scratch/jgblanc/ukbb/plink2-files/ALL/{rep}/tmp_{chr}.pgen",
-        "/scratch/jgblanc/ukbb/plink2-files/ALL/{rep}/tmp_{chr}.pvar",
-        "/scratch/jgblanc/ukbb/plink2-files/ALL/{rep}/tmp_{chr}.psam"
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
     params:
-        prefix_out = "/scratch/jgblanc/ukbb/plink2-files/ALL/{rep}/tmp_{chr}",
-        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
-    threads: 16
-    resources:
-        mem_mb=38000,
-        time="00:30:00"
+        prefix_in="data/hgdp/plink2-files-raw/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
     shell:
         """
-        plink2 --pfile {params.prefix_plink} \
-        --keep {input.IDs} \
-        --extract {input.overlap_snps} \
-	--make-pgen \
+        plink2 --pfile {params.prefix_in} \
+        --extract {input.snp_list} \
+	      --ref-allele {input.snp_list} \
+	      --make-pgen \
         --out {params.prefix_out}
         """
 
-
-rule merge_GWAS_PCA:
+rule HGDP_recoded_freq:
     input:
-        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/ALL/{{rep}}/tmp_{chr}.pgen", chr=CHR)
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
     output:
-        vec="data/pga_paper/pca/{rep}/pca.eigenvec",
-        val="data/pga_paper/pca/{rep}/pca.eigenval"
+	      freq="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq"
     params:
-        prefix_out = "data/pga_paper/pca/{rep}/pca",
-        merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/ALL/{{rep}}/tmp_{chr}", chr=CHR, newline="\n"),
-	remove_path = "/scratch/jgblanc/ukbb/plink2-files/ALL/{rep}/"
-    threads: 16
-    resources:
-        mem_mb=60000,
-        time="03:00:00"
+        prefix_in="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
     shell:
         """
-	echo {params.merge_prefix} > {wildcards.rep}-tmp.txt
-        tr ' ' '\n' < "{wildcards.rep}-tmp.txt" > "{wildcards.rep}-tmp_chrm_list.txt"
-        plink2 --pmerge-list {wildcards.rep}-tmp_chrm_list.txt \
-        --pca 20 approx \
-	--memory 50000 \
-	--threads 16 \
+        plink2 --pfile {params.prefix_in} \
+	      --freq \
         --out {params.prefix_out}
-        rm {wildcards.rep}-tmp*
-	rm {params.remove_path}*
-	rm {params.prefix_out}.p*
         """
 
-# Sample individuals for panels
-
-rule get_ID_lists:
-    input:
-        sex="data/phenotypes/genetic_sex_22001.txt",
-        batch="data/phenotypes/genotype_measurement_batch_22000.txt",
-        north="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-        east="data/phenotypes/PlaceOfBirthEastCord_130.txt",
-        age="data/phenotypes/age_at_recruitment_21022.txt",
-        genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
-        wbs="data/ukbb/WBS.ids",
-        white="data/ukbb/nonWBS-White.ids",
-        all = "data/ukbb/ALL.ids"
-    output:
-        gwas="data/pga_paper/{rep}/ids/gwas.ids",
-        test="data/pga_paper/{rep}/ids/test.ids"
-    params:
-        gs_WBS=0,
-        gs_Other = 50000,
-        ts=100000
-    shell:
-        """
-        Rscript code/PGA_paper/get_IDs_B.R {input.sex} {input.batch} {input.north} {input.east} {input.age} {input.genotyped} {output.gwas} {output.test} {params.gs_WBS} {params.gs_Other} {params.ts} {input.wbs} {input.white} {input.all}
-        """
-
-
-# Get overlapping SNPs
+## Get overlapping set of final SNPS
 
 rule get_overlapping_snps:
     input:
-        "data/ukbb/variants/White/ukb_imp_chr{chr}_v3.afreq"
+        freq_hgdp="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.afreq",
+	      freq_ukbb="data/ukbb/{gwas}/variants/ukb_imp_chr{chr}_v3.afreq"
     output:
-        "data/pga_paper/variants/overlappingSNPs_chr{chr}.txt"
+        "data/hgdp/{dataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
     shell:
         """
-        cut -f2,3 {input} > {output}
+        Rscript code/hgdp/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
         """
 
-# Make birth coordinates test vector
+# Make Lat and Long Test Vector
 
 rule get_TestVector:
     input:
-        North="data/phenotypes/PlaceOfBirthNorthCord_129.txt",
-        East = "data/phenotypes/PlaceOfBirthEastCord_130.txt",
-        ids="data/pga_paper/{rep}/ids/test.ids"
+        metadata="data/hgdp/hgdp_wgs.20190516.metadata.txt",
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr1.psam"
     output:
-        north = "data/pga_paper/{rep}/TestVecs/north.txt",
-        east = "data/pga_paper/{rep}/TestVecs/east.txt"
+        Lat="data/hgdp/{dataset}/TestVecs/Lat.txt",
+        Long="data/hgdp/{dataset}/TestVecs/Long.txt"
     shell:
         """
-        Rscript code/PGA_paper/get_Tvec.R {input.North} {input.East} {input.ids} {output.north} {output.east}
+        Rscript code/hgdp/get_LatLong_Tvec.R {input.metadata} {input.psam} {output.Lat} {output.Long}
         """
-
-# Compute genotype contrasts
 
 rule compute_r:
     input:
-        Tvec="data/pga_paper/{rep}/TestVecs/{contrasts}.txt",
-        IDs="data/pga_paper/{rep}/ids/test.ids",
-        snps="data/pga_paper/variants/overlappingSNPs_chr{chr}.txt"
+        TvecLat="data/hgdp/{dataset}/TestVecs/Lat.txt",
+        TvecLong="data/hgdp/{dataset}/TestVecs/Long.txt",
+        tp_genos="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        snps="data/hgdp/{dataset}/variants-fliped/flipped_snps_{chr}.txt"
     output:
-        "data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec"
-    resources:
-        mem_mb=50000,
-	time="03:00:00"
-    threads: 1
+        Lat="data/hgdp/{dataset}/r/Lat_chr{chr}.rvec",
+        Long="data/hgdp/{dataset}/r/Long_chr{chr}.rvec"
     params:
-        prefix_tp = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        prefix_out = "data/pga_paper/{rep}/r/{chr}-{contrasts}"
+        prefix_tp = "data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out = "data/hgdp/{dataset}/r/"
     shell:
         """
-        Rscript code/PGA_paper/compute_r.R {params.prefix_tp} {input.Tvec} {params.prefix_out} {input.snps} {output} {input.IDs}
+        Rscript code/hgdp/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
         rm {params.prefix_out}xt_temp.*
         """
 
-# Downsample SNPs for correction
+## Get list of all population IDs
 
-rule prune_SNPs:
+#rule get_region_list:
+#    input:
+#        "data/hgdp/hgdp_wgs.20190516.metadata.txt"
+#    output:
+#        expand("data/hgdp/ALL/popIDs/{subpops}.txt", subpops=SUBPOPS)
+#    params:
+#        prefix_out="data/hgdp/ALL/popIDs/"
+#    shell:
+#        """
+#        Rscript code/hgdp/get_region_samples.R {input} {params.prefix_out}
+#        """
+
+rule get_EUR_suppop_list:
     input:
-        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-        IDs="data/pga_paper/{rep}/ids/gwas.ids",
-        snps="data/pga_paper/variants/overlappingSNPs_chr{chr}.txt"
+        "data/hgdp/hgdp_wgs.20190516.metadata.txt"
     output:
-        "data/pga_paper/{rep}/pruned_snps/{chr}.prune.in"
+        expand("data/hgdp/ALL/popIDs/{subpops}.txt", subpops=SUBPOPS)
     params:
-        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        prefix_out = "data/pga_paper/{rep}/pruned_snps/{chr}"
+        prefix_out="data/hgdp/ALL/popIDs/"
     shell:
         """
-        plink2 --pfile {params.prefix_plink} \
+        Rscript code/hgdp/get_EUR_subpop_samples.R {input} {params.prefix_out}
+        """
+
+## Get population specifc allele frequencies
+
+rule get_subpop_AF:
+    input:
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen",
+        IDs="data/hgdp/ALL/popIDs/{subpops}.txt"
+    output:
+        "data/hgdp/{dataset}/popAF/{subpops}_chr{chr}.afreq"
+    params:
+        prefix_in="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/{dataset}/popAF/{subpops}_chr{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
         --keep {input.IDs} \
-        --extract {input.snps} \
-        --indep-pairwise 100kb 0.8 \
+        --freq \
         --out {params.prefix_out}
         """
 
-rule downsample_snps:
+## Get all AF contrasts
+
+rule get_all_r:
     input:
-        expand("data/pga_paper/{{rep}}/pruned_snps/{chr}.prune.in", chr = CHR, newline="\n")
+        expand("data/hgdp/{{dataset}}/popAF/{subpops}_chr{{chr}}.afreq", subpops=SUBPOPS)
     output:
-        all = "data/pga_paper/{rep}/pruned_snps/{nsnp}/all.in",
-        sample = "data/pga_paper/{rep}/{nsnp}/all_snps.txt"
-    shell:
-        """
-        Rscript code/PGA_paper/sample_snps.R {output.all} {output.sample} {wildcards.nsnp} {input}
-        """
-
-# Compute FGr
-
-rule compute_FGr_chr:
-  input:
-      r="data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec",
-      gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-      overlap_snps="data/pga_paper/{rep}/{nsnp}/all_snps.txt",
-      IDs="data/pga_paper/{rep}/ids/gwas.ids"
-  output:
-      "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}_{chr}.txt"
-  resources:
-      mem_mb=100000,
-      time="03:00:00"
-  threads: 16
-  params:
-      gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-      out_prefix = "output/calculate_FGr/pga_paper/{rep}/{nsnp}/{contrasts}_{chr}"
-  shell:
-      """
-      Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output} {input.IDs}
-      """
-
-rule concat_chr_FGr:
-    input:
-        expand("output/calculate_FGr/pga_paper/{{rep}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
-    output:
-        "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr-LOCO_{contrasts}_{chr}.txt"
+        "data/hgdp/{dataset}/r/r_list_{chr}.txt"
     params:
-        chrNum = lambda wildcards: get_chr_num(wildcards.chr),
-        prefix_in = "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}"
+        spnum = SPNUM,
+        prefix_out = "data/hgdp/{dataset}/r/"
     shell:
         """
-        Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
+        Rscript code/hgdp/get_pairwise_AF_contrasts.R {params.spnum} {input} {params.prefix_out} {output}
         """
 
-# Estimate FGr Error
 
-rule compute_FGr_error:
+
+
+
+
+## Build polygenic scores
+
+#rule format_ss_pgs:
+#    input:
+#        expand("output/prs/hgdp/{{dataset}}/vilma/{{gwas}}/{{contrasts}}_{chr}-PC{{pc}}.estimates.tsv", chr=CHR)
+#    output:
+#        "output/prs/hgdp/{dataset}/{gwas}/vilma/{contrasts}-PC{pc}.all.tsv"
+#    params:
+#        all_chrs = CHR,
+#        num_chr = len(CHR),
+#        prefix_one = "output/prs/hgdp/{dataset}/vilma/{gwas}/{contrasts}",
+#        prefix_two = "-PC{pc}.estimates.tsv"
+#    shell:
+#        """
+#        Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
+#        """
+
+rule format_ss_pgs:
     input:
-        expand("output/calculate_FGr/pga_paper/{{rep}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+        "output/prs/hgdp/{dataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv"
     output:
-      "output/calculate_FGr/pga_paper/{rep}/{nsnp}/Var_{contrasts}.txt"
+        "output/prs/hgdp/{dataset}/plink_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.betas"
+    shell:
+        """
+        Rscript code/prs/format_ss_for_plink.R {input} {output}
+        """
+
+rule build_pgs:
+    input:
+        betas="output/prs/hgdp/{dataset}/plink_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.betas",
+        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+    output:
+        "output/prs/hgdp/{dataset}/scores/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.sscore"
     params:
-      prefix_in = "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}"
+        prefix_out="output/prs/hgdp/{dataset}/scores/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}",
+        prefix_in="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
     shell:
-      """
-      Rscript code/calculate_FGr/compute_error_jacknife.R {params.prefix_in} {output}
-      """
+        """
+        plink2 --pfile {params.prefix_in} \
+        --score {input.betas} center cols=dosagesum,scoresums  \
+        --out {params.prefix_out}
+        """
 
-# Assemble covariates
-
-rule assemble_fixed_covars:
+rule combine_pgs:
     input:
-      sex="data/phenotypes/genetic_sex_22001.txt",
-      batch="data/phenotypes/genotype_measurement_batch_22000.txt"
+        expand("output/prs/hgdp/{{dataset}}/scores/{{gwas}}/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.sscore", chr=CHR)
     output:
-      "output/run_gwas/fixed_covars.txt"
-    shell:
-      """
-      Rscript code/run_gwas/assemble_fixed_covar.R {input.sex} {input.batch} {output}
-      """
-
-#rule assemble_quant_covars_FGr:
-#    input:
-#      age="data/phenotypes/age_at_recruitment_21022.txt",
-#      covar="output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr-LOCO_{contrasts}_{chr}.txt"
-#    output:
-#      "output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/FGr-LOCO_{contrasts}_{chr}.txt"
-#    shell:
-#      """
-#      Rscript code/PGA_paper/assemble_quant_covar.R {input.age} {input.covar} {output}
-#      """
-
-rule assemble_quant_covars_control:
-    input:
-        age="data/phenotypes/age_at_recruitment_21022.txt"
-    output:
-        "output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/no-FGr_{contrasts}_{chr}.txt"
+        "output/prs/hgdp/{dataset}/scores/{gwas}/{covar}_{contrasts}-PC{pc}.all.sscore"
+    params:
+        all_chrs = CHR,
+        num_chr = len(CHR),
+        prefix_one = "output/prs/hgdp/{dataset}/scores/{gwas}/{covar}_{contrasts}",
+        prefix_two = "-PC{pc}.sscore"
     shell:
         """
-        Rscript code/PGA_paper/assemble_quant_covar_control.R {input.age} {output}
-        """
-
-# Run GWAS
-
-#rule run_fastGWA:
-#    input:
-#      pheno="data/phenotypes/{phenotype}.txt",
-#      qcovar="output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/{covar}_{contrasts}_{chr}.txt",
-#      gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
-#      overlap_snps="data/pga_paper/variants/overlappingSNPs_chr{chr}.txt",
-#      covar="output/run_gwas/fixed_covars.txt",
-#      IDs="data/pga_paper/{rep}/ids/gwas.ids"
-#    output:
-#      "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}.fastGWA",
-#    params:
-#        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}",
-#        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
-#    threads: 16
-#    resources:
-#        mem_mb=100,
-#        time="00:30:00"
-#    shell:
-#        """
-#        gcta  --pheno {input.pheno} \
-#        --keep {input.IDs} \
-#        --qcovar {input.qcovar} \
-#        --covar {input.covar} \
-#        --extract {input.overlap_snps} \
-#        --fastGWA-lr \
-#        --threads {threads} \
-#        --pfile {params.prefix_plink} \
-#        --out {params.prefix_out}
-#        """
-
-# Pick minimum p-value per block
-
-#rule assign_snps_to_blocks:
-#    input:
-#        ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
-#        ss="/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}.fastGWA",
-#        r="data/pga_paper/{rep}/r/{contrasts}_chr{chr}.rvec",
-#    output:
-#        betas="/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}_{chr}.betas"
-#    params:
-#        pt = PVALUE_THRESHOLD
-#    shell:
-#        """
-#        Rscript code/pga_test/assign_snps_to_blocks_LR.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {params.pt}
-#        rm {input.ss}
-#        """
-
-#rule concat_snps:
-#    input:
-#        expand("/scratch/jgblanc/stratification-data_analysis/output/pga_test/pga_paper/{{rep}}/{{nsnp}}/{{phenotype}}/formated_ss_LR/{{covar}}_{{contrasts}}_{chr}.betas", chr=CHR)
-#    output:
-#        "output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all.betas"
-#    shell:
-#        """
-#        cat {input} > {output}
-#        rm {input}
-#        """
-
-# Calculate q
-
-#rule pga_test:
-#    input:
-#        "output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/formated_ss_LR/{covar}_{contrasts}.all.betas"
-#    output:
-#        results="output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}.all.results"
-#    shell:
-#        """
-#        Rscript code/PGA_paper/run_test_jacknife_LR.R {input} {output.results}
-#        """
-
-# Concat error
-
-rule concat_FGr_error:
-    input:
-        expand("output/calculate_FGr/pga_paper/{rep}/{nsnp}/Var_{contrasts}.txt", rep = REP, nsnp = NSNP, contrasts=CONTRASTS, covar=COVAR)
-    output:
-        "plots/pga_paper/error.txt"
-    shell:
-        """
-        Rscript code/PGA_paper/concat_error.R {output} {input}
-        """
-
-# Concat error
-
-rule concat_q:
-    input:
-        expand("output/pga_test/pga_paper/{rep}/{nsnp}/{phenotype}/results_LR/{covar}_{contrasts}.all.results",covar=COVAR, rep = REP, nsnp = NSNP,phenotype=PHENOTYPE, contrasts=CONTRASTS)
-    output:
-        "plots/pga_paper/q.txt"
-    shell:
-        """
-        Rscript code/PGA_paper/concat_q.R {output} {input}
+        Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
+	rm {input}
         """
