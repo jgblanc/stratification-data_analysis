@@ -1,5 +1,5 @@
 # Snakefile to run HGDP (full data) / UKBB  data analysis
-DATASET=["ALL"]
+DATASET=["hgdp-all"]
 GWAS=["ALL", "WBS"]
 #SUBPOPS=["CENTRALSOUTHASIA", "AFRICA", "OCEANIA", "EUROPE", "MIDDLEEAST", "AMERICA", "EASTASIA"]
 #SUBPOPS=["French", "Sardinian", "Orcadian", "Russian", "BergamoItalian", "Tuscan" , "Basque", "Adygei"]
@@ -19,7 +19,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}.afreq" , chr=CHR)
+        expand("data/hgdp/hgdp-all/{gwas}/variants/overlappingSNPs_chr{chr}.txt" , chr=CHR, gwas=GWAS)
 
 
 ## HGDP genotype data processing
@@ -124,4 +124,17 @@ rule HGDP_recoded_freq:
         plink2 --pfile {params.prefix_in} \
 	      --freq \
         --out {params.prefix_out}
+        """
+
+## Get overlapping set of final SNPS for differenet datasets
+
+rule get_overlapping_snps:
+    input:
+        freq_hgdp="data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}.afreq",
+	      freq_ukbb="data/ukbb/{gwas}/variants/ukb_imp_chr{chr}_v3.afreq"
+    output:
+        "data/hgdp/hgdp-all/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/hgdp/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
         """
