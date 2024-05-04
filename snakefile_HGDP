@@ -1,5 +1,5 @@
 # Snakefile to run HGDP (full data) / UKBB  data analysis
-DATASET=["EUR"]
+DATASET=["ALL"]
 GWAS=["ALL", "WBS"]
 #SUBPOPS=["CENTRALSOUTHASIA", "AFRICA", "OCEANIA", "EUROPE", "MIDDLEEAST", "AMERICA", "EASTASIA"]
 #SUBPOPS=["French", "Sardinian", "Orcadian", "Russian", "BergamoItalian", "Tuscan" , "Basque", "Adygei"]
@@ -19,12 +19,12 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/plink2-files-raw/hgdp_wgs.20190516.full.chr{chr}.psam" , chr=CHR)
+        expand("data/hgdp/variants-fliped/flipped_snps_{chr}.txt" , chr=CHR)
 
 
 ## HGDP genotype data processing
 
-rule HGDP_make_plink2_EUR:
+rule HGDP_make_plink2:
     input:
         psam="/gpfs/data/berg-lab/data/HGDP/plink2-files-hg19/hgdp_wgs.20190516.full.chr{chr}.psam",
         pvar="/gpfs/data/berg-lab/data/HGDP/plink2-files-hg19/hgdp_wgs.20190516.full.chr{chr}.pvar",
@@ -50,3 +50,36 @@ rule HGDP_make_plink2_EUR:
         --out {params.prefix_out}
         """
 
+# Get allele frequency in HGDP
+
+rule HGDP_freq:
+    input:
+        psam="data/hgdp/plink2-files-raw/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files-raw/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files-raw/hgdp_wgs.20190516.full.chr{chr}.pgen"
+    output:
+        freq="data/hgdp/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq"
+    params:
+        prefix_in="data/hgdp/plink2-files-raw/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/variants-raw/hgdp_wgs.20190516.full.chr{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --freq \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
+        """
+
+# Get list of SNPs to recode
+
+rule recode_list:
+    input:
+        freq_hgdp="data/hgdp/variants-raw/hgdp_wgs.20190516.full.chr{chr}.afreq",
+        freq_ukbb="data/ukbb/ALL/variants/ukb_imp_chr{chr}_v3.afreq"
+    output:
+        "data/hgdp/variants-fliped/flipped_snps_{chr}.txt"
+    shell:
+        """
+        Rscript code/hgdp/flip_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
+        """
