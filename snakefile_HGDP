@@ -19,7 +19,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/plink2-files-raw/hgdp_wgs.20190516.full.chr{chr}.psam" , chr=CHR, dataset = DATASET, gwas=GWAS, subpops=SUBPOPS)
+        expand("data/hgdp/plink2-files-raw/hgdp_wgs.20190516.full.chr{chr}.psam" , chr=CHR)
 
 
 ## HGDP genotype data processing
@@ -40,7 +40,6 @@ rule HGDP_make_plink2_EUR:
         """
         plink2 --pfile {params.prefix_in} \
         --maf 0.01 \
-        --keep {input.samples} \
         --rm-dup exclude-all \
         --snps-only \
         --max-alleles 2 \
