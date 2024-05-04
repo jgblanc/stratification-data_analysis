@@ -106,7 +106,7 @@ rule HGDP_recode:
 	      --ref-allele {input.snp_list} \
 	      --make-pgen \
         --out {params.prefix_out}
-        rm {prefix_in}.*
+        rm {params.prefix_in}.*
         """
 
 rule HGDP_recoded_freq:
