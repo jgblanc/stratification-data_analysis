@@ -28,7 +28,6 @@ df <- inner_join(dfPSam, dfMeta, by = c("#IID" = "sample"))
 dfLat <- df %>% select("#IID", "latitude")
 dfLong <- df %>% select("#IID", "longitude")
 
-
 # Save output
 fwrite(dfLat,outfile_lat, row.names = F, col.names = T, quote = F, sep = "\t")
 fwrite(dfLong,outfile_long, row.names = F, col.names = T, quote = F, sep = "\t")
