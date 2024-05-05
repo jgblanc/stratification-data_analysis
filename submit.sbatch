@@ -16,8 +16,8 @@ module load R
 source ../myVilma/bin/activate 
 
 echo "SLURM_JOBID="$SLURM_JOBID
-cat snakefile_HGDP
-snakemake --profile cluster-setup/ -s snakefile_HGDP --rerun-incomplete
+cat snakefile_UKBB
+snakemake --profile cluster-setup/ -s snakefile_UKBB --rerun-incomplete
 #snakemake -j1 --rerun-incomplete -s snakefile_main 
 
 #snakemake --cores all --rerun-incomplete -s snakefile_UKBB    
