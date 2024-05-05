@@ -23,7 +23,8 @@ rule compute_FGr_chr:
     input:
         r="data/{dataset}/{subdataset}/r/{contrasts}_chr{chr}.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3.pgen",
-        overlap_snps="data/{dataset}/{subdataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
+        overlap_snps="data/{dataset}/{subdataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt",
+	ids = "data/ukbb/{gwas}.ids"
     output:
         "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt"
     resources:
@@ -34,6 +35,6 @@ rule compute_FGr_chr:
         out_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/{contrasts}_{chr}"
     shell:
         """
-        Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output}
+        Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output} {input.ids}
         """
 
