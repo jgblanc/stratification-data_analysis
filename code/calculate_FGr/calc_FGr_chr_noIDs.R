@@ -3,7 +3,7 @@
 
 args=commandArgs(TRUE)
 
-if(length(args)<6){stop("Rscript calc_FGr_chr.R <gwas panel prefix> <output directory> <contrasts> <overlap snps> <output file>")}
+if(length(args)<5){stop("Rscript calc_FGr_chr_noIDs.R <gwas panel prefix> <output directory> <contrasts> <overlap snps> <output file>")}
 
 suppressWarnings(suppressMessages({
   library(data.table)
