@@ -1,7 +1,10 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
+BLOCK = []
+for i in range(1, 1704):
+  BLOCK.append(str(i))
 DATASET = ["hgdp"]
 SUBDATASET = ["hgdp-all"]
 CONTRASTS = ["Lat", "Long"]
@@ -14,10 +17,12 @@ def get_chr_num(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS)
+        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/FGr_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS)
 
 
 ## Compute FGr
+
+# Compute FGr per chromosome
 
 rule compute_FGr_chr:
     input:
@@ -38,3 +43,24 @@ rule compute_FGr_chr:
         Rscript code/calculate_FGr/calc_FGr_chr_noIDs.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output}
         """
 
+# Computer FGr per block
+
+rule compute_FGr_block:
+    input:
+        r="data/{dataset}/{subdataset}/r/{contrasts}_chr{chr}.rvec",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3.pgen",
+        overlap_snps="data/{dataset}/{subdataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt",
+        ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed"
+    output:
+        "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/FGr_{contrasts}_{chr}.txt"
+    threads: 16
+    resources:
+        mem_mb=38000,
+	time="03:00:00"
+    params:
+        gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3",
+        out_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/{contrasts}_{chr}",
+    shell:
+        """
+        Rscript code/calculate_FGr/calc_FGr_block.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output}
+        """
