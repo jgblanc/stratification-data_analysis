@@ -65,7 +65,7 @@ for (i in 1:numBlocks) {
 
   # Get block num
   block_num <- unique(r_blocks$block)[i]
-  print(paste0("The block number is ", block_nem))
+  print(paste0("The block number is ", block_num))
 
   # Select only snps on that block
   selected_snps <- r_blocks %>% filter(block == block_num) %>% select("ID")

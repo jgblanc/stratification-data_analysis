@@ -7,8 +7,8 @@ for i in range(1, 1704):
   BLOCK.append(str(i))
 DATASET = ["hgdp"]
 SUBDATASET = ["hgdp-all"]
-CONTRASTS = ["Lat", "Long"]
-GWAS=["ALL", "WBS"]
+CONTRASTS = ["Lat"]
+GWAS=["ALL"]
 
 
 def get_chr_num(x):
