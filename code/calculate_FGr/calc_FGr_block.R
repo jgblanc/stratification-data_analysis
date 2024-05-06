@@ -87,12 +87,13 @@ for (i in 1:numBlocks) {
   length_mc_genos <- length_mc_genos * (1/(m-1))
 
   #  Re-write .linear file with correct betas
-  r$BETA <- r$BETA * (1/length_mc_genos)
-  r[is.na(r)] <- 0
-  r[is.infinite(r$BETA),3] <- 0
+  r_tmp <- r
+  r_tmp$BETA <- r_tmp$BETA * (1/length_mc_genos)
+  r_tmp[is.na(r_tmp)] <- 0
+  r_tmp[is.infinite(r_tmp$BETA),3] <- 0
 
   # Save r to use as scoring weights
-  fwrite(r, paste0(out_prefix, ".xt_temp.glm.linear"), sep = "\t")
+  fwrite(r_tmp, paste0(out_prefix, ".xt_temp.glm.linear"), sep = "\t")
 
   # Compute FGr
   cmd_b <- paste("sh code/calculate_FGr/GWAS_score.sh",
