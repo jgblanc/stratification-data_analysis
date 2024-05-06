@@ -52,9 +52,10 @@ assign_SNP_to_block <- function(CHR, BP, block = ld) {
 }
 
 # Add block info - takes a while
-df_blocks <- df %>%
-  mutate(block = apply(., MARGIN = 1, FUN = function(params)assign_SNP_to_block(as.numeric(params[3]), as.numeric(params[4]))))
-
+r_blocks <- r %>%
+  mutate(block = apply(., MARGIN = 1, FUN = function(params)assign_SNP_to_block(as.numeric(params[2]), as.numeric(params[3]))))
+print(head(r_blocks))
+print(tail(r_blocks))
 
 
 
