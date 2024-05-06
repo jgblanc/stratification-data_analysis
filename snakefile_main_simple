@@ -26,9 +26,10 @@ rule compute_FGr_chr:
         overlap_snps="data/{dataset}/{subdataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
     output:
         "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}_{chr}.txt"
+    threads: 16
     resources:
-        mem_mb=2000,
-        time="03:00:00"
+        mem_mb=38000,
+	time="03:00:00"
     params:
         gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3",
         out_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/{contrasts}_{chr}"

@@ -2,7 +2,7 @@
 #SBATCH --job-name=main
 #SBATCH --output=logs/main.out
 #SBATCH --error=logs/main.err
-#SBATCH --time=24:00:00
+#SBATCH --time=04:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem-per-cpu=2000
@@ -16,8 +16,9 @@ module load R
 source ../myVilma/bin/activate 
 
 echo "SLURM_JOBID="$SLURM_JOBID
-cat snakefile_UKBB
-snakemake --profile cluster-setup/ -s snakefile_UKBB --rerun-incomplete
+cat snakefile_main_simple
+snakemake --unlock -s snakefile_main_simple
+snakemake --profile cluster-setup/ -s snakefile_main_simple --rerun-incomplete
 #snakemake -j1 --rerun-incomplete -s snakefile_main 
 
 #snakemake --cores all --rerun-incomplete -s snakefile_UKBB    
