@@ -1,14 +1,14 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =["22"]
-#for i in range(1, 23):
-#  CHR.append(str(i))
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
 BLOCK = []
 for i in range(1, 1704):
   BLOCK.append(str(i))
 DATASET = ["hgdp"]
 SUBDATASET = ["hgdp-all"]
-CONTRASTS = ["Lat"]
-GWAS=["ALL"]
+CONTRASTS = ["Lat", "Long"]
+GWAS=["ALL", "WBS"]
 
 
 def get_chr_num(x):
@@ -56,7 +56,7 @@ rule compute_FGr_block:
     threads: 16
     resources:
         mem_mb=38000,
-	time="03:00:00"
+	time="06:00:00"
     params:
         gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3",
         out_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/{contrasts}_{chr}",
