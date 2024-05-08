@@ -22,6 +22,7 @@ data <- data[,3:ncol(data)]
 
 for (i in 2:22) {
 
+  print(paste0("chr num ",i)) 
   # Read in new chromosome
   filename <- paste0(Tm_prefix,"_", i, ".txt")
   tmp <- fread(filename)
@@ -37,14 +38,16 @@ nblocks <- ncol(data)
 gammas <- matrix(NA, nrow = nrow(data), ncol = nblocks)
 for (i in 1:nblocks) {
 
+  print(paste0("block num ",i))
   # Drop ith  column
   loco <- data[,-i]
 
   # Compute mean across entries
-  means <- apply(loco, 1, mean)
+  means <- apply(loco, 1, mean,na.rm=TRUE)
   gammas[,i] <- means
 
 }
+print("Computed LOCO gamma")
 
 # Calculate error
 Fbar <- apply(gammas, 1, mean)
