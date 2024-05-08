@@ -452,3 +452,16 @@ ggsave("~/Desktop/HGDP_EUR.png",pl, width = 15, height = 8)
 ```
 
 
+
+```{r}
+df <- fread("../data/ukbb/ukbb_pc_snps.txt")
+df2 <- df %>% separate(ID, c("CHR", "BP"), ":", remove = FALSE)
+df2$CHR <- as.numeric(df2$CHR)
+
+dfOdd <- df2 %>% filter(CHR %in% odd) %>% select("ID", "REF")
+dfEven <- df2 %>% filter(CHR %in% even) %>% select("ID", "REF")
+
+fwrite(dfOdd, "../data/ukbb/chr-odd_pc_snps.txt", quote = F, col.names = T, row.names = F, sep = "\t")
+fwrite(dfEven, "../data/ukbb/chr-even_pc_snps.txt", quote = F, col.names = T, row.names = F, sep = "\t")
+```
+
