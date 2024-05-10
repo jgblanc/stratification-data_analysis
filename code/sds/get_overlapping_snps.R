@@ -5,24 +5,20 @@
 
 args=commandArgs(TRUE)
 
-if(length(args)<4){stop("Rscript flip_overlapping_snps.R <ukbb.freq> <SDS> <outfile>")}
+if(length(args)<3){stop("Rscript flip_overlapping_snps.R <ukbb.freq> <SDS> <outfile>")}
 
 suppressWarnings(suppressMessages({
   library(data.table)
   library(tidyverse)
 }))
 
-ukbb_file_wbs = args[1]
-ukbb_file_all = args[2]
-sds_file = args[3]
-outfile_r = args[4]
+ukbb_file = args[1]
+sds_file = args[2]
+outfile_snps = args[3]
 
 # Read in UKBB freq file
-ukbb_wbs <- fread(ukbb_file_wbs)
-ukbb_wbs <- ukbb_wbs %>% separate(ID, c("chr", "POS"), remove = FALSE) %>% filter(ukbb$ALT_FREQS > 0.01 & ukbb$ALT_FREQS < 0.99) %>% select("#CHROM",	"ID",	"REF",	"ALT")
-ukbb_all <- fread(ukbb_file_all)
-ukbb_all <- ukbb_all %>% separate(ID, c("chr", "POS"), remove = FALSE) %>% filter(ukbb$ALT_FREQS > 0.01 & ukbb$ALT_FREQS < 0.99) %>% select("#CHROM",	"ID",	"REF",	"ALT")
-ukbb <- inner_join(ukbb_wbs, ukbb_all)
+ukbb <- fread(ukbb_file)
+ukbb <- ukbb %>% separate(ID, c("chr", "POS"), remove = FALSE) %>% filter(ukbb$ALT_FREQS > 0.01 & ukbb$ALT_FREQS < 0.99)
 
 # Read in SDS
 sds <- fread(sds_file)
@@ -41,7 +37,8 @@ df_flipped <- df_filter %>% mutate(SDS = case_when(DA == REF ~ (-1 * SDS), DA ==
 df_out <- df_flipped %>% select("#CHROM", "ID.x", "REF", "ALT", "SDS")
 colnames(df_out) <- c("#CHROM", "ID", "REF", "ALT", "r")
 
+# Format for overlapping snps
+df_snps <- df_out %>% select(ID, REF)
+
 # Save output
-fwrite(df_out,outfile_r, row.names = F, col.names = T, quote = F, sep = "\t")
-
-
+fwrite(df_snps,outfile_snps, row.names = F, col.names = T, quote = F, sep = "\t")
