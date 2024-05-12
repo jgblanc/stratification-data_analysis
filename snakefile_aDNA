@@ -30,6 +30,19 @@ rule get_overlapping_snps:
         Rscript code/adna/overlapping_snps.R {input.freq_ukbb} {input.adna} {output} {wildcards.chr}
         """
 
+rule flip_all_snps:
+    input:
+        freq_ukbb_wbs="data/ukbb/WBS/variants/ukb_imp_chr{chr}_v3.afreq",
+        freq_ukbb_all="data/ukbb/ALL/variants/ukb_imp_chr{chr}_v3.afreq",
+	      sds="data/adna/le/all_populations_mles.txt"
+    output:
+        rvec=expand("data/adna/le/r/{contrasts}_chr{chr}.rvec", contrasts = CONSTRASTS)
+    params:
+        out_path= "data/adna/le/r/"
+    shell:
+        """
+        Rscript code/sds/flip_overlapping_snps.R {input.freq_ukbb_wbs} {input.freq_ukbb_all} {input.sds} {params.out_path}
+        """
 
 
 
