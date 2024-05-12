@@ -38,7 +38,7 @@ df_out <- df_flipped %>% select("#CHROM", "ID.x", "REF", "ALT", "SDS")
 colnames(df_out) <- c("#CHROM", "ID", "REF", "ALT", "r")
 
 # Format for overlapping snps
-df_snps <- df_out %>% select(ID, REF)
+df_snps <- df_out %>% select(ID)
 
 # Save output
 fwrite(df_snps,outfile_snps, row.names = F, col.names = T, quote = F, sep = "\t")

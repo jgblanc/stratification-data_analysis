@@ -10,7 +10,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/sds/UK10K/r/sds_chr{chr}.rvec", chr=CHR, gwas=GWAS)
+        expand("data/sds/UK10K/{gwas}/variants/overlappingSNPs_chr{chr}.txt", chr=CHR, gwas=GWAS)
 
 
 # SDS Data processing
@@ -18,7 +18,7 @@ rule all:
 rule flip_all_snps:
     input:
         freq_ukbb_wbs="data/ukbb/WBS/variants/ukb_imp_chr{chr}_v3.afreq",
-        freq_ukbb_all="data/ukbb/ALL/variants/ukb_imp_chr{chr}_v3.afreq"
+        freq_ukbb_all="data/ukbb/ALL/variants/ukb_imp_chr{chr}_v3.afreq",
 	      sds="data/sds/SDS_UK10K_n3195_release_Sep_19_2016.tab"
     output:
         rvec="data/sds/UK10K/r/sds_chr{chr}.rvec",
@@ -38,12 +38,12 @@ rule overlapping_snp_WBS:
         Rscript code/sds/get_overlapping_snps.R {input.freq_ukbb} {input.sds} {output.snps}
         """
 
-rule overlapping_snp_WBS:
+rule overlapping_snp_ALL:
     input:
-        freq_ukbb="data/ukbb/WBS/variants/ukb_imp_chr{chr}_v3.afreq",
+        freq_ukbb="data/ukbb/ALL/variants/ukb_imp_chr{chr}_v3.afreq",
 	      sds="data/sds/SDS_UK10K_n3195_release_Sep_19_2016.tab"
     output:
-	      snps="data/sds/UK10K/WBS/variants/overlappingSNPs_chr{chr}.txt"
+	      snps="data/sds/UK10K/ALL/variants/overlappingSNPs_chr{chr}.txt"
     shell:
         """
         Rscript code/sds/get_overlapping_snps.R {input.freq_ukbb} {input.sds} {output.snps}

@@ -19,9 +19,9 @@ outfile_r = args[4]
 
 # Read in UKBB freq file
 ukbb_wbs <- fread(ukbb_file_wbs)
-ukbb_wbs <- ukbb_wbs %>% separate(ID, c("chr", "POS"), remove = FALSE) %>% filter(ukbb$ALT_FREQS > 0.01 & ukbb$ALT_FREQS < 0.99) %>% select("#CHROM",	"ID",	"REF",	"ALT")
+ukbb_wbs <- ukbb_wbs %>% separate(ID, c("chr", "POS"), remove = FALSE) %>% filter(ukbb_wbs$ALT_FREQS > 0.01 & ukbb_wbs$ALT_FREQS < 0.99) %>% select("#CHROM",	"ID","POS","REF",	"ALT")
 ukbb_all <- fread(ukbb_file_all)
-ukbb_all <- ukbb_all %>% separate(ID, c("chr", "POS"), remove = FALSE) %>% filter(ukbb$ALT_FREQS > 0.01 & ukbb$ALT_FREQS < 0.99) %>% select("#CHROM",	"ID",	"REF",	"ALT")
+ukbb_all <- ukbb_all %>% separate(ID, c("chr", "POS"), remove = FALSE) %>% filter(ukbb_all$ALT_FREQS > 0.01 & ukbb_all$ALT_FREQS < 0.99) %>% select("#CHROM",	"ID","POS","REF",	"ALT")
 ukbb <- inner_join(ukbb_wbs, ukbb_all)
 
 # Read in SDS
