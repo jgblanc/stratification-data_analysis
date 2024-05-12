@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=main
+#SBATCH --job-name=indv
 #SBATCH --output=logs/indv.out
 #SBATCH --error=logs/indv.err
 #SBATCH --time=03:00:00
