@@ -4,7 +4,7 @@ GWAS=["ALL", "WBS"]
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-CONTRASTS = ["EN", "BA", "H"]
+CONTRASTS = ["EUROPEAN_NEOLITHIC", "BRONZE_AGE", "HISTORICAL"]
 #PC = [40]
 #COVAR=["FGr-LOCO", "control"]
 
@@ -14,7 +14,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/hgdp/le/{gwas}/variants/overlappingSNPs_chr{chr}.txt" , chr=CHR, gwas=GWAS, dataset=DATASET)
+        expand("data/adna/le/r/{contrasts}_chr{chr}.rvec" , chr=CHR, gwas=GWAS, dataset=DATASET)
 
 
 ## Get overlapping set of final SNPS for differenet datasets
@@ -41,7 +41,7 @@ rule flip_all_snps:
         out_path= "data/adna/le/r/"
     shell:
         """
-        Rscript code/sds/flip_overlapping_snps.R {input.freq_ukbb_wbs} {input.freq_ukbb_all} {input.sds} {params.out_path}
+        Rscript code/sds/flip_overlapping_snps.R {input.freq_ukbb_wbs} {input.freq_ukbb_all} {input.sds} {params.out_path} {wildcards.chr}
         """
 
 
