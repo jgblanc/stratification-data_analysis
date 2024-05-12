@@ -14,10 +14,18 @@ suppressWarnings(suppressMessages({
 Tm_prefix = args[1]
 PC_file = args[2]
 outfile = args[3]
+test_type = args[4]
 
 
-# Get list of all but the focal chromosome
-chrs <- seq(1,22)
+# Get list of correct chromosomes
+if (test_type == "all") {
+  chrs <- seq(1,22)
+} else if (test_type == "odd" ) {
+  chrs <- c(1,3,5,7,9,11,13,15,17,19,21)
+} else if (test_type == "even") {
+  chrs <- c(2,4,6,8,10,12,14,16,18,20,22)
+}
+print(chrs)
 
 # Add Tm for each chromosome to each other
 df <- fread(paste0(Tm_prefix, "_", chrs[1], ".txt"))
@@ -37,7 +45,7 @@ print(nrow(dfCombine))
 print(head(dfCombine[,3]))
 print(head(dfCombine[,42]))
 
-# Construct data fram to collate results
+# Construct data frame to collate results
 dfOut <- matrix(NA, nrow = 40, ncol = 5)
 dfOut[,1] <- seq(1,40)
 

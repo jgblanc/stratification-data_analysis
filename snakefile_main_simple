@@ -6,15 +6,22 @@ DATASET = ["hgdp"]
 SUBDATASET = ["hgdp-all"]
 CONTRASTS = ["Lat", "Long"]
 GWAS=["WBS", "ALL"]
-CHRTYPE = ["chr-even", "chr-odd", "chr-all"]
+#CHRTYPE_GWAS = ["chr-even", "chr-odd", "chr-all"]
+CHRTYPE_GWAS = ["chr-odd"]
+CHRTYPE_TEST = ["test-even"]
 
 def get_chr_num(x):
   out = int(x)
   return out
 
+def get_chr_type(x):
+  out = x.split("-")[0]
+  print(out)
+  return out
+
 rule all:
     input:
-        expand("data/ukbb/pca/{gwas}/{chrtype}/pca.eigenvec", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype=CHRTYPE)
+        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/{chrtype_gwas}/{chrtype_test}/{contrasts}_PCs_FGr.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS)
 
 
 ## Compute FGr
@@ -62,7 +69,7 @@ rule compute_FGr_block:
         Rscript code/calculate_FGr/calc_FGr_block.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output}
         """
 
-# Find block jacknife error
+## Find block jacknife error in FGr
 
 rule compute_FGr_error:
     input:
@@ -108,12 +115,12 @@ rule make_tmp_plink2:
 rule merge_GWAS_PCA:
     input:
         gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/merged/tmp_{chr}.pgen", chr=CHR),
-        snp="data/ukbb/{chrtype}_pc_snps.txt"
+        snp="data/ukbb/{chrtype_gwas}_pc_snps.txt"
     output:
-        vec="data/ukbb/pca/{gwas}/{chrtype}/pca.eigenvec",
-        val="data/ukbb/pca/{gwas}/{chrtype}/pca.eigenval"
+        vec="data/ukbb/pca/{gwas}/{chrtype_gwas}/pca.eigenvec",
+        val="data/ukbb/pca/{gwas}/{chrtype_gwas}/pca.eigenval"
     params:
-        prefix_out = "data/ukbb/pca/{gwas}/{chrtype}/pca",
+        prefix_out = "data/ukbb/pca/{gwas}/{chrtype_gwas}/pca",
         merge_prefix = expand("/scratch/jgblanc/ukbb/plink2-files/{{gwas}}/merged/tmp_{chr}", chr=CHR, newline="\n")
     threads: 16
     resources:
@@ -121,13 +128,29 @@ rule merge_GWAS_PCA:
         time="12:00:00"
     shell:
         """
-        echo {params.merge_prefix} > {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype}-tmp.txt
-        tr ' ' '\n' < "{params.prefix_out}{wildcards.gwas}-{wildcards.chrtype}-tmp.txt" > "{params.prefix_out}{wildcards.gwas}-{wildcards.chrtype}-tmp_chrm_list.txt"
-        plink2 --pmerge-list {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype}-tmp_chrm_list.txt \
+        echo {params.merge_prefix} > {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp.txt
+        tr ' ' '\n' < "{params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp.txt" > "{params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp_chrm_list.txt"
+        plink2 --pmerge-list {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp_chrm_list.txt \
         --pca 40 approx \
         --memory 60000 \
         --threads 16 \
         --out {params.prefix_out}
-        rm {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype}-tmp*
+        rm {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas_gwas}-tmp*
         rm {params.prefix_out}.p*
+        """
+
+## R2 for PCs vs FGr
+
+rule compute_PC_FGr:
+    input:
+        Fgr=expand("output/calculate_FGr/{{dataset}}/{{subdataset}}/{{gwas}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+        PCs = "data/ukbb/pca/{gwas}/{chrtype_gwas}/pca.eigenvec"
+    output:
+        "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/{chrtype_gwas}/{chrtype_test}/{contrasts}_PCs_FGr.txt"
+    params:
+        prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/FGr_{contrasts}"
+        type_test = lambda wildcards: get_chr_type(wildcards.chrtype_test)
+    shell:
+        """
+        Rscript code/calculate_FGr/compute_PC_FGR_model.R {params.prefix_in} {input.PCs} {output} {params.type_test}
         """
