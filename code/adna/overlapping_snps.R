@@ -8,6 +8,7 @@ if(length(args)<3){stop("Rscript overlapping_snps.R <ukbb.freq> <test panel.freq
 suppressWarnings(suppressMessages({
   library(data.table)
   library(dplyr)
+  library(tidyr)
 }))
 
 ukbb_file = args[1]
