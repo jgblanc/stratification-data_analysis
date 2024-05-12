@@ -205,3 +205,64 @@ rule get_all_r:
         Rscript code/hgdp/get_pairwise_AF_contrasts.R {params.spnum} {input} {params.prefix_out} {output}
         """
 
+
+## Build polygenic scores
+
+#rule format_ss_pgs:
+#    input:
+#        expand("output/prs/hgdp/{{dataset}}/vilma/{{gwas}}/{{contrasts}}_{chr}-PC{{pc}}.estimates.tsv", chr=CHR)
+#    output:
+#        "output/prs/hgdp/{dataset}/{gwas}/vilma/{contrasts}-PC{pc}.all.tsv"
+#    params:
+#        all_chrs = CHR,
+#        num_chr = len(CHR),
+#        prefix_one = "output/prs/hgdp/{dataset}/vilma/{gwas}/{contrasts}",
+#        prefix_two = "-PC{pc}.estimates.tsv"
+#    shell:
+#        """
+#        Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
+#        """
+
+#rule format_ss_pgs:
+#    input:
+#        "output/prs/hgdp/{dataset}/vilma/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.estimates.tsv"
+#    output:
+#        "output/prs/hgdp/{dataset}/plink_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.betas"
+#    shell:
+#        """
+#        Rscript code/prs/format_ss_for_plink.R {input} {output}
+#        """
+
+#rule build_pgs:
+#    input:
+#        betas="output/prs/hgdp/{dataset}/plink_format/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.betas",
+#        psam="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.psam",
+#        pvar="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pvar",
+#        pgen="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}.pgen"
+#    output:
+#        "output/prs/hgdp/{dataset}/scores/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}.sscore"
+#    params:
+#        prefix_out="output/prs/hgdp/{dataset}/scores/{gwas}/{covar}_{contrasts}_{chr}-PC{pc}",
+#        prefix_in="data/hgdp/plink2-files/{dataset}/hgdp_wgs.20190516.full.chr{chr}"
+#    shell:
+#        """
+#        plink2 --pfile {params.prefix_in} \
+#        --score {input.betas} center cols=dosagesum,scoresums  \
+#        --out {params.prefix_out}
+#        """
+
+#rule combine_pgs:
+#    input:
+#        expand("output/prs/hgdp/{{dataset}}/scores/{{gwas}}/{{covar}}_{{contrasts}}_{chr}-PC{{pc}}.sscore", chr=CHR)
+#    output:
+#        "output/prs/hgdp/{dataset}/scores/{gwas}/{covar}_{contrasts}-PC{pc}.all.sscore"
+#    params:
+#        all_chrs = CHR,
+#        num_chr = len(CHR),
+#        prefix_one = "output/prs/hgdp/{dataset}/scores/{gwas}/{covar}_{contrasts}",
+#        prefix_two = "-PC{pc}.sscore"
+#    shell:
+#        """
+#        Rscript code/prs/combine_chr.R {params.num_chr} {params.prefix_one} {params.prefix_two} {output} {params.all_chrs}
+#	rm {input}
+#        """

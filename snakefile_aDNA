@@ -1,0 +1,36 @@
+# Snakefile to run HGDP (full data) / UKBB  data analysis
+DATASET=["le"]
+GWAS=["ALL", "WBS"]
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
+CONTRASTS = ["EN", "BA", "H"]
+#PC = [40]
+#COVAR=["FGr-LOCO", "control"]
+
+def get_params(x):
+  out = x.split("_")[1]
+  return out
+
+rule all:
+    input:
+        expand("data/hgdp/le/{gwas}/variants/overlappingSNPs_chr{chr}.txt" , chr=CHR, gwas=GWAS, dataset=DATASET, subpops=SUBPOPS)
+
+
+## Get overlapping set of final SNPS for differenet datasets
+
+rule get_overlapping_snps:
+    input:
+        adna="data/adna/le/all_populations_mles.txt",
+	      freq_ukbb="data/ukbb/{gwas}/variants/ukb_imp_chr{chr}_v3.afreq"
+    output:
+        "data/hgdp/le/{gwas}/variants/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/hgdp/overlapping_snps.R {input.freq_ukbb} {input.adna} {output} {wildcards.chr}
+        """
+
+
+
+
+

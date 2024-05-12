@@ -465,3 +465,17 @@ fwrite(dfOdd, "../data/ukbb/chr-odd_pc_snps.txt", quote = F, col.names = T, row.
 fwrite(dfEven, "../data/ukbb/chr-even_pc_snps.txt", quote = F, col.names = T, row.names = F, sep = "\t")
 ```
 
+
+```{r}
+df <- fread("~/Downloads/all_populations_mles.txt")
+df <- df %>% filter(CHROM == "22")
+ukbb <- fread("~/Downloads/ukb_imp_chr22_v3.afreq")[1:100000,] 
+colnames(ukbb)[1] <- "CHROM"
+ukbb <- ukbb %>% separate(ID, c("tmp", "POS")) 
+ukbb$POS <- as.numeric(ukbb$POS)
+
+data <- inner_join(df, ukbb)
+
+
+```
+
