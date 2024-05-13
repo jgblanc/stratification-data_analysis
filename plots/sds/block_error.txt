@@ -1,0 +1,3 @@
+varE	subdataset	gwas	contrast
+0.74749252844795	UK10K	WBS	sds
+0.0787225881546659	UK10K	ALL	sds
