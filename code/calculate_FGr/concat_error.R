@@ -24,7 +24,7 @@ for (i in 2:length(args)) {
   tmp <- strsplit(filename, "/")[[1]]
   test <- tmp[4]
   gwas <- tmp[5]
-  contrast <- strsplit(strsplit(tmp[6], "_")[[1]][2], ".txt")[[1]][1]
+  contrast <- strsplit(strsplit(tmp[7], "_")[[1]][2], ".txt")[[1]][1]
 
   # Read in results
   dfTmp <- fread(filename)
@@ -38,7 +38,7 @@ for (i in 2:length(args)) {
 
 # Remove first row
 dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
-colnames(dfOut) <- c("varE", "testSize", "gwasSize",  "contrast")
+colnames(dfOut) <- c("varE", "subdataset", "gwas",  "contrast")
 
 # Save file
 print(dfOut)
