@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=indv
-#SBATCH --output=logs/indv.out
-#SBATCH --error=logs/indv.err
-#SBATCH --time=03:00:00
+#SBATCH --job-name=three
+#SBATCH --output=logs/three.out
+#SBATCH --error=logs/three.err
+#SBATCH --time=24:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --mem-per-cpu=2000
@@ -16,9 +16,9 @@ module load R
 source ../myVilma/bin/activate 
 
 echo "SLURM_JOBID="$SLURM_JOBID
-cat snakefile_main_simple2
-snakemake --unlock -s snakefile_main_simple2
-snakemake --profile cluster-setup/ -s snakefile_main_simple2 --rerun-incomplete
+cat snakefile_main_simple3
+snakemake --unlock -s snakefile_main_simple3
+snakemake --profile cluster-setup/ -s snakefile_main_simple3 --rerun-incomplete
 #snakemake -j1 --rerun-incomplete -s snakefile_main 
 
 #snakemake --cores all --rerun-incomplete -s snakefile_UKBB    

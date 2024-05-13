@@ -14,7 +14,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/adna/le/r/{contrasts}_chr{chr}.rvec" , chr=CHR, gwas=GWAS, dataset=DATASET)
+        expand("data/hgdp/le/{gwas}/variants/overlappingSNPs_chr{chr}.txt" , chr=CHR, gwas=GWAS, dataset=DATASET, contrasts=CONTRASTS)
 
 
 ## Get overlapping set of final SNPS for differenet datasets
@@ -36,12 +36,12 @@ rule flip_all_snps:
         freq_ukbb_all="data/ukbb/ALL/variants/ukb_imp_chr{chr}_v3.afreq",
 	      sds="data/adna/le/all_populations_mles.txt"
     output:
-        rvec=expand("data/adna/le/r/{contrasts}_chr{chr}.rvec", contrasts = CONSTRASTS)
+        rvec=expand("data/adna/le/r/{contrasts}_chr{{chr}}.rvec", contrasts = CONTRASTS)
     params:
         out_path= "data/adna/le/r/"
     shell:
         """
-        Rscript code/sds/flip_overlapping_snps.R {input.freq_ukbb_wbs} {input.freq_ukbb_all} {input.sds} {params.out_path} {wildcards.chr}
+        Rscript code/adna/flip_overlapping_snps.R {input.freq_ukbb_wbs} {input.freq_ukbb_all} {input.sds} {params.out_path} {wildcards.chr}
         """
 
 

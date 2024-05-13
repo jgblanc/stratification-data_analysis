@@ -2,12 +2,9 @@
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-DATASET = ["hgdp"]
-SUBDATASET = ["hgdp-all"]
-TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/hgdp-all/r/") if f.endswith('_chr9.rvec')]
-CONTRASTS = [s.rstrip("_chr9") for s in TMP]
-print(CONTRASTS)
-#CONTRASTS = ["Lat", "Long"]
+DATASET = ["adna"]
+SUBDATASET = ["le"]
+CONTRASTS = ["EUROPEAN_NEOLITHIC", "BRONZE_AGE", "HISTORICAL"]
 GWAS=["WBS", "ALL"]
 CHRTYPE_GWAS = ["chr-even", "chr-odd", "chr-all"]
 CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]

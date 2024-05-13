@@ -2,9 +2,9 @@
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-DATASET = ["hgdp"]
-SUBDATASET = ["hgdp-all"]
-CONTRASTS = ["Lat", "Long"]
+DATASET = ["sds"]
+SUBDATASET = ["UK10K"]
+CONTRASTS = ["sds"]
 GWAS=["WBS", "ALL"]
 CHRTYPE_GWAS = ["chr-even", "chr-odd", "chr-all"]
 CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
@@ -20,7 +20,7 @@ def get_chr_type(x):
 
 rule all:
     input:
-        expand("data/ukbb/pca/{gwas}/{chrtype_gwas}/pca.eigenvec", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/{chrtype_gwas}/{chrtype_test}/{contrasts}_PCs_FGr.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 
 ## Compute FGr
