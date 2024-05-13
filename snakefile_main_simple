@@ -2,11 +2,12 @@
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-DATASET = ["hgdp"]
-SUBDATASET = ["hgdp-all"]
-TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/hgdp-all/r/") if f.endswith('_chr9.rvec')]
-CONTRASTS = [s.rstrip("_chr9") for s in TMP]
-#CONTRASTS = ["EUROPEAN_NEOLITHIC", "BRONZE_AGE", "HISTORICAL"]
+DATASET = ["adna"]
+SUBDATASET = ["le"]
+#TMP = [f.split(".")[0] for f in os.listdir("data/hgdp/hgdp-all/r/") if f.endswith('_chr9.rvec')]
+#CONTRASTS = [s.rstrip("_chr9") for s in TMP]
+CONTRASTS = ["EUROPEAN_NEOLITHIC", "BRONZE_AGE", "HISTORICAL"]
+#CONTRASTS = ["sds"]
 GWAS=["WBS", "ALL"]
 CHRTYPE_GWAS = ["chr-even", "chr-odd", "chr-all"]
 CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
@@ -17,7 +18,6 @@ def get_chr_num(x):
 
 def get_chr_type(x):
   out = x.split("-")[1]
-  print(out)
   return out
 
 rule all:
@@ -172,7 +172,7 @@ rule concat_FGr_error:
 
 # Concat R2 PC FGr
 
-rule concat_FGr_error:
+rule concat_R2_PC_FGr:
     input:
         expand("output/calculate_FGr/{{dataset}}/{subdataset}/{gwas}/{chrtype_gwas}/{chrtype_test}/{contrasts}_PCs_FGr.txt", contrasts=CONTRASTS, subdataset=SUBDATASET, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
     output:

@@ -14,6 +14,8 @@ suppressWarnings(suppressMessages({
 outfile = args[1]
 
 dfOut <- matrix(NA, nrow = 1, ncol = 10)
+colnames(dfOut) <- c("PC","r2",   "rho",  "lc", "up", "test", "gwas", "contrast", "chrtype_gwas", "chrtype_test")
+#print(dfOut)
 
 for (i in 2:length(args)) {
 
@@ -29,12 +31,13 @@ for (i in 2:length(args)) {
   chrtype_test <- tmp[7]
 
   # Read in results
-  dfTmp <- fread(filename)
+  dfTmp <- fread(filename,header=TRUE)
   dfTmp$test <- test
   dfTmp$gwas <- gwas
-  dfTmp$contrast <- constrast
+  dfTmp$contrast <- contrast
   dfTmp$chrtype_gwas <- chrtype_gwas
   dfTmp$chrtype_test <- chrtype_test
+  #print(dfTmp)
 
   # Save results in table
   dfOut <- rbind(dfOut, dfTmp)
@@ -43,7 +46,7 @@ for (i in 2:length(args)) {
 
 # Remove first row
 dfOut <- as.data.frame(dfOut[2:nrow(dfOut),])
-colnames(dfOut) <- c("PC",	"r2",	"rho", 	"lc", "up", "subdataset", "gwas", "constrast", "chrtype_gwas", "chrtype_test")
+#colnames(dfOut) <- c("PC",	"r2",	"rho", 	"lc", "up", "subdataset", "gwas", "constrast", "chrtype_gwas", "chrtype_test")
 
 # Save file
 print(dfOut)
