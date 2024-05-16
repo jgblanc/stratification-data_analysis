@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(data.table)
 library(tidyverse)
 library(ggpubr)
+library(latex2exp)
 ```
 
 
@@ -475,7 +476,154 @@ ukbb <- ukbb %>% separate(ID, c("tmp", "POS"))
 ukbb$POS <- as.numeric(ukbb$POS)
 
 data <- inner_join(df, ukbb)
-
-
 ```
+
+
+
+```{r}
+# PC data
+df <- fread("../plots/sds/r2_PC_FGr.txt")
+df$PC <- as.integer(df$PC)
+df_eo <- df %>% filter(chrtype_gwas == "chr-even" & chrtype_test == "test-odd") %>% mutate(type = "even-odd")
+df_all <- df %>% filter(chrtype_gwas == "chr-all" & chrtype_test == "test-all") %>% mutate(type = "all")
+plot_df <- rbind(df_eo, df_all)
+
+# Error data
+data <- fread("../plots/sds/block_error.txt")
+data$error <- 1 - data$varE
+
+
+pl <- ggplot(plot_df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold')) + facet_grid(row = vars(gwas), cols = vars(type)) + geom_hline(data = data, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("SDS")
+pl
+#ggsave("~/Desktop/sds.png", pl, height = 7,  width = 10)
+
+tmp <- plot_df %>% filter(gwas == "WBS" & type == "even-odd")
+tmp2 <- data %>% filter(gwas == "WBS")
+pl <- ggplot(tmp, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold'))  + geom_hline(data = tmp2, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("SDS") 
+ggsave("~/Desktop/sds_tmp.png", pl, height = 5, width = 7)
+
+
+pl2 <- ggplot(tmp, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 22)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) 
+ggsave("~/Desktop/sds_tmp.png", pl2, height = 4, width = 8.5)
+```
+
+
+```{r}
+# PC data
+df <- fread("../plots/adna/r2_PC_FGr.txt")
+df$PC <- as.integer(df$PC)
+df_eo <- df %>% filter(chrtype_gwas == "chr-even" & chrtype_test == "test-odd") %>% mutate(type = "even-odd")
+df_all <- df %>% filter(chrtype_gwas == "chr-all" & chrtype_test == "test-all") %>% mutate(type = "all")
+plot_df <- rbind(df_eo, df_all)
+
+# Error data
+data <- fread("../plots/adna/block_error.txt")
+data$error <- 1 - data$varE
+
+
+# European Neolithic 
+plot_EN <- plot_df %>% filter(contrast == "EUROPEAN_NEOLITHIC")
+data_EN <- data %>% filter(contrast == "EUROPEAN")
+pl_EN <- ggplot(plot_EN, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold')) + facet_grid(row = vars(gwas), cols = vars(type)) + geom_hline(data = data_EN, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("European Neolithic")
+pl_EN
+ggsave("~/Desktop/en.png", pl_EN, height = 7, width = 10)
+
+# Bronze Age 
+plot_BA <- plot_df %>% filter(contrast == "BRONZE_AGE")
+data_BA <- data %>% filter(contrast == "BRONZE")
+pl_BA <- ggplot(plot_BA, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold')) + facet_grid(row = vars(gwas), cols = vars(type)) + geom_hline(data = data_BA, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("Bronze Age")
+pl_BA
+ggsave("~/Desktop/ba.png", pl_BA, height = 7, width = 10)
+
+# Historical 
+plot_H <- plot_df %>% filter(contrast == "HISTORICAL")
+data_H <- data %>% filter(contrast == "HISTORICAL")
+pl_H <- ggplot(plot_H, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold')) + facet_grid(row = vars(gwas), cols = vars(type)) + geom_hline(data = data_H, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("Historical")
+pl_H
+ggsave("~/Desktop/h.png", pl_H,  height = 7, width = 10)
+
+
+tmp <- plot_H %>% filter(gwas == "WBS" & type == "even-odd")
+tmp2 <- data_H %>% filter(gwas == "WBS")
+pl <- ggplot(tmp, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold'))  + geom_hline(data = tmp2, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("Historical") 
+pl
+ggsave("~/Desktop/H_tmp.png", pl, height = 5, width = 7)
+
+
+pl2 <- ggplot(tmp, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 22)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) 
+pl2
+
+ggsave("~/Desktop/H_tmp.png", pl2, height = 4, width = 8.5)
+```
+
+
+```{r}
+# PC data
+df <- fread("../plots/hgdp/r2_PC_FGr.txt")
+df$PC <- as.integer(df$PC)
+df_eo <- df %>% filter(chrtype_gwas == "chr-even" & chrtype_test == "test-odd") %>% mutate(type = "even-odd")
+df_all <- df %>% filter(chrtype_gwas == "chr-all" & chrtype_test == "test-all") %>% mutate(type = "all")
+plot_df <- rbind(df_eo, df_all)
+
+# Error data
+data <- fread("../plots/hgdp/block_error.txt")
+data$error <- 1 - data$varE
+
+
+# Latitude 
+plot_Lat <- plot_df %>% filter(contrast == "Lat")
+data_Lat <- data %>% filter(contrast == "Lat")
+pl_Lat <- ggplot(plot_Lat, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold')) + facet_grid(row = vars(gwas), cols = vars(type)) + geom_hline(data = data_Lat, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("Latitude")
+pl_Lat
+#ggsave("~/Desktop/Lat.png", pl_Lat,  height = 7, width = 10)
+
+# Longitude 
+plot_Long <- plot_df %>% filter(contrast == "Long")
+data_Long <- data %>% filter(contrast == "Long")
+pl_Long <- ggplot(plot_Long, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold')) + facet_grid(row = vars(gwas), cols = vars(type)) + geom_hline(data = data_Long, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("Longitude")
+pl_Long
+#ggsave("~/Desktop/Long.png", pl_Long,  height = 7, width = 10)
+
+
+tmp <- plot_Long %>% filter(gwas == "ALL" & type == "even-odd")
+tmp2 <- data_Long %>% filter(gwas == "WBS")
+pl <- ggplot(tmp, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold'))  + geom_hline(data = tmp2, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("Longitude") 
+ggsave("~/Desktop/long_tmp.png", pl, height = 5, width = 7)
+
+
+pl2 <- ggplot(tmp, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 22)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) 
+ggsave("~/Desktop/long_tmp.png", pl2, height = 5.5, width = 8.5)
+```
+
+
+```{r}
+# PC data
+df <- fread("../plots/hgdp/r2_PC_FGr.txt")
+df$PC <- as.integer(df$PC)
+plot_df <- df %>% filter(chrtype_gwas == "chr-even" & chrtype_test == "test-odd") %>% mutate(type = "even-odd")
+
+# Error data
+data <- fread("../plots/hgdp/block_error.txt")
+data$error <- 1 - data$varE
+plot_data <- data
+
+#ggplot(plot_df, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold')) + facet_grid(cols = vars(gwas), rows = vars(contrast)) + geom_hline(data = data, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) 
+
+pl <- ggplot(plot_data, aes(x = contrast, y = varE)) + geom_bar(stat = "identity", fill = "purple4") + facet_wrap(~gwas) + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold'), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 8)) + ylab("error")  
+pl
+
+tmp <- plot_df %>% filter(PC == 40 )
+tmp2 <- inner_join(tmp, plot_data)
+
+pl <- ggplot(tmp2, aes(x = contrast, y = error)) + geom_bar(stat = "identity") + facet_wrap(~gwas) + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold'), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 8)) + ylab("1 - error") + geom_bar(aes(x = contrast,y = (r2*error)), alpha = 0.5, stat = "identity", fill = "red")
+
+ggsave("~/Desktop/continental_error.png", pl,  height = 7, width = 10)
+```
+
+
+
+
+
+
+
 

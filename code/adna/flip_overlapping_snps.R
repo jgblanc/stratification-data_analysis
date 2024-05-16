@@ -40,19 +40,25 @@ df <- inner_join(ukbb, sds)
 head(df)
 
 # Change allele frequency to alternate allele freq by taking 1 -
-df_flipped <- df %>% mutate(EUROPEAN_NEOLITHIC = 1 - EUROPEAN_NEOLITHIC, BRONZE_AGE = 1 - BRONZE_AGE, HISTORICAL = 1 - HISTORICAL)
+df_flipped <- ss %>% mutate(EUROPEAN_NEOLITHIC = 1 - EUROPEAN_NEOLITHIC, BRONZE_AGE = 1 - BRONZE_AGE, HISTORICAL = 1 - HISTORICAL,
+                            ANATOLIA_NEOLITHIC = 1 -ANATOLIA_NEOLITHIC, MESOLITHIC = 1 - MESOLITHIC, STEPPE = 1 - STEPPE)
+
+# Calculate statistic
+df_EN <- df_flipped %>% mutate(expected = (0.84*ANATOLIA_NEOLITHIC) + (0.16*MESOLITHIC)) %>% mutate(ss = EUROPEAN_NEOLITHIC - expected)
+df_BA <- df_flipped %>% mutate(expected = (0.52*STEPPE) + (0.48*EUROPEAN_NEOLITHIC)) %>% mutate(ss = BRONZE_AGE - expected)
+df_H <- df_flipped %>% mutate(expected = (0.15*EUROPEAN_NEOLITHIC) + (0.85*BRONZE_AGE)) %>% mutate(ss = HISTORICAL - expected)
 
 # Select correct columns and save output
 
-df_EN <- df_flipped %>% select("CHROM", "ID", "REF", "ALT", "EUROPEAN_NEOLITHIC")
+df_EN <- df_EN %>% select("CHROM", "ID", "REF", "ALT", "ss")
 colnames(df_EN) <- c("CHROM", "ID", "REF", "ALT", "r")
 fwrite(df_EN, paste0(outpath,"EUROPEAN_NEOLITHIC_chr", chr_num, ".rvec"), row.names = F, col.names = T, quote = F, sep = "\t")
 
-df_BA <- df_flipped %>% select("CHROM", "ID", "REF", "ALT", "BRONZE_AGE")
+df_BA <- df_BA %>% select("CHROM", "ID", "REF", "ALT", "ss")
 colnames(df_BA) <- c("CHROM", "ID", "REF", "ALT", "r")
 fwrite(df_BA, paste0(outpath,"BRONZE_AGE_chr", chr_num, ".rvec"), row.names = F, col.names = T, quote = F, sep = "\t")
 
-df_H <- df_flipped %>% select("CHROM", "ID", "REF", "ALT", "HISTORICAL")
+df_H <- df_H %>% select("CHROM", "ID", "REF", "ALT", "ss")
 colnames(df_H) <- c("CHROM", "ID", "REF", "ALT", "r")
 fwrite(df_H, paste0(outpath,"HISTORICAL_chr", chr_num, ".rvec"), row.names = F, col.names = T, quote = F, sep = "\t")
 
