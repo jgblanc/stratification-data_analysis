@@ -14,7 +14,7 @@ def get_params(x):
 
 rule all:
     input:
-        expand("data/adna/le/r/{contrasts}_chr{{chr}}.rvec" , chr=CHR, gwas=GWAS, dataset=DATASET, contrasts=CONTRASTS)
+        expand("data/adna/le/r/{contrasts}_chr{chr}.rvec" , chr=CHR, gwas=GWAS, dataset=DATASET, contrasts=CONTRASTS)
 
 
 ## Get overlapping set of final SNPS for differenet datasets

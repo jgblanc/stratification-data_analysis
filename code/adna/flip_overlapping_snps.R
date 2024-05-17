@@ -40,7 +40,7 @@ df <- inner_join(ukbb, sds)
 head(df)
 
 # Change allele frequency to alternate allele freq by taking 1 -
-df_flipped <- ss %>% mutate(EUROPEAN_NEOLITHIC = 1 - EUROPEAN_NEOLITHIC, BRONZE_AGE = 1 - BRONZE_AGE, HISTORICAL = 1 - HISTORICAL,
+df_flipped <- df %>% mutate(EUROPEAN_NEOLITHIC = 1 - EUROPEAN_NEOLITHIC, BRONZE_AGE = 1 - BRONZE_AGE, HISTORICAL = 1 - HISTORICAL,
                             ANATOLIA_NEOLITHIC = 1 -ANATOLIA_NEOLITHIC, MESOLITHIC = 1 - MESOLITHIC, STEPPE = 1 - STEPPE)
 
 # Calculate statistic
