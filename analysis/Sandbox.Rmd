@@ -543,17 +543,17 @@ pl_H
 ggsave("~/Desktop/h.png", pl_H,  height = 7, width = 10)
 
 
-tmp <- plot_H %>% filter(gwas == "WBS" & type == "even-odd")
-tmp2 <- data_H %>% filter(gwas == "WBS")
-pl <- ggplot(tmp, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold'))  + geom_hline(data = tmp2, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("Historical") 
+tmp <- plot_EN %>% filter(gwas == "ALL" & type == "even-odd")
+tmp2 <- data_EN %>% filter(gwas == "ALL")
+pl <- ggplot(tmp, aes(x = PC, y = r2)) + geom_bar(stat = "identity", fill = "aquamarine3") + ylab(TeX("Variance in $\\hat{F}_{Gr}$ Explained")) + xlab("Cumulative PCs") + theme_classic(base_size = 20) + ylim(0,1) + theme( plot.title=element_text( hjust=0.5, face='bold'))  + geom_hline(data = tmp2, aes(yintercept = error), color = "red", linetype = "dashed", size = 1.5) + ggtitle("European Neolithic") 
 pl
-ggsave("~/Desktop/H_tmp.png", pl, height = 5, width = 7)
+ggsave("~/Desktop/EN_tmp.png", pl, height = 5, width = 7)
 
 
 pl2 <- ggplot(tmp, aes(x = PC, y = rho)) + geom_bar(stat = "identity", fill = "aquamarine4") + geom_errorbar(aes(ymin = lc, ymax = up)) + theme_classic(base_size = 22)+ xlab("PC") + ylab(TeX("$\\rho(PC, \\hat{F}_{Gr})$")) 
 pl2
 
-ggsave("~/Desktop/H_tmp.png", pl2, height = 4, width = 8.5)
+ggsave("~/Desktop/EN_tmp.png", pl2, height = 4, width = 8.5)
 ```
 
 
