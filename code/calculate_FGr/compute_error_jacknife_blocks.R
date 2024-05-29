@@ -73,7 +73,7 @@ pval <- pchisq(f2, df =1, lower.tail = F)
 
 # Find proportion
 varFGr <- var(FGr_hat, na.rm = TRUE)
-error <- f / varFGr
+error <- jkVar / varFGr
 
 # Make output table
 dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 6))
