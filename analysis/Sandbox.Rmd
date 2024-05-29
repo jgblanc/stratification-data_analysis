@@ -621,8 +621,147 @@ ggsave("~/Desktop/continental_error.png", pl,  height = 7, width = 10)
 ```
 
 
+```{r}
+L <- 300
+M <- 200
+
+# Simulate contrasts
+r <- runif(L)
+r <- scale(r)
+
+# Simulate genotypes
+G <- matrix(NA, nrow = M, ncol = L)
+for (i in 1:L) {
+  G[,i] <- rnorm(M)
+}
+G <- scale(G, scale = FALSE)
+Gnorm <- scale(G, scale = TRUE)
+
+# Do PCA vis SVD
+mySVD <- svd(Gnorm)
+vecs <- mySVD$u
+vals <- mySVD$d
+loadings <- mySVD$v
+
+# Calculate FGr
+FGr <- Gnorm %*% r *(1/L)
+
+# Calculate D
+D <- t(FGr) %*% FGr *(L^2)
+D2 <- (t(r) %*% (t(Gnorm) %*% Gnorm) %*% r) 
+
+# Calculate D via loadings
+f <- t(r) %*% loadings
+fp <- f * vals  
+D3 <- sum(fp^2)
 
 
+# Calculate expD
+K <- (Gnorm %*% t(Gnorm)) * (1/(L))
+R <- (t(Gnorm) %*% Gnorm) * (1/(M-1))
+
+sum(diag(R)) * (M-1)
+sum(diag(K)) * (L)
+
+# Check variance of loadinds 
+mean(rowMeans(loadings^2))
+1/L
+```
+
+
+
+```{r}
+sim <- function(M, L) {
+
+  # Simulate contrasts
+  r <- runif(L)
+  r <- scale(r)
+
+  # Simulate genotypes
+  G <- matrix(NA, nrow = M, ncol = L)
+  for (i in 1:L) {
+    G[,i] <- rnorm(M)
+  }
+  G <- scale(G, scale = FALSE)
+  Gnorm <- scale(G, scale = TRUE)
+  
+  # Calculate FGr
+  FGr <- Gnorm %*% r *(1/L)
+  
+  # Calculate D
+  D <- t(FGr) %*% FGr *(L^2)
+  
+  return(D)
+}
+```
+
+```{r}
+numRep <- 10000
+L <- 300
+M <- 200
+
+allDs <- rep(NA, numRep)
+for (i in 1:numRep) {
+  allDs[i] <- sim(M, L)
+}
+```
+
+```{r}
+expD <- (M-1) * L
+meanD <- mean(allDs)
+
+hist(allDs)
+abline(v = meanD, col = "blue", lwd = 2)
+abline(v = expD, col = "red", lwd = 2)
+```
+```{r}
+# Read GWAS Matrix 
+library(pgenlibr)
+pvar <- NewPvar("/Users/jenniferblanc/polygenic_adaptation_stratification/output/Simulate_Genotypes/4PopSplit/B1/C1/genos-gwas_common.pvar")
+d1 <- NewPgen("/Users/jenniferblanc/polygenic_adaptation_stratification/output/Simulate_Genotypes/4PopSplit/B1/C1/genos-gwas_common.pgen")
+G <- ReadList(d1,seq(1,10905), meanimpute=F)
+G <- G[c(1:100, 1901:2000),sample(1:10905, 500)]
+Gnorm <- scale(G)
+L <- ncol(G)
+M <- nrow(G)
+r <- runif(L, 0, 1)
+r <- scale(r)
+
+# Do PCA vis SVD
+mySVD <- svd(Gnorm)
+vecs <- mySVD$u
+vals <- mySVD$d
+loadings <- mySVD$v
+
+
+# Calculate FGr
+FGr <- Gnorm %*% r *(1/L)
+
+# Calculate D
+D <- t(FGr) %*% FGr *(L^2)
+D2 <- (t(r) %*% (t(Gnorm) %*% Gnorm) %*% r) 
+
+# Calculate D via loadings
+f <- t(r) %*% loadings
+fp <- f * vals  
+D3 <- sum(fp^2)
+
+
+# Calculate expD
+K <- (Gnorm %*% t(Gnorm)) * (1/(L))
+R <- (t(Gnorm) %*% Gnorm) * (1/(M-1))
+
+sum(diag(R)) * (M-1)
+sum(diag(K)) * (L)
+
+# Check variance of loadinds 
+mean(rowMeans(loadings^2))
+1/L
+```
+
+```{r}
+
+```
 
 
 

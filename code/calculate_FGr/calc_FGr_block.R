@@ -31,6 +31,7 @@ r <- inner_join(r, dfSnps)
 r <- r %>% dplyr::select("ID", "ALT", "r")
 colnames(r) <- c("ID", "A1", "BETA")
 
+
 # Separate ID into CHR and BP
 r_blocks <- r %>% separate("ID", into = c("CHR", "BP"), sep = ":", remove = FALSE)
 print(head(r_blocks))
@@ -56,6 +57,26 @@ r_blocks <- r_blocks %>%
   mutate(block = apply(., MARGIN = 1, FUN = function(params)assign_SNP_to_block(as.numeric(params[2]), as.numeric(params[3])))) %>%
   drop_na()
 
+# Compute GWAS genotype counts of all SNPs
+selected_snps <- r_blocks %>% select("ID")
+snps_file =  paste0(out_prefix,"allSNPs.txt")
+fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
+outfile_count <- paste0(out_prefix, "G_count")
+cmd_count <- paste("sh code/calculate_FGr/compute_GWAS_count.sh", gwas_prefix, outfile_count, snps_file, sep = " ")
+print(cmd_count)
+system(cmd_count)
+
+# Calculate variance of GWAS panel genotypes from counts
+count_plink <- fread(paste0(out_prefix, "G_count.gcount"))
+nOBS <- (count_plink$HOM_REF_CT + count_plink$HET_REF_ALT_CTS + count_plink$TWO_ALT_GENO_CTS)
+counts <- (count_plink$HOM_REF_CT * 0) + (count_plink$HET_REF_ALT_CTS * 1) + (count_plink$TWO_ALT_GENO_CTS * 2)
+mean_gc <- counts / nOBS
+length_mc_genos <- (count_plink$HOM_REF_CT * (-1 * mean_gc)^2) + (count_plink$HET_REF_ALT_CTS * (1 - mean_gc)^2) +  (count_plink$TWO_ALT_GENO_CTS * (2 - mean_gc)^2)
+length_mc_genos <- length_mc_genos * (1/(m-1))
+
+# Divide r by SD and scale
+r_blocks$BETA <- r_blocks$BETA * (1/sqrt(length_mc_genos))
+r_blocks$BETA <- scale(r_blocks$BETA)
 
 # Loop through blocks and calculate FGr for each block
 numBlocks <- length(unique(r_blocks$block))
@@ -87,7 +108,7 @@ for (i in 1:numBlocks) {
 
   #  Re-write .linear file with correct betas
   r_tmp <- r
-  r_tmp$BETA <- r_tmp$BETA * (1/length_mc_genos)
+  r_tmp$BETA <- r_tmp$BETA * (1/sqrt(length_mc_genos))
   r_tmp[is.na(r_tmp)] <- 0
   r_tmp[is.infinite(r_tmp$BETA),3] <- 0
 

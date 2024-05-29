@@ -1,0 +1,115 @@
+---
+title: "Compute D"
+author: "Jennifer Blanc"
+date: "2024-05-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(pgenlibr)
+library(data.table)
+```
+
+## Read in GWAS panel genotype matrix 
+
+```{r}
+pvar <- NewPvar("../data/small_example/genos-gwas_common.pvar")
+d1 <- NewPgen("../data/small_example/genos-gwas_common.pgen")
+G <- ReadList(d1,seq(1,10905), meanimpute=F)
+#variantIndx <- sample(1:10905, 500)
+#G <- G[c(1:100, 1901:2000),variantIndx]
+Gnorm <- scale(G)
+```
+
+Grab parameters
+```{r}
+L <- ncol(G)
+M <- nrow(G)
+```
+
+## Simulate and create file for contrasts
+
+```{r}
+# Make rs
+r <- runif(L, 0, 1)
+varIDs <- rep(NA, L)
+
+# Read in freq file 
+freq <- fread("../data/small_example/genos-gwas_common.afreq")
+#freq <- freq[variantIndx, ]
+
+# Set up file 
+dfR <- freq %>% select(ID, ALT)
+dfR$BETA <- r
+```
+
+## Get GWAS panel variance and re-scale betas
+```{r}
+cmd_count <- paste0("~/plink2 --pfile ../data/small_example/genos-gwas_common --geno-counts --out ../data/small_example/count_temp")
+
+system(cmd_count)
+```
+
+```{r}
+# Calculate variance of GWAS panel genotypes from counts
+count_plink <- fread("../data/small_example/count_temp.gcount")
+nOBS <- (count_plink$HOM_REF_CT + count_plink$HET_REF_ALT_CTS + count_plink$TWO_ALT_GENO_CTS)
+counts <- (count_plink$HOM_REF_CT * 0) + (count_plink$HET_REF_ALT_CTS * 1) + (count_plink$TWO_ALT_GENO_CTS * 2)
+mean_gc <- counts / nOBS
+length_mc_genos <- (count_plink$HOM_REF_CT * (-1 * mean_gc)^2) + (count_plink$HET_REF_ALT_CTS * (1 - mean_gc)^2) +  (count_plink$TWO_ALT_GENO_CTS * (2 - mean_gc)^2)
+length_mc_genos <- length_mc_genos * (1/(M-1))
+
+# Check that variances are the same
+head(length_mc_genos)
+head(apply(G, 2, var))
+
+#  Re-write r file with r's scaled by SD and then normalized and scaled by SD again 
+dfR$BETA <- dfR$BETA * (1/sqrt(length_mc_genos))
+dfR$BETA <- scale(dfR$BETA)
+dfR$BETA <- dfR$BETA * (1/sqrt(length_mc_genos))
+
+# Save file to use as scoring weights 
+fwrite(dfR, "../data/small_example/example.xt_temp.glm.linear", sep = "\t")
+```
+
+
+## Compute FGr
+```{r}
+cmd_FGr <- paste0("~/plink2 --pfile ../data/small_example/genos-gwas_common --score ../data/small_example/example.xt_temp.glm.linear center header-read cols=dosagesum,scoresums --out ../data/small_example/example_gxt")
+
+system(cmd_FGr)
+```
+
+```{r}
+dfFGr <- fread("../data/small_example/example_gxt.sscore")
+FGr_plink <-  dfFGr$BETA_SUM 
+```
+
+## Calculate D 
+```{r}
+D_plink <- t(FGr_plink) %*% FGr_plink 
+```
+
+
+## Compare to R 
+
+```{r}
+# Calculate FGr
+FGr <- scale(G, scale = F) %*% dfR$BETA 
+
+plot(FGr, FGr_plink)
+abline(0, 1, col = "red")
+```
+
+```{r}
+# Calculate D
+D <-  t(FGr) %*% FGr 
+
+expD <- (M-1) * L 
+```
+
+
+
+
