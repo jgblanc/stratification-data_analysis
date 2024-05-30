@@ -59,7 +59,7 @@ r_blocks <- r_blocks %>%
 print(paste0("Now r blocks has", nrow(r_blocks), " rows"))
 
 # Select only SNPs that have a block
-r <- r %>% filter(ID %in% r_block$ID)
+r <- r %>% filter(ID %in% r_blocks$ID)
 print(paste0("Now r has", nrow(r), " rows"))
 
 # Compute GWAS genotype counts of all SNPs
