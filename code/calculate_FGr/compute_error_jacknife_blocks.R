@@ -35,10 +35,10 @@ print(dim(data))
 
 # Compute D
 FGr_hat <- apply(data, 1, sum) * (1/L)
-D <- t(FGr_hat) %*% FGr_hat * (L^2)
+D <- t(FGr_hat) %*% FGr_hat
 
 # Expected D
-expD <- (M-1) * L^2
+expD <- (M-1) / (L)
 
 # Compute LOCO gamma
 nblocks <- ncol(data)

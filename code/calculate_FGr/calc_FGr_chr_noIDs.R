@@ -46,7 +46,9 @@ length_mc_genos <- (count_plink$HOM_REF_CT * (-1 * mean_gc)^2) + (count_plink$HE
 length_mc_genos <- length_mc_genos * (1/(m-1))
 
 #  Re-write .linear file with correct betas
-r$BETA <- r$BETA * (1/length_mc_genos)
+r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
+r$BETA <- scale(r$BETA)
+r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
 r[is.na(r)] <- 0
 r[is.infinite(r$BETA),3] <- 0
 
@@ -63,8 +65,6 @@ system(cmd_b)
 
 # Read in FGr
 dfFGr = fread(paste0(out_prefix, ".gxt_tmp.sscore"))
-print(head(dfFGr))
-print(nrow(dfFGr))
 FGr = as.matrix(dfFGr$BETA_SUM)
 
 # Format output

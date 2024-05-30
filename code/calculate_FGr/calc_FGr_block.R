@@ -82,6 +82,12 @@ length_mc_genos <- length_mc_genos * (1/(m-1))
 # Divide r by SD and scale
 r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
 r$BETA <- scale(r$BETA)
+r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
+r[is.na(r)] <- 0
+r[is.infinite(r$BETA),3] <- 0
+
+# Save as scoring weights
+fwrite(r, paste0(out_prefix, "_scoringWeights.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Loop through blocks and calculate FGr for each block
 numBlocks <- length(unique(r_blocks$block))
@@ -97,33 +103,11 @@ for (i in 1:numBlocks) {
   snps_file =  paste0(out_prefix,"_", block_num, ".txt")
   fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
 
-  # Compute GWAS genotype counts
-  outfile_count <- paste0(out_prefix, "G_count")
-  cmd_count <- paste("sh code/calculate_FGr/compute_GWAS_count.sh", gwas_prefix, outfile_count, snps_file, sep = " ")
-  print(cmd_count)
-  system(cmd_count)
-
-  # Calculate variance of GWAS panel genotypes from counts
-  count_plink <- fread(paste0(out_prefix, "G_count.gcount"))
-  nOBS <- (count_plink$HOM_REF_CT + count_plink$HET_REF_ALT_CTS + count_plink$TWO_ALT_GENO_CTS)
-  counts <- (count_plink$HOM_REF_CT * 0) + (count_plink$HET_REF_ALT_CTS * 1) + (count_plink$TWO_ALT_GENO_CTS * 2)
-  mean_gc <- counts / nOBS
-  length_mc_genos <- (count_plink$HOM_REF_CT * (-1 * mean_gc)^2) + (count_plink$HET_REF_ALT_CTS * (1 - mean_gc)^2) +  (count_plink$TWO_ALT_GENO_CTS * (2 - mean_gc)^2)
-  length_mc_genos <- length_mc_genos * (1/(m-1))
-
-  #  Re-write .linear file with correct betas
-  r_tmp <- r
-  r_tmp$BETA <- r_tmp$BETA * (1/sqrt(length_mc_genos))
-  r_tmp[is.na(r_tmp)] <- 0
-  r_tmp[is.infinite(r_tmp$BETA),3] <- 0
-
-  # Save r to use as scoring weights
-  fwrite(r_tmp, paste0(out_prefix, ".xt_temp.glm.linear"), sep = "\t")
 
   # Compute FGr
   cmd_b <- paste("sh code/calculate_FGr/GWAS_score.sh",
                  gwas_prefix,
-                 paste0(out_prefix, ".xt_temp.glm.linear"),
+                 paste0(out_prefix, "_scoringWeights.txt"),
                  paste0(out_prefix,".gxt_tmp"), snps_file, sep = " ")
   print(cmd_b)
   system(cmd_b)
@@ -135,7 +119,6 @@ for (i in 1:numBlocks) {
   # Format output
   col_name <- paste0("block_", block_num)
   gwasID[[col_name]] <- FGr
-  print(head(gwasID))
 
   # Remove tmp files
   cmd <- paste("rm",paste0(out_prefix, "_", block_num, ".txt"), paste0(out_prefix, ".xt_temp.glm.linear*"),  paste0(out_prefix,".gxt_tmp*" ), paste0(out_prefix,"G_count*" ), sep = " ")
