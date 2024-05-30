@@ -33,6 +33,13 @@ for (i in 2:22) {
 data <- as.data.frame(data)
 print(dim(data))
 
+# Compute D
+FGr_hat <- apply(data, 1, sum) * (1/L)
+D <- t(FGr_hat) %*% FGr_hat * (L^2)
+
+# Expected D
+expD <- (M-1) * L^2
+
 # Compute LOCO gamma
 nblocks <- ncol(data)
 gammas <- matrix(NA, nrow = nrow(data), ncol = nblocks)

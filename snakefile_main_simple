@@ -57,7 +57,8 @@ rule compute_FGr_block:
         overlap_snps="data/{dataset}/{subdataset}/{gwas}/variants/overlappingSNPs_chr{chr}.txt",
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed"
     output:
-        "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/FGr_{contrasts}_{chr}.txt"
+        FGr="output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/FGr_{contrasts}_{chr}.txt",
+        snps="output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/{contrasts}_{chr}_allSNPs.txt"
     threads: 16
     resources:
         mem_mb=38000,
@@ -67,7 +68,7 @@ rule compute_FGr_block:
         out_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/{contrasts}_{chr}",
     shell:
         """
-        Rscript code/calculate_FGr/calc_FGr_block.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output}
+        Rscript code/calculate_FGr/calc_FGr_block.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output.FGr}
         """
 
 ## Find block jacknife error in FGr

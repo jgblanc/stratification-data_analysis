@@ -34,7 +34,7 @@ colnames(r) <- c("ID", "A1", "BETA")
 
 # Separate ID into CHR and BP
 r_blocks <- r %>% separate("ID", into = c("CHR", "BP"), sep = ":", remove = FALSE)
-print(head(r_blocks))
+print(paste0("r has", nrow(r), " rows"))
 
 # Read in LD block file
 ld <- fread(ldFile)
@@ -56,10 +56,15 @@ assign_SNP_to_block <- function(CHR, BP, block = ld) {
 r_blocks <- r_blocks %>%
   mutate(block = apply(., MARGIN = 1, FUN = function(params)assign_SNP_to_block(as.numeric(params[2]), as.numeric(params[3])))) %>%
   drop_na()
+print(paste0("Now r blocks has", nrow(r_blocks), " rows"))
+
+# Select only SNPs that have a block
+r <- r %>% filter(ID %in% r_block$ID)
+print(paste0("Now r has", nrow(r), " rows"))
 
 # Compute GWAS genotype counts of all SNPs
-selected_snps <- r_blocks %>% select("ID")
-snps_file =  paste0(out_prefix,"allSNPs.txt")
+selected_snps <- r %>% select("ID")
+snps_file =  paste0(out_prefix,"_allSNPs.txt")
 fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
 outfile_count <- paste0(out_prefix, "G_count")
 cmd_count <- paste("sh code/calculate_FGr/compute_GWAS_count.sh", gwas_prefix, outfile_count, snps_file, sep = " ")
@@ -75,8 +80,8 @@ length_mc_genos <- (count_plink$HOM_REF_CT * (-1 * mean_gc)^2) + (count_plink$HE
 length_mc_genos <- length_mc_genos * (1/(m-1))
 
 # Divide r by SD and scale
-r_blocks$BETA <- r_blocks$BETA * (1/sqrt(length_mc_genos))
-r_blocks$BETA <- scale(r_blocks$BETA)
+r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
+r$BETA <- scale(r$BETA)
 
 # Loop through blocks and calculate FGr for each block
 numBlocks <- length(unique(r_blocks$block))
