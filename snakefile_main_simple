@@ -84,10 +84,10 @@ rule compute_FGr_error:
         time="24:00:00"
     params:
       prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/FGr_{contrasts}",
-      SNP_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/{contrasts}_{chr}"
+      SNP_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/{contrasts}"
     shell:
       """
-      Rscript code/calculate_FGr/compute_error_jacknife_blocks.R {params.prefix_in} {output} {params.snp_prefix}
+      Rscript code/calculate_FGr/compute_error_jacknife_blocks.R {params.prefix_in} {output} {params.SNP_prefix}
       """
 
 ## GWAS PCA

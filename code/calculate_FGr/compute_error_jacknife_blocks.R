@@ -11,7 +11,7 @@ suppressWarnings(suppressMessages({
 
 Tm_prefix = args[1]
 outfile = args[2]
-
+snp_prefix = args[3]
 
 # Get list of all chromosomes
 chrs <- seq(1,22)
@@ -32,16 +32,17 @@ for (i in 2:22) {
 }
 data <- as.data.frame(data)
 print(dim(data))
-print(head(data))
 
 # Find total number of SNPs
 snp_nums <- rep(NA,22)
 snp_nums[1] <- nrow(fread(paste0(snp_prefix, "_1_allSNPs.txt")))
+print(snp_nums)
 for (i in 2:22) {
 
   print(paste0("chr num ",i))
   # Read in new chromosome
-  snp_nums[i] <- paste0(snp_prefix,"_", i, "_allSNPs.txt")
+  snp_nums[i] <- nrow(fread(paste0(snp_prefix,"_", i, "_allSNPs.txt")))
+  print(snp_nums)
 
 }
 
@@ -52,7 +53,7 @@ print(paste0("L is ", L))
 print(paste0("M is ", M))
 
 # Compute D
-FGr_hat <- apply(data_block, 1, sum) * (1/L)
+FGr_hat <- apply(data, 1, sum) * (1/L)
 D <- t(FGr_hat) %*% FGr_hat
 
 # Expected D
@@ -61,7 +62,6 @@ expD <- (M-1) / (L)
 
 # Compute LOCO gamma
 nblocks <- ncol(data)
-nblocks = 5
 allFGrs <- matrix(NA, nrow = nrow(data), ncol = nblocks)
 allDs <- rep(NA, nblocks)
 for (i in 1:nblocks) {
@@ -104,9 +104,9 @@ varFGr <- var(FGr_hat, na.rm = TRUE)
 error <- jkVar / varFGr
 
 # Make output table
-dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 6))
-colnames(dfOut) <- c("D", "varD", "pvalD", "jkVar", "varFGr", "error")
-dfOut[1,] <- c(D,varD,pval,jkVar,varFGr,error)
+dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 7))
+colnames(dfOut) <- c("D","ExpD", "varD", "pvalD", "jkVar", "varFGr", "error")
+dfOut[1,] <- c(D,expD,varD,pval,jkVar,varFGr,error)
 fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
 
