@@ -81,8 +81,9 @@ for (i in 1:nblocks) {
 }
 print("Computed LOCO gamma")
 print(allDs)
+print(mean(allDs))
 # Calculate variance of D
-varD <-  ((nblocks -1)/nblocks) * sum((allDs - mean(allDs))^2)
+varD <-  ((nblocks -1)/nblocks) * sum((allDs - mean(allDs, na.rm=TRUE))^2)
 
 
 # Calculate variance of all entries of FGr
