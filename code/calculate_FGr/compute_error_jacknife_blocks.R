@@ -32,60 +32,81 @@ for (i in 2:22) {
 }
 data <- as.data.frame(data)
 print(dim(data))
+print(head(data))
+
+# Find total number of SNPs
+snp_nums <- rep(NA,22)
+snp_nums[1] <- nrow(fread(paste0(snp_prefix, "_1_allSNPs.txt")))
+for (i in 2:22) {
+
+  print(paste0("chr num ",i))
+  # Read in new chromosome
+  snp_nums[i] <- paste0(snp_prefix,"_", i, "_allSNPs.txt")
+
+}
+
+# Set parameters
+L <- sum(snp_nums)
+M <- nrow(data)
+print(paste0("L is ", L))
+print(paste0("M is ", M))
 
 # Compute D
-FGr_hat <- apply(data, 1, sum) * (1/L)
+FGr_hat <- apply(data_block, 1, sum) * (1/L)
 D <- t(FGr_hat) %*% FGr_hat
 
 # Expected D
 expD <- (M-1) / (L)
 
+
 # Compute LOCO gamma
 nblocks <- ncol(data)
-gammas <- matrix(NA, nrow = nrow(data), ncol = nblocks)
+nblocks = 5
+allFGrs <- matrix(NA, nrow = nrow(data), ncol = nblocks)
+allDs <- rep(NA, nblocks)
 for (i in 1:nblocks) {
 
   print(paste0("block num ",i))
   # Drop ith  column
   loco <- data[,-i]
 
-  # Compute mean across entries
-  means <- apply(loco, 1, mean,na.rm=TRUE)
-  gammas[,i] <- means
+  # Compute loco FGR
+  FGr_loco <- apply(loco, 1, sum,na.rm=TRUE) * (1/L)
+  allFGrs[,i] <- FGr_loco
+
+  # Compute Loco D
+  D_loco <- t(FGr_loco) %*% FGr_loco
+  allDs <- D_loco
 
 }
 print("Computed LOCO gamma")
 
-# Calculate error
-Fbar <- apply(gammas, 1, mean)
-sigmas2 <- rep(0, nrow(data))
+# Calculate variance of D
+varD <-  ((nblocks -1)/nblocks) * sum((allDs - mean(allDs))^2)
+
+
+# Calculate variance of all entries of FGr
+Fbar <- apply(allFGrs, 1, mean)
+sigmas <- rep(0, nrow(data))
 for (i in 1:nrow(data)) {
 
-  sigmas2[i] <- ((nblocks - 1)/nblocks) * sum((gammas[i,] - Fbar[i])^2)
+  sigmas[i] <- ((nblocks - 1)/nblocks) * sum((allFGrs[i,] - Fbar[i])^2)
 
 }
-print(mean(sigmas2, na.rm = TRUE))
+jkVar <- mean(sigmas, na.rm = TRUE)
 
-FGr_hat <- apply(data, 1, mean)
 
-# Get test stat
-f <- mean(FGr_hat)
-f2 <- f^2
+# Test D for significance
+pval <- pnorm(abs(D -expD) ,mean =0, sd = sqrt(varD), lower.tail = FALSE)
 
-# Get variance
-jkVar <- mean(sigmas2, na.rm = TRUE)
-
-# Test for significance
-pval <- pchisq(f2, df =1, lower.tail = F)
-
-# Find proportion
+# Find Error
 varFGr <- var(FGr_hat, na.rm = TRUE)
 error <- jkVar / varFGr
 
 # Make output table
 dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 6))
-colnames(dfOut) <- c("f", "f2", "jkVar", "pval", "varFGr", "error")
-dfOut[1,] <- c(f,f2,jkVar,pval,varFGr,error)
+colnames(dfOut) <- c("D", "varD", "pvalD", "jkVar", "varFGr", "error")
+dfOut[1,] <- c(D,varD,pval,jkVar,varFGr,error)
 fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
 

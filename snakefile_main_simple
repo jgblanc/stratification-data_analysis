@@ -22,7 +22,7 @@ def get_chr_type(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/FGr_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/Var_{contrasts}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 
 ## Compute FGr
@@ -83,10 +83,11 @@ rule compute_FGr_error:
         mem_mb=100000,
         time="24:00:00"
     params:
-      prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/FGr_{contrasts}"
+      prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/FGr_{contrasts}",
+      SNP_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/{contrasts}_{chr}"
     shell:
       """
-      Rscript code/calculate_FGr/compute_error_jacknife_blocks.R {params.prefix_in} {output}
+      Rscript code/calculate_FGr/compute_error_jacknife_blocks.R {params.prefix_in} {output} {params.snp_prefix}
       """
 
 ## GWAS PCA

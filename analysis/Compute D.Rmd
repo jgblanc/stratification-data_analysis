@@ -84,12 +84,16 @@ system(cmd_FGr)
 
 ```{r}
 dfFGr <- fread("../data/small_example/example_gxt.sscore")
-FGr_plink <-  dfFGr$BETA_SUM 
+FGr_plink <-  dfFGr$BETA_SUM * (1/L)
 ```
 
 ## Calculate D 
 ```{r}
 D_plink <- t(FGr_plink) %*% FGr_plink 
+```
+
+```{r}
+expD <- (M-1) / L 
 ```
 
 
