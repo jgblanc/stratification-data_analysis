@@ -80,7 +80,7 @@ for (i in 1:nblocks) {
 
 }
 print("Computed LOCO gamma")
-
+print(allDs)
 # Calculate variance of D
 varD <-  ((nblocks -1)/nblocks) * sum((allDs - mean(allDs))^2)
 
