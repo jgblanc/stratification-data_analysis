@@ -76,7 +76,7 @@ for (i in 1:nblocks) {
 
   # Compute Loco D
   D_loco <- t(FGr_loco) %*% FGr_loco
-  allDs <- D_loco
+  allDs[i] <- D_loco
 
 }
 print("Computed LOCO gamma")
