@@ -85,7 +85,8 @@ rule prune_SNPs:
     output:
         "data/pga_paper/{rep}/pruned_snps/{chr}.prune.in"
     resources:
-        time="06:00:00"
+        time="06:00:00",
+	mem_mb=38000
     params:
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
         prefix_out = "data/pga_paper/{rep}/pruned_snps/{chr}"
