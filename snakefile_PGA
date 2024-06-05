@@ -28,7 +28,7 @@ print("HI")
 
 rule all:
     input:
-        expand("data/pga_paper/{rep}/r/Lat_chr{chr}.rvec", rep=REP, chr=CHR)
+        expand("data/pga_paper/{rep}/pruned_snps/{chr}.prune.in", rep=REP, chr=CHR)
 
 
 # Sample individuals for panels
@@ -73,4 +73,27 @@ rule compute_r:
         """
         cp {input.Lat} {output.Lat}
         cp {input.Long} {output.Long}
+        """
+
+# Downsample SNPs for correction
+
+rule prune_SNPs:
+    input:
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
+        IDs="data/pga_paper/{rep}/ids/gwas.ids",
+        snps="data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt"
+    output:
+        "data/pga_paper/{rep}/pruned_snps/{chr}.prune.in"
+    resources:
+        time="06:00:00"
+    params:
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out = "data/pga_paper/{rep}/pruned_snps/{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_plink} \
+        --keep {input.IDs} \
+        --extract {input.snps} \
+        --indep-pairwise 100kb 0.8 \
+        --out {params.prefix_out}
         """
