@@ -28,7 +28,7 @@ print("HI")
 
 rule all:
     input:
-        expand("data/pga_paper/{rep}/ids/gwas.ids", rep=REP)
+        expand("data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt", rep=REP, chr=CHR)
 
 
 # Sample individuals for panels
@@ -46,5 +46,17 @@ rule get_ID_lists:
     shell:
         """
         Rscript code/PGA_paper/IDs_ALL.R  {input.sex} {input.batch} {input.age} {input.genotyped} {input.phenotyped} {input.withdraw} {output.gwas}
+        """
+
+# Get overlapping SNPs
+
+rule get_overlapping_snps:
+    input:
+        "data/hgdp/hgdp-all/ALL/variants/overlappingSNPs_chr{chr}.txt"
+    output:
+        "data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        cp {input} {output}
         """
 
