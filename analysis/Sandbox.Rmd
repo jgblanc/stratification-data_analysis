@@ -749,10 +749,16 @@ D3 <- sum(fp^2)
 
 # Calculate expD
 K <- (Gnorm %*% t(Gnorm)) * (1/(L))
-R <- (t(Gnorm) %*% Gnorm) * (1/(M-1))
+R <- (t(Gnorm) %*% Gnorm)
+* (1/(M-1))
 
 sum(diag(R)) * (M-1)
 sum(diag(K)) * (L)
+
+sum(vals^2)
+
+myE <- eigen(R)
+sum(myE$values)
 
 # Check variance of loadinds 
 mean(rowMeans(loadings^2))
@@ -760,9 +766,42 @@ mean(rowMeans(loadings^2))
 ```
 
 ```{r}
+# Read GWAS Matrix 
+library(pgenlibr)
+pvar <- NewPvar("/Users/jenniferblanc/polygenic_adaptation_stratification/output/Simulate_Genotypes/4PopSplit/B1/C1/genos-gwas_common.pvar")
+d1 <- NewPgen("/Users/jenniferblanc/polygenic_adaptation_stratification/output/Simulate_Genotypes/4PopSplit/B1/C1/genos-gwas_common.pgen")
+G <- ReadList(d1,seq(1,10905), meanimpute=F)
+G <- G[c(1:100, 1901:2000),sample(1:10905, 500)]
+Gnorm <- scale(G)
+L <- ncol(G)
+M <- nrow(G)
+
+# Simuate R
+r <- runif(L, 0, 1)
+r <- r - mean(r)
+r <- r / sqrt(sum(r^2))
+
+# Do PCA vis SVD
+mySVD <- svd(Gnorm)
+vecs <- mySVD$u
+vals <- mySVD$d
+v <- mySVD$v
+
+# Calculate FGr
+FGr <- Gnorm %*% r *(1/L)
+
+# Calculate D
+D <-  t(FGr) %*% FGr *(L^2)
+
+# Calculate Expected value of D
+expD <- M-1
+sum(vals^2) * (1/L)
+
+# Variance explained 
+D / ((M-1) * L) 
+
 
 ```
-
 
 
 

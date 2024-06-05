@@ -60,7 +60,7 @@ D <- t(FGr_hat) %*% FGr_hat
 expD <- (M-1) / (L)
 
 
-# Compute LOCO gamma
+# Compute LOCO
 nblocks <- ncol(data)
 allFGrs <- matrix(NA, nrow = nrow(data), ncol = nblocks)
 allDs <- rep(NA, nblocks)
@@ -98,7 +98,7 @@ jkVar <- mean(sigmas, na.rm = TRUE)
 
 
 # Test D for significance
-pval <- pnorm(abs(D -expD) ,mean =0, sd = sqrt(varD), lower.tail = FALSE)
+pval <- pnorm(abs(D -expD) ,mean =0, sd = sqrt(varD), lower.tail = FALSE) * 2
 
 # Find Error
 varFGr <- var(FGr_hat, na.rm = TRUE)

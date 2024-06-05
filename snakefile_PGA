@@ -1,0 +1,49 @@
+# Snakefile to run full data analysis with any set of constrasts
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
+DATASET = ["pga_paper"]
+NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000"]
+#NSNP = ["L-1000000"]
+REP = ["B1"]
+CONTRASTS = ["lat", "long"]
+PC = [0,40]
+COVAR = ["no-FGr", "FGr-LOCO"]
+PHENOTYPE=[ "StandingHeight_50"]
+#PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+PVALUE_THRESHOLD = "1e-5"
+#print(CONTRASTS)
+
+
+wildcard_constraints:
+    subdataset="t[0-9]*",
+    gwas="g[0-9]*"
+
+
+def get_chr_num(x):
+  out = int(x)
+  return out
+
+
+rule all:
+    input:
+        expand("data/pga_paper/{rep}/ids/gwas.ids", rep=REP=)
+
+
+# Sample individuals for panels
+
+rule get_ID_lists:
+    input:
+        sex="data/phenotypes/genetic_sex_22001.txt",
+        batch="data/phenotypes/genotype_measurement_batch_22000.txt",
+        age="data/phenotypes/age_at_recruitment_21022.txt",
+        genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
+        phenotyped = "data/phenotypes/StandingHeight_50.txt",
+        withdraw = "data/ukbb/withdraw69046_241_20240328.txt"
+    output:
+        gwas="data/pga_paper/{rep}/ids/gwas.ids"
+    shell:
+        """
+        Rscript code/PGA_paper/get_IDs_gwas.R {input.sex} {input.batch} {input.age} {input.genotyped} {input.phenotyped} {input.withdraw} {output.gwas}
+        """
+

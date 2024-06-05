@@ -18,6 +18,7 @@ library(data.table)
 pvar <- NewPvar("../data/small_example/genos-gwas_common.pvar")
 d1 <- NewPgen("../data/small_example/genos-gwas_common.pgen")
 G <- ReadList(d1,seq(1,10905), meanimpute=F)
+G <- scale(G, scale = FALSE)
 #variantIndx <- sample(1:10905, 500)
 #G <- G[c(1:100, 1901:2000),variantIndx]
 Gnorm <- scale(G)
@@ -34,11 +35,9 @@ M <- nrow(G)
 ```{r}
 # Make rs
 r <- runif(L, 0, 1)
-varIDs <- rep(NA, L)
 
 # Read in freq file 
 freq <- fread("../data/small_example/genos-gwas_common.afreq")
-#freq <- freq[variantIndx, ]
 
 # Set up file 
 dfR <- freq %>% select(ID, ALT)
@@ -101,7 +100,7 @@ expD <- (M-1) / L
 
 ```{r}
 # Calculate FGr
-FGr <- scale(G, scale = F) %*% dfR$BETA 
+FGr <- G %*% dfR$BETA * (1/L)
 
 plot(FGr, FGr_plink)
 abline(0, 1, col = "red")
@@ -114,6 +113,10 @@ D <-  t(FGr) %*% FGr
 expD <- (M-1) * L 
 ```
 
+
+```{r}
+K <- t(G) %*% G * (1/L)
+```
 
 
 
