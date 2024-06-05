@@ -64,8 +64,8 @@ rule get_overlapping_snps:
 
 rule compute_r:
     input:
-        Lat="data/hgdp/{dataset}/r/Lat_chr{chr}.rvec",
-        Long="data/hgdp/{dataset}/r/Long_chr{chr}.rvec"
+        Lat="data/hgdp/hgdp-all/r/Lat_chr{chr}.rvec",
+        Long="data/hgdp/hgdp-all/r/Long_chr{chr}.rvec"
     output:
         Lat = "data/pga_paper/{rep}/r/Lat_chr{chr}.rvec",
         Long = "data/pga_paper/{rep}/r/Long_chr{chr}.rvec"
