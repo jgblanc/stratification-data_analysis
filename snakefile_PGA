@@ -28,7 +28,7 @@ print("HI")
 
 rule all:
     input:
-        expand("data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt", rep=REP, chr=CHR)
+        expand("data/pga_paper/{rep}/r/Lat_chr{chr}.rvec", rep=REP, chr=CHR)
 
 
 # Sample individuals for panels
@@ -60,3 +60,17 @@ rule get_overlapping_snps:
         cp {input} {output}
         """
 
+# Compute genotype contrasts
+
+rule compute_r:
+    input:
+        Lat="data/hgdp/{dataset}/r/Lat_chr{chr}.rvec",
+        Long="data/hgdp/{dataset}/r/Long_chr{chr}.rvec"
+    output:
+        Lat = "data/pga_paper/{rep}/r/Lat_chr{chr}.rvec",
+        Long = "data/pga_paper/{rep}/r/Long_chr{chr}.rvec"
+    shell:
+        """
+        cp {input.Lat} {output.Lat}
+        cp {input.Long} {output.Long}
+        """
