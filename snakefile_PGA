@@ -24,10 +24,11 @@ def get_chr_num(x):
   out = int(x)
   return out
 
+print("HI")
 
 rule all:
     input:
-        expand("data/pga_paper/{rep}/ids/gwas.ids", rep=REP=)
+        expand("data/pga_paper/{rep}/ids/gwas.ids", rep=REP)
 
 
 # Sample individuals for panels
@@ -44,6 +45,6 @@ rule get_ID_lists:
         gwas="data/pga_paper/{rep}/ids/gwas.ids"
     shell:
         """
-        Rscript code/PGA_paper/get_IDs_gwas.R {input.sex} {input.batch} {input.age} {input.genotyped} {input.phenotyped} {input.withdraw} {output.gwas}
+        Rscript code/PGA_paper/IDs_ALL.R  {input.sex} {input.batch} {input.age} {input.genotyped} {input.phenotyped} {input.withdraw} {output.gwas}
         """
 

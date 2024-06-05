@@ -2,7 +2,7 @@
 
 args=commandArgs(TRUE)
 
-if(length(args)<11){stop("Rscript get_IDs.R")}
+if(length(args)<7){stop("Rscript get_IDs.R")}
 
 suppressWarnings(suppressMessages({
   library(data.table)
