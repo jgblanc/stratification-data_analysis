@@ -28,7 +28,7 @@ print("HI")
 
 rule all:
     input:
-        expand("output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}_{chr}.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
+        expand("output/calculate_FGr/pga_paper/{rep}/{nsnp}/Var_{contrasts}.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 
 
 # Sample individuals for panels
@@ -130,4 +130,31 @@ rule compute_FGr_chr:
   shell:
       """
       Rscript code/calculate_FGr/calc_FGr_chr.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {output} {input.IDs}
+      """
+
+rule concat_chr_FGr:
+    input:
+        expand("output/calculate_FGr/pga_paper/{{rep}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+    output:
+        "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr-LOCO_{contrasts}_{chr}.txt"
+    params:
+        chrNum = lambda wildcards: get_chr_num(wildcards.chr),
+        prefix_in = "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}"
+    shell:
+        """
+        Rscript code/calculate_FGr/concat_FGr_LOCO.R {params.prefix_in} {params.chrNum} {output}
+        """
+
+# Estimate FGr Error
+
+rule compute_FGr_error:
+    input:
+        expand("output/calculate_FGr/pga_paper/{{rep}}/{{nsnp}}/FGr_{{contrasts}}_{chr}.txt", chr = CHR)
+    output:
+      "output/calculate_FGr/pga_paper/{rep}/{nsnp}/Var_{contrasts}.txt"
+    params:
+      prefix_in = "output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}"
+    shell:
+      """
+      Rscript code/calculate_FGr/compute_error_jacknife.R {params.prefix_in} {output}
       """
