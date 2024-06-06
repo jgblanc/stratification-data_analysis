@@ -6,7 +6,7 @@ DATASET = ["pga_paper"]
 NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000"]
 #NSNP = ["L-1000000"]
 REP = ["B1"]
-CONTRASTS = ["lat", "long"]
+CONTRASTS = ["Lat", "Long"]
 PC = [0,40]
 COVAR = ["no-FGr", "FGr-LOCO"]
 PHENOTYPE=[ "StandingHeight_50"]
@@ -28,7 +28,7 @@ print("HI")
 
 rule all:
     input:
-        expand("output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}_{chr}.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONSTRASTS)
+        expand("output/calculate_FGr/pga_paper/{rep}/{nsnp}/FGr_{contrasts}_{chr}.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 
 
 # Sample individuals for panels
