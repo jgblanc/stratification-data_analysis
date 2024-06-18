@@ -201,7 +201,7 @@ rule merge_GWAS_PCA:
     threads: 16
     resources:
         mem_mb=60000,
-        time="03:00:00"
+        time="12:00:00"
     shell:
         """
 	echo {params.merge_prefix} > {wildcards.rep}-tmp.txt
@@ -271,10 +271,9 @@ rule run_fastGWA:
     params:
         prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
-    threads: 16
     resources:
-        mem_mb=100,
-        time="00:30:00"
+        mem_mb=10000,
+        time="01:30:00"
     shell:
         """
         gcta  --pheno {input.pheno} \
