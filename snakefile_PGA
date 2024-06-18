@@ -28,7 +28,7 @@ print("HI")
 
 rule all:
     input:
-      expand("data/pga_paper/{rep}/ids/test.ids", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
+      expand("data/pga_paper/{rep}/r/Lat_chr{chr}.rvec", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 
 #expand("plots/pga_paper/{rep}/error.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 #expand("plots/pga_paper/{rep}/q.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)

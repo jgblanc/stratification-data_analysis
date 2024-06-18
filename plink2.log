@@ -1,0 +1,26 @@
+PLINK v2.00a5.8LM AVX2 Intel (21 Nov 2023)
+Options in effect:
+  --extract data/pga_paper/variants/B2/overlappingSNPs_chr2.txt
+  --glm omit-ref allow-no-covars
+  --keep data/pga_paper/B2/ids/test.ids  
+  --pfile data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr2
+  --pheno data/pga_paper/B2/TestVecs/Lat.txt
+  --pheno-name latitude
+
+Hostname: cri22in001
+Working directory: /gpfs/data/berg-lab/jgblanc/stratification-data_analysis
+Start time: Tue Jun 18 15:11:40 2024
+
+Random number seed: 1718741500
+257555 MiB RAM detected, ~216591 available; reserving 128777 MiB for main
+workspace.
+Using up to 32 threads (change this with --threads).
+929 samples (0 females, 0 males, 929 ambiguous; 929 founders) loaded from
+data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr2.psam.
+590464 variants loaded from
+data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr2.pvar.
+1 quantitative phenotype loaded (736 values).
+--extract: 590459 variants remaining.
+Error: Failed to open   : No such file or directory.
+
+End time: Tue Jun 18 15:11:40 2024

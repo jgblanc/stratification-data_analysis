@@ -9,9 +9,9 @@ IDs=$6
 plink2 \
   --pfile $pfile_path \
   --extract $overlap_snps \
+  --keep $IDs \
   --glm omit-ref allow-no-covars \
   --pheno $pheno_path \
   --pheno-name $test_type \
-  --keep $IDs \ 
   --geno-counts \
   --out $outfile
