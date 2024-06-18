@@ -25,7 +25,7 @@ dfPSam <- fread(psam_file)
 df <- inner_join(dfPSam, dfMeta, by = c("#IID" = "sample"))
 
 # Only keep Eurasian samples
-df <- filter(region %in% c("CENTRAL_SOUTH_ASIA", "EUROPE",  "MIDDLE_EAST",  "EAST_ASIA"))
+df <- df %>% filter(region %in% c("CENTRAL_SOUTH_ASIA", "EUROPE",  "MIDDLE_EAST",  "EAST_ASIA"))
 
 # Set up outfiles
 dfLat <- df %>% select("#IID", "latitude")
