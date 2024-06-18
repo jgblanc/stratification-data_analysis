@@ -28,8 +28,10 @@ print("HI")
 
 rule all:
     input:
-        expand("plots/pga_paper/{rep}/error.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS),
-        expand("plots/pga_paper/{rep}/q.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
+      expand("data/pga_paper/{rep}/TestVecs/Lat.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
+
+#expand("plots/pga_paper/{rep}/error.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
+#expand("plots/pga_paper/{rep}/q.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 
 
 # Sample individuals for panels
@@ -63,18 +65,50 @@ rule get_overlapping_snps:
 
 # Compute genotype contrasts
 
-rule compute_r:
+rule get_TestVector:
     input:
-        Lat="data/hgdp/hgdp-all/r/Lat_chr{chr}.rvec",
-        Long="data/hgdp/hgdp-all/r/Long_chr{chr}.rvec"
+        metadata="data/hgdp/hgdp_wgs.20190516.metadata.txt",
+        psam="data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr1.psam"
     output:
-        Lat = "data/pga_paper/{rep}/r/Lat_chr{chr}.rvec",
-        Long = "data/pga_paper/{rep}/r/Long_chr{chr}.rvec"
+        Lat="data/pga_paper/{rep}/TestVecs/Lat.txt",
+        Long="data/pga_paper/{rep}/TestVecs/Long.txt"
     shell:
         """
-        cp {input.Lat} {output.Lat}
-        cp {input.Long} {output.Long}
+        Rscript code/PGA_paper/get_LatLong_Tvec.R {input.metadata} {input.psam} {output.Lat} {output.Long}
         """
+
+rule compute_r:
+    input:
+        TvecLat="data/pga_paper/{rep}/TestVecs/Lat.txt",
+        TvecLong="data/pga_paper/{rep}/TestVecs/Long.txt",
+        tp_genos="data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}.psam",
+        snps="data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt"
+    output:
+        Lat="data/hgdp/{dataset}/r/Lat_chr{chr}.rvec",
+        Long="data/hgdp/{dataset}/r/Long_chr{chr}.rvec"
+    params:
+        prefix_tp = "data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out = "data/hgdp/{dataset}/r/{chr}"
+    shell:
+        """
+        Rscript code/hgdp/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
+        rm {params.prefix_out}xt_temp.*
+        """
+
+
+
+#rule compute_r:
+#    input:
+#        Lat="data/hgdp/hgdp-all/r/Lat_chr{chr}.rvec",
+#        Long="data/hgdp/hgdp-all/r/Long_chr{chr}.rvec"
+#    output:
+#        Lat = "data/pga_paper/{rep}/r/Lat_chr{chr}.rvec",
+#        Long = "data/pga_paper/{rep}/r/Long_chr{chr}.rvec"
+#    shell:
+#        """
+#        cp {input.Lat} {output.Lat}
+#        cp {input.Long} {output.Long}
+#        """
 
 # Downsample SNPs for correction
 
