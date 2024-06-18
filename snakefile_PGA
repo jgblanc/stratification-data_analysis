@@ -28,7 +28,7 @@ print("HI")
 
 rule all:
     input:
-      expand("data/pga_paper/{rep}/TestVecs/Lat.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
+      expand("data/pga_paper/{rep}/r/Lat_chr{chr}.rvec", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 
 #expand("plots/pga_paper/{rep}/error.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 #expand("plots/pga_paper/{rep}/q.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
@@ -84,14 +84,14 @@ rule compute_r:
         tp_genos="data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}.psam",
         snps="data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt"
     output:
-        Lat="data/hgdp/{dataset}/r/Lat_chr{chr}.rvec",
-        Long="data/hgdp/{dataset}/r/Long_chr{chr}.rvec"
+        Lat="data/pga_paper/{rep}/r/Lat_chr{chr}.rvec",
+        Long="data/pga_paper/{rep}/r/Long_chr{chr}.rvec"
     params:
         prefix_tp = "data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}",
-        prefix_out = "data/hgdp/{dataset}/r/{chr}"
+        prefix_out = "data/pga_paper/{rep}/r/{chr}"
     shell:
         """
-        Rscript code/hgdp/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
+        Rscript code/PGA_paper/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
         rm {params.prefix_out}xt_temp.*
         """
 

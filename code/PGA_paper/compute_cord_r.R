@@ -61,9 +61,7 @@ compute_b <- function(path_to_test, testvec_file, test_type, outpath) {
 
 
 # Gather parameters
-testID <- fread(paste0(test_prefix, ".psam"))
-head(testID)
-colnames(testID) <- c("IID",  "Sex")
+testID <- fread(tvec_file_lat)
 n <- nrow(testID)
 
 # Compute b for latitude
