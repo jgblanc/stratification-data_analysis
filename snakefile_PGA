@@ -28,7 +28,7 @@ print("HI")
 
 rule all:
     input:
-      expand("data/pga_paper/{rep}/r/Lat_chr{chr}.rvec", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
+      expand("data/pga_paper/{rep}/ids/test.ids", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 
 #expand("plots/pga_paper/{rep}/error.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 #expand("plots/pga_paper/{rep}/q.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
@@ -71,10 +71,11 @@ rule get_TestVector:
         psam="data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr1.psam"
     output:
         Lat="data/pga_paper/{rep}/TestVecs/Lat.txt",
-        Long="data/pga_paper/{rep}/TestVecs/Long.txt"
+        Long="data/pga_paper/{rep}/TestVecs/Long.txt",
+        IDs = "data/pga_paper/{rep}/ids/test.ids"
     shell:
         """
-        Rscript code/PGA_paper/get_LatLong_Tvec.R {input.metadata} {input.psam} {output.Lat} {output.Long}
+        Rscript code/PGA_paper/get_LatLong_Tvec.R {input.metadata} {input.psam} {output.Lat} {output.Long} {output.IDs}
         """
 
 rule compute_r:
@@ -82,7 +83,8 @@ rule compute_r:
         TvecLat="data/pga_paper/{rep}/TestVecs/Lat.txt",
         TvecLong="data/pga_paper/{rep}/TestVecs/Long.txt",
         tp_genos="data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}.psam",
-        snps="data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt"
+        snps="data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt",
+        IDs = "data/pga_paper/{rep}/ids/test.ids"
     output:
         Lat="data/pga_paper/{rep}/r/Lat_chr{chr}.rvec",
         Long="data/pga_paper/{rep}/r/Long_chr{chr}.rvec"
@@ -91,7 +93,7 @@ rule compute_r:
         prefix_out = "data/pga_paper/{rep}/r/{chr}"
     shell:
         """
-        Rscript code/PGA_paper/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long}
+        Rscript code/PGA_paper/compute_cord_r.R {params.prefix_tp} {input.TvecLat} {input.TvecLong} {params.prefix_out} {input.snps} {output.Lat} {output.Long} {input.IDs}
         rm {params.prefix_out}xt_temp.*
         """
 

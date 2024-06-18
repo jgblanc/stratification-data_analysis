@@ -4,6 +4,7 @@ pheno_path=$2
 test_type=$3
 outfile=$4
 overlap_snps=$5
+IDs=$6
 
 plink2 \
   --pfile $pfile_path \
@@ -11,5 +12,6 @@ plink2 \
   --glm omit-ref allow-no-covars \
   --pheno $pheno_path \
   --pheno-name $test_type \
+  --keep $IDs \ 
   --geno-counts \
   --out $outfile

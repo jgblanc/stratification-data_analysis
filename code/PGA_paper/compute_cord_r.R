@@ -17,6 +17,7 @@ out_prefix = args[4]
 overlap_snps = args[5]
 outfile_lat = args[6]
 outfile_long = args[7]
+tp_IDs = args[8]
 
 ####################
 ## Functions #######
@@ -28,7 +29,7 @@ compute_b <- function(path_to_test, testvec_file, test_type, outpath) {
   # Compute t(X)T
   outfile_XT <- paste0(outpath, "xt_temp")
   pheno_file <- testvec_file
-  cmd_XT <- paste("sh code/calculate_FGr/compute_XT.sh", path_to_test, pheno_file, test_type, outfile_XT, overlap_snps, sep = " ")
+  cmd_XT <- paste("sh code/calculate_FGr/compute_XT_IDs.sh", path_to_test, pheno_file, test_type, outfile_XT, overlap_snps, tp_IDs sep = " ")
   system(cmd_XT)
 
   # Adjust Betas to account for variance in x
@@ -63,6 +64,7 @@ compute_b <- function(path_to_test, testvec_file, test_type, outpath) {
 # Gather parameters
 testID <- fread(tvec_file_lat)
 n <- nrow(testID)
+
 
 # Compute b for latitude
 r_lat = compute_b(path_to_test = test_prefix, testvec_file = tvec_file_lat, test_type = "latitude", outpath = out_prefix)

@@ -3,7 +3,7 @@
 
 args=commandArgs(TRUE)
 
-if(length(args)<4){stop("Rscript get_LatLong_Tvec.R <metadata> <psam> <outfile Lat> <outfile Long>")}
+if(length(args)<5){stop("Rscript get_LatLong_Tvec.R <metadata> <psam> <outfile Lat> <outfile Long>")}
 
 suppressWarnings(suppressMessages({
   library(data.table)
@@ -14,6 +14,7 @@ md_file = args[1]
 psam_file = args[2]
 outfile_lat = args[3]
 outfile_long = args[4]
+outfile_IDs = args[5]
 
 # Read in metadata
 dfMeta <- fread(md_file)
@@ -30,7 +31,9 @@ df <- df %>% filter(region %in% c("CENTRAL_SOUTH_ASIA", "EUROPE",  "MIDDLE_EAST"
 # Set up outfiles
 dfLat <- df %>% select("#IID", "latitude")
 dfLong <- df %>% select("#IID", "longitude")
+dfIDs <- df %>% select("#IID")
 
 # Save output
 fwrite(dfLat,outfile_lat, row.names = F, col.names = T, quote = F, sep = "\t")
 fwrite(dfLong,outfile_long, row.names = F, col.names = T, quote = F, sep = "\t")
+fwrite(dfIDs,outfile_IDs, row.names = F, col.names = T, quote = F, sep = "\t")
