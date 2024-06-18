@@ -28,7 +28,7 @@ print("HI")
 
 rule all:
     input:
-      expand("data/pga_paper/{rep}/r/Lat_chr{chr}.rvec", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
+      expand("data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 
 #expand("plots/pga_paper/{rep}/error.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 #expand("plots/pga_paper/{rep}/q.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
@@ -51,19 +51,7 @@ rule get_ID_lists:
         Rscript code/PGA_paper/IDs_ALL.R  {input.sex} {input.batch} {input.age} {input.genotyped} {input.phenotyped} {input.withdraw} {output.gwas}
         """
 
-# Get overlapping SNPs
-
-rule get_overlapping_snps:
-    input:
-        "data/hgdp/hgdp-all/ALL/variants/overlappingSNPs_chr{chr}.txt"
-    output:
-        "data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt"
-    shell:
-        """
-        cp {input} {output}
-        """
-
-# Compute genotype contrasts
+# Get test vector
 
 rule get_TestVector:
     input:
@@ -77,6 +65,40 @@ rule get_TestVector:
         """
         Rscript code/PGA_paper/get_LatLong_Tvec.R {input.metadata} {input.psam} {output.Lat} {output.Long} {output.IDs}
         """
+
+# Get overlapping SNPs
+
+rule HGDP_Eurasia_freq:
+    input:
+        psam="data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}.psam",
+        pvar="data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}.pvar",
+        pgen="data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}.pgen",
+        IDs = "data/pga_paper/{rep}/ids/test.ids"
+    output:
+	      freq="data/hgdp/plink2-files/Eurasia/hgdp_wgs.20190516.full.chr{chr}.afreq"
+    params:
+        prefix_in="data/hgdp/plink2-files/hgdp_wgs.20190516.full.chr{chr}",
+        prefix_out="data/hgdp/plink2-files/Eurasia/hgdp_wgs.20190516.full.chr{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --keep {input.IDs} \
+	      --freq \
+        --out {params.prefix_out}
+        """
+
+rule get_overlapping_snps:
+    input:
+        freq_hgdp="data/hgdp/plink2-files/Eurasia/hgdp_wgs.20190516.full.chr{chr}.afreq",
+	      freq_ukbb="data/ukbb/{gwas}/variants/ukb_imp_chr{chr}_v3.afreq"
+    output:
+        "data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/hgdp/overlapping_snps.R {input.freq_ukbb} {input.freq_hgdp} {output}
+        """
+
+# Get genotype contrasts
 
 rule compute_r:
     input:
