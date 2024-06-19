@@ -15,7 +15,7 @@ for i in range(1, nPART+1):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/grm/{subset}/sparseGRM.grm.sp",chr=CHR, subset=SUBSET, npart=nPART, parts=PARTS)
+        expand("/scratch/jgblanc/ukbb/grm/{subset}/sp_grm.part_{npart}_{parts}.grm.bin" ,chr=CHR, subset=SUBSET, npart=nPART, parts=PARTS)
 
 
 ## UKBB Genotype data processing
@@ -151,6 +151,9 @@ rule get_GRM_pruned_snps:
         prefix_out="/scratch/jgblanc/ukbb/plink2-files-grm/{subset}/ukb_imp_chr{chr}_v3",
         prefix_in="/scratch/jgblanc/ukbb/plink2-files/{subset}/ukb_imp_chr{chr}_v3"
     threads: 16
+    resources:
+        mem_mb=38000,
+        time="06:00:00"
     shell:
         """
 	      plink2 --pfile {params.prefix_in} \
