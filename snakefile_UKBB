@@ -2,7 +2,7 @@
 CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
-SUBSET=["WBS"]
+SUBSET=["ALL"]
 nPART=250
 PARTS = []
 for i in range(1, nPART+1):
@@ -15,7 +15,7 @@ for i in range(1, nPART+1):
 
 rule all:
     input:
-        expand("/scratch/jgblanc/ukbb/plink2-files/WBS/ukb_imp_chr{chr}_v3.psam",chr=CHR, subset=SUBSET, npart=nPART, parts=PARTS)
+        expand("/scratch/jgblanc/ukbb/grm/{subset}/sparseGRM.grm.sp",chr=CHR, subset=SUBSET, npart=nPART, parts=PARTS)
 
 
 ## UKBB Genotype data processing
