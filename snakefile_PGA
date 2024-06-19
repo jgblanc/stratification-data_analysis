@@ -10,7 +10,8 @@ CONTRASTS = ["Lat", "Long"]
 PC = [0,40]
 COVAR = ["no-FGr", "FGr-LOCO"]
 #PHENOTYPE=[ "StandingHeight_50"]
-PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+#PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+PHENOTYPE = ["BMI_Normalized_21001", "PlateletCount_Normalized_30080", "Triglycerides_Normalized_30870", "StandingHeight_Normalized_50"]
 PVALUE_THRESHOLD = "1e-5"
 #print(CONTRASTS)
 
@@ -318,7 +319,7 @@ rule assemble_quant_covars_FGr_PCA:
 
 rule run_fastGWA:
     input:
-      pheno="data/phenotypes/{phenotype}.txt",
+      pheno="data/phenotypes/normalized/{phenotype}.txt",
       qcovar="output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
       gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
       overlap_snps="data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt",
@@ -359,6 +360,7 @@ rule assign_snps_to_blocks:
     shell:
         """
         Rscript code/pga_test/assign_snps_to_blocks_LR.R {input.ldBlocks} {input.ss} {input.r} {output.betas} {params.pt}
+	rm {input.ss}
         """
 
 rule concat_snps:
@@ -369,6 +371,7 @@ rule concat_snps:
     shell:
         """
         cat {input} > {output}
+	rm {input}
         """
 
 # Calculate q
