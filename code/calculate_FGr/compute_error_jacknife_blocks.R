@@ -54,11 +54,10 @@ print(paste0("M is ", M))
 
 # Compute D
 FGr_hat <- apply(data, 1, sum) * (1/L)
-D <- t(FGr_hat) %*% FGr_hat
+D <- t(FGr_hat) %*% FGr_hat * (L^2)
 
 # Expected D
-expD <- (M-1) / (L)
-
+expD <- (M-1)
 
 # Compute LOCO
 nblocks <- ncol(data)
@@ -71,11 +70,11 @@ for (i in 1:nblocks) {
   loco <- data[,-i]
 
   # Compute loco FGR
-  FGr_loco <- apply(loco, 1, sum,na.rm=TRUE) * (1/L)
+  FGr_loco <- apply(loco, 1, sum,na.rm=TRUE) * (1/L) # Fix to get SNPs without block
   allFGrs[,i] <- FGr_loco
 
   # Compute Loco D
-  D_loco <- t(FGr_loco) %*% FGr_loco
+  D_loco <- t(FGr_loco) %*% FGr_loco * (L^2) # Fix to get SNPs without block
   allDs[i] <- D_loco
 
 }
@@ -104,10 +103,14 @@ pval <- pnorm(abs(D -expD) ,mean =0, sd = sqrt(varD), lower.tail = FALSE) * 2
 varFGr <- var(FGr_hat, na.rm = TRUE)
 error <- jkVar / varFGr
 
+# Find Z
+Z <- D / ((M-1) * L)
+
+
 # Make output table
-dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 7))
-colnames(dfOut) <- c("D","ExpD", "varD", "pvalD", "jkVar", "varFGr", "error")
-dfOut[1,] <- c(D,expD,varD,pval,jkVar,varFGr,error)
+dfOut <- as.data.frame(matrix(NA, nrow = 1, ncol = 8))
+colnames(dfOut) <- c("D","ExpD", "varD", "pvalD","Z", "jkVar", "varFGr", "error")
+dfOut[1,] <- c(D,expD,varD,pval,Z, jkVar,varFGr,error)
 fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
 
 

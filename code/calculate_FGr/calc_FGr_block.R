@@ -64,8 +64,8 @@ print(paste0("Now r has", nrow(r), " rows"))
 
 # Compute GWAS genotype counts of all SNPs
 selected_snps <- r %>% select("ID")
-snps_file =  paste0(out_prefix,"_allSNPs.txt")
-fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
+#snps_file =  paste0(out_prefix,"_allSNPs.txt")
+#fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
 outfile_count <- paste0(out_prefix, "G_count")
 cmd_count <- paste("sh code/calculate_FGr/compute_GWAS_count.sh", gwas_prefix, outfile_count, snps_file, sep = " ")
 print(cmd_count)
@@ -81,7 +81,8 @@ length_mc_genos <- length_mc_genos * (1/(m-1))
 
 # Divide r by SD and scale
 r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
-r$BETA <- scale(r$BETA)
+r$BETA <- r$BETA - mean(r$BETA)
+r$BETA <- r$BETA / sqrt(sum(r$BETA))
 r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
 r[is.na(r)] <- 0
 r[is.infinite(r$BETA),3] <- 0
@@ -100,7 +101,7 @@ for (i in 1:numBlocks) {
 
   # Select only snps on that block
   selected_snps <- r_blocks %>% filter(block == block_num) %>% select("ID")
-  snps_file =  paste0(out_prefix,"_", block_num, ".txt")
+  snps_file =  paste0(out_prefix,"_SNPs", block_num, ".txt")
   fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
 
 
@@ -121,7 +122,7 @@ for (i in 1:numBlocks) {
   gwasID[[col_name]] <- FGr
 
   # Remove tmp files
-  cmd <- paste("rm",paste0(out_prefix, "_", block_num, ".txt"), paste0(out_prefix, ".xt_temp.glm.linear*"),  paste0(out_prefix,".gxt_tmp*" ), paste0(out_prefix,"G_count*" ), sep = " ")
+  cmd <- paste("rm", paste0(out_prefix, ".xt_temp.glm.linear*"),  paste0(out_prefix,".gxt_tmp*" ), paste0(out_prefix,"G_count*" ), sep = " ")
   system(cmd)
 
 }

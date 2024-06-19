@@ -772,6 +772,7 @@ pvar <- NewPvar("/Users/jenniferblanc/polygenic_adaptation_stratification/output
 d1 <- NewPgen("/Users/jenniferblanc/polygenic_adaptation_stratification/output/Simulate_Genotypes/4PopSplit/B1/C1/genos-gwas_common.pgen")
 G <- ReadList(d1,seq(1,10905), meanimpute=F)
 G <- G[c(1:100, 1901:2000),sample(1:10905, 500)]
+G <- scale(G, scale = FALSE)
 Gnorm <- scale(G)
 L <- ncol(G)
 M <- nrow(G)
@@ -779,6 +780,7 @@ M <- nrow(G)
 # Simuate R
 r <- runif(L, 0, 1)
 r <- r - mean(r)
+r <- r / apply(G, 2, sd)
 r <- r / sqrt(sum(r^2))
 
 # Do PCA vis SVD
@@ -789,6 +791,7 @@ v <- mySVD$v
 
 # Calculate FGr
 FGr <- Gnorm %*% r *(1/L)
+FGr2 <- G %*% diag(1/apply(G, 2, sd)) %*% r * (1/L)
 
 # Calculate D
 D <-  t(FGr) %*% FGr *(L^2)
@@ -799,7 +802,7 @@ sum(vals^2) * (1/L)
 
 # Variance explained 
 D / ((M-1) * L) 
-
+1/L
 
 ```
 
