@@ -9,8 +9,8 @@ REP = ["B2"]
 CONTRASTS = ["Lat", "Long"]
 PC = [0,40]
 COVAR = ["no-FGr", "FGr-LOCO"]
-PHENOTYPE=[ "StandingHeight_50"]
-#PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
+#PHENOTYPE=[ "StandingHeight_50"]
+PHENOTYPE = [f.split(".")[0] for f in os.listdir("data/phenotypes/normalized/") if f.endswith('.txt')]
 PVALUE_THRESHOLD = "1e-5"
 #print(CONTRASTS)
 
