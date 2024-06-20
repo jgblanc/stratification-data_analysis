@@ -17,6 +17,7 @@ r_file = args[3]
 snps_file = args[4]
 ldFile = args[5]
 outfile = args[6]
+outfile_snps = args[7]
 
 
 # Read in GWAS individuals
@@ -92,6 +93,9 @@ fwrite(r, paste0(out_prefix, "_scoringWeights.txt"), row.names = F, col.names = 
 
 # Loop through blocks and calculate FGr for each block
 numBlocks <- length(unique(r_blocks$block))
+dfSNPs <- as.data.frame(matrix(NA, ncol = 2, nrow = numBlocks))
+colnames(dfSNPs) <- c("Block", "nSNP")
+print(dfSNPs)
 for (i in 1:numBlocks) {
 
 
@@ -104,6 +108,11 @@ for (i in 1:numBlocks) {
   snps_file =  paste0(out_prefix,"_SNPs_", block_num, ".txt")
   fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
 
+  # Save number of SNPs
+  nsnp_in_block <- nrow(selected_snps)
+  dfSNPs[i,1] <- block_num
+  dfSNPs[i,2] <- nsnp_in_block
+  print(dfSNPs)
 
   # Compute FGr
   cmd_b <- paste("sh code/calculate_FGr/GWAS_score.sh",
@@ -122,7 +131,7 @@ for (i in 1:numBlocks) {
   gwasID[[col_name]] <- FGr
 
   # Remove tmp files
-  cmd <- paste("rm", paste0(out_prefix, ".xt_temp.glm.linear*"),  paste0(out_prefix,".gxt_tmp*" ), paste0(out_prefix,"G_count*" ), sep = " ")
+  cmd <- paste("rm", paste0(out_prefix,"_SNPs_", block_num, ".txt"),  paste0(out_prefix,".gxt_tmp*" ), paste0(out_prefix,"G_count*" ), sep = " ")
   system(cmd)
 
 }
@@ -130,4 +139,5 @@ for (i in 1:numBlocks) {
 
 # Save output
 fwrite(gwasID, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
+fwrite(dfSNPs, outfile_snps, row.names = F, col.names = T, quote = F, sep = "\t")
 
