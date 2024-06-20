@@ -82,7 +82,7 @@ length_mc_genos <- length_mc_genos * (1/(m-1))
 # Divide r by SD and scale
 r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
 r$BETA <- r$BETA - mean(r$BETA)
-r$BETA <- r$BETA / sqrt(sum(r$BETA))
+r$BETA <- r$BETA / sqrt(sum(r$BETA^2))
 r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
 r[is.na(r)] <- 0
 r[is.infinite(r$BETA),3] <- 0
@@ -101,7 +101,7 @@ for (i in 1:numBlocks) {
 
   # Select only snps on that block
   selected_snps <- r_blocks %>% filter(block == block_num) %>% select("ID")
-  snps_file =  paste0(out_prefix,"_SNPs", block_num, ".txt")
+  snps_file =  paste0(out_prefix,"_SNPs_", block_num, ".txt")
   fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
 
 

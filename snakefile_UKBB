@@ -196,8 +196,8 @@ rule make_sparse_grm_parts:
         "/scratch/jgblanc/ukbb/grm/{subset}/sp_grm.part_{npart}_{parts}.grm.bin"
     threads: 16
     resources:
-        mem_mb=7000,
-        walltime="00:03:00:00"
+        mem_mb=38000,
+        time="24:00:00"
     params:
         prefix_out = "/scratch/jgblanc/ukbb/grm/{subset}/sp_grm"
     shell:
