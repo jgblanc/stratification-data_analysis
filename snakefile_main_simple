@@ -22,7 +22,7 @@ def get_chr_type(x):
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/{contrasts}_{chr}_SNPcount.txt"", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/{contrasts}_{chr}_SNPcount.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 
 ## Compute FGr
