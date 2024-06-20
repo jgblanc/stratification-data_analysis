@@ -34,20 +34,19 @@ data <- as.data.frame(data)
 print(dim(data))
 
 # Find total number of SNPs
-snp_nums <- rep(NA,22)
-snp_nums[1] <- nrow(fread(paste0(snp_prefix, "_1_allSNPs.txt")))
-print(snp_nums)
+snp_nums <- nrow(fread(paste0(snp_prefix, "_1_SNPcount.txt")))
 for (i in 2:22) {
 
   print(paste0("chr num ",i))
   # Read in new chromosome
-  snp_nums[i] <- nrow(fread(paste0(snp_prefix,"_", i, "_allSNPs.txt")))
-  print(snp_nums)
+  snp_nums <- rbind(snp_nums, fread(paste0(snp_prefix,"_", i, "_SNPcount.txt")))
 
 }
+print(dim(snp_nums))
+print(snp_nums)
 
 # Set parameters
-L <- sum(snp_nums)
+L <- sum(snp_nums$nSNP)
 M <- nrow(data)
 print(paste0("L is ", L))
 print(paste0("M is ", M))
@@ -69,12 +68,17 @@ for (i in 1:nblocks) {
   # Drop ith  column
   loco <- data[,-i]
 
+  # Drop block nsnps
+  block_snps <- snp_nums[i, 2]
+  locoL <- L - block_snps
+  print(locoL)
+
   # Compute loco FGR
-  FGr_loco <- apply(loco, 1, sum,na.rm=TRUE) * (1/L) # Fix to get SNPs without block
+  FGr_loco <- apply(loco, 1, sum,na.rm=TRUE) * (1/locoL) # Fix to get SNPs without block
   allFGrs[,i] <- FGr_loco
 
   # Compute Loco D
-  D_loco <- t(FGr_loco) %*% FGr_loco * (L^2) # Fix to get SNPs without block
+  D_loco <- t(FGr_loco) %*% FGr_loco * (locoL^2) # Fix to get SNPs without block
   allDs[i] <- D_loco
 
 }

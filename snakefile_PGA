@@ -374,6 +374,7 @@ rule concat_snps:
 	rm {input}
         """
 
+
 # Calculate q
 
 rule pga_test:
