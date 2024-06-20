@@ -65,8 +65,8 @@ print(paste0("Now r has", nrow(r), " rows"))
 
 # Compute GWAS genotype counts of all SNPs
 selected_snps <- r %>% select("ID")
-#snps_file =  paste0(out_prefix,"_allSNPs.txt")
-#fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
+snps_file =  paste0(out_prefix,"_allSNPs.txt")
+fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
 outfile_count <- paste0(out_prefix, "G_count")
 cmd_count <- paste("sh code/calculate_FGr/compute_GWAS_count.sh", gwas_prefix, outfile_count, snps_file, sep = " ")
 print(cmd_count)
