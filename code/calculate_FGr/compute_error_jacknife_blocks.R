@@ -34,7 +34,7 @@ data <- as.data.frame(data)
 print(dim(data))
 
 # Find total number of SNPs
-snp_nums <- nrow(fread(paste0(snp_prefix, "_1_SNPcount.txt")))
+snp_nums <- fread(paste0(snp_prefix, "_1_SNPcount.txt"))
 for (i in 2:22) {
 
   print(paste0("chr num ",i))
@@ -70,11 +70,12 @@ for (i in 1:nblocks) {
 
   # Drop block nsnps
   block_snps <- snp_nums[i, 2]
-  locoL <- L - block_snps
+  locoL <- as.integer(L - block_snps)
   print(locoL)
 
   # Compute loco FGR
   FGr_loco <- apply(loco, 1, sum,na.rm=TRUE) * (1/locoL) # Fix to get SNPs without block
+  print(str(FGr_loco))
   allFGrs[,i] <- FGr_loco
 
   # Compute Loco D
