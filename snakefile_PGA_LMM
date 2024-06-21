@@ -3,8 +3,8 @@ CHR =[]
 for i in range(1, 23):
   CHR.append(str(i))
 DATASET = ["pga_paper"]
-NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000"]
-#NSNP = ["L-1000000"]
+#NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000"]
+NSNP = ["L-1000000"]
 REP = ["B2"]
 CONTRASTS = ["Lat", "Long"]
 PC = [0,40]
@@ -30,8 +30,7 @@ print("HI")
 
 rule all:
     input:
-      expand("plots/pga_paper/{rep}/error.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS),
-      expand("plots/pga_paper/{rep}/q.txt", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
+      expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LMM/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
 
 
 
@@ -326,13 +325,14 @@ rule run_fastGWA:
       covar="output/run_gwas/fixed_covars.txt",
       IDs="data/pga_paper/{rep}/ids/gwas.ids"
     output:
-      "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
+      "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LMM/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
-        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LR/{covar}_{contrasts}_{chr}-PC{pc}",
-        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
+        prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LMM/{covar}_{contrasts}_{chr}-PC{pc}",
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_grm = "/scratch/jgblanc/ukbb/grm/ALL/sparseGRM"
     resources:
-        mem_mb=10000,
-        time="01:30:00"
+        mem_mb=60000,
+        time="03:00:00"
     shell:
         """
         gcta  --pheno {input.pheno} \
@@ -340,9 +340,9 @@ rule run_fastGWA:
         --qcovar {input.qcovar} \
         --covar {input.covar} \
         --extract {input.overlap_snps} \
-        --fastGWA-lr \
+        --fastGWA-mlm --h2-limit 2.5 --maf 0 --geno 1  \
+        --grm-sparse {params.prefix_grm} --pfile {params.prefix_plink} \
         --threads {threads} \
-        --pfile {params.prefix_plink} \
         --out {params.prefix_out}
         """
 
