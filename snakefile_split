@@ -1,0 +1,34 @@
+# Snakefile to run full data analysis with any set of constrasts
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
+DATASET = ["split"]
+SUBDATASET = ["awbs-small"]
+CONTRASTS = ["afr-wbs"]
+GWAS=["afr-wbs-small"]
+CHRTYPE_GWAS = ["chr-even", "chr-odd", "chr-all"]
+CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
+
+rule all:
+    input:
+        expand("data/{data}/{subdataset}/ids/gwas.ids", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+
+# Sample individuals for panels
+
+rule get_ID_lists:
+    input:
+        sex="data/phenotypes/genetic_sex_22001.txt",
+        batch="data/phenotypes/genotype_measurement_batch_22000.txt",
+        age="data/phenotypes/age_at_recruitment_21022.txt",
+        genotyped="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr22_v3.psam",
+        phenotyped = "data/phenotypes/StandingHeight_50.txt",
+        wbs="data/ukbb/WBS.ids",
+        african="data/ukbb/african.ids",
+        withdraw = "data/ukbb/withdraw69046_241_20240328.txt"
+    output:
+        gwas="data/{data}/{subdataset}/ids/gwas.ids",
+        test="data/{data}/{subdataset}/ids/test.ids"
+    shell:
+        """
+        Rscript code/split/get_IDs.R {input.sex} {input.batch} {input.age} {input.genotyped} {output.gwas} {output.test} {input.wbs} {input.african} {input.phenotyped} {input.withdraw}
+        """

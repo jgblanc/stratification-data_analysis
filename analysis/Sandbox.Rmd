@@ -24,7 +24,31 @@ df <- ALL %>% filter(!IID %in% WBS$IID) %>% filter(EthnicBackground_21000 %in% c
 dfOut <- df[,1:2]
 
 fwrite(dfOut,"~/Downloads/nonWBS-White.ids", row.names = F, col.names = T, quote = F, sep = "\t")
+
+# Get "African" IDs 
+african <- ALL %>% filter(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003))
+fwrite(african,"~/Downloads/african.ids", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
+
+
+
+
+```{r}
+vecs <- fread("~/Downloads/pca.eigenvec")
+
+df <- inner_join(vecs, ALL) %>% filter(EthnicBackground_21000 %in% c(1001, 1002,1003, 2001, 2002, 2003, 2004, 3001, 3002, 3003, 3004, 4001, 4002, 4003))
+
+df <- inner_join(vecs, ALL) %>% filter(EthnicBackground_21000 %in% c(1001, 1002,1003, 4001, 4002, 4003))
+
+ggplot(df , aes(x = PC1, y=PC2, color =EthnicBackground_21000 )) + geom_point()
+```
+
+
+
+
+
+
+
 
 
 
@@ -301,6 +325,7 @@ pl <- ggpubr::ggarrange(pl1, pl2, nrow = 1, widths = c(1, 1))
 ggsave("~/Desktop/SDSSimpleWBS.png",pl, width = 15, height = 7)
 
 ```
+
 
 
 
