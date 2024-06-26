@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
 
 rule all:
     input:
-        expand("data/{data}/{subdataset}/ids/gwas.ids", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("data/{dataset}/{subdataset}/ids/gwas.ids", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 # Sample individuals for panels
 
@@ -26,8 +26,8 @@ rule get_ID_lists:
         african="data/ukbb/african.ids",
         withdraw = "data/ukbb/withdraw69046_241_20240328.txt"
     output:
-        gwas="data/{data}/{subdataset}/ids/gwas.ids",
-        test="data/{data}/{subdataset}/ids/test.ids"
+        gwas="data/{dataset}/{subdataset}/ids/gwas.ids",
+        test="data/{dataset}/{subdataset}/ids/test.ids"
     shell:
         """
         Rscript code/split/get_IDs.R {input.sex} {input.batch} {input.age} {input.genotyped} {output.gwas} {output.test} {input.wbs} {input.african} {input.phenotyped} {input.withdraw}

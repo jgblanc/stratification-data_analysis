@@ -11,7 +11,7 @@ suppressWarnings(suppressMessages({
 
 sex = args[1]
 batch = args[2]
-north = args[3]
+age = args[3]
 genotyped = args[4]
 outGWAS = args[5]
 outTest = args[6]
@@ -45,6 +45,6 @@ df_gwas <- rbind(df_african_gwas, df_wbs_gwas) %>% select("#FID", "IID")
 fwrite(df_test, outTest ,row.names=F,quote=F,sep="\t", col.names = T)
 
 ## Select gwas panel
-fwrite(df_GWAS, outGWAS ,row.names=F,quote=F,sep="\t", col.names = T)
+fwrite(df_gwas, outGWAS ,row.names=F,quote=F,sep="\t", col.names = T)
 
 
