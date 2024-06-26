@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 DATASET = ["pga_paper"]
 #NSNP = ["L-1000" ,"L-3162", "L-10000","L-31623",  "L-100000","L-316228", "L-1000000"]
 NSNP = ["L-1000000"]
@@ -30,7 +30,7 @@ print("HI")
 
 rule all:
     input:
-      expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LMM/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA"", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS)
+      expand("/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LMM/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA", rep=REP, chr=CHR, nsnp=NSNP, contrasts=CONTRASTS, phenotype=PHENOTYPE, covar=COVAR, pc=PC)
 
 
 
@@ -318,21 +318,25 @@ rule assemble_quant_covars_FGr_PCA:
 
 rule run_fastGWA:
     input:
-      pheno="data/phenotypes/normalized/{phenotype}.txt",
+      pheno="data/phenotypes/{phenotype}.txt",
       qcovar="output/run_gwas/pga_paper/{rep}/{nsnp}/covariates/{covar}_{contrasts}_{chr}-PC{pc}.txt",
       gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
       overlap_snps="data/pga_paper/variants/{rep}/overlappingSNPs_chr{chr}.txt",
       covar="output/run_gwas/fixed_covars.txt",
-      IDs="data/pga_paper/{rep}/ids/gwas.ids"
+      IDs="data/pga_paper/{rep}/ids/gwas.ids",
+      sp="/scratch/jgblanc/ukbb/grm/ALL/sparseGRM.grm.sp",
+      id="/scratch/jgblanc/ukbb/grm/ALL/sparseGRM.grm.id"      
     output:
       "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LMM/{covar}_{contrasts}_{chr}-PC{pc}.fastGWA",
     params:
         prefix_out = "/scratch/jgblanc/stratification-data_analysis/output/run_gwas/pga_paper/{rep}/{nsnp}/{phenotype}/raw_LMM/{covar}_{contrasts}_{chr}-PC{pc}",
         prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
         prefix_grm = "/scratch/jgblanc/ukbb/grm/ALL/sparseGRM"
-    resources:
-        mem_mb=60000,
-        time="03:00:00"
+#    threads: 10
+#    resources:
+#        mem_mb=400000,
+#        time="10:00:00",
+#	partition="tier2q"
     shell:
         """
         gcta  --pheno {input.pheno} \
@@ -342,7 +346,7 @@ rule run_fastGWA:
         --extract {input.overlap_snps} \
         --fastGWA-mlm --h2-limit 2.5 --maf 0 --geno 1  \
         --grm-sparse {params.prefix_grm} --pfile {params.prefix_plink} \
-        --threads {threads} \
+        --thread-num 10 \
         --out {params.prefix_out}
         """
 
