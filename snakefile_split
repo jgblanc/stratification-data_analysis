@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
 
 rule all:
     input:
-        expand("data/{dataset}/{subdataset}/variantFreq/gwas.afreq", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("data/{dataset}/{subdataset}/variantFreq/gwas_{chr}.afreq", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 # Sample individuals for panels
 
@@ -40,12 +40,12 @@ rule get_AF:
         gwas="data/{dataset}/{subdataset}/ids/gwas.ids",
         test="data/{dataset}/{subdataset}/ids/test.ids"
     output:
-        gwas="data/{dataset}/{subdataset}/variantFreq/gwas.afreq",
-        test="data/{dataset}/{subdataset}/variantFreq/test.afreq"
+        gwas="data/{dataset}/{subdataset}/variantFreq/gwas_{chr}.afreq",
+        test="data/{dataset}/{subdataset}/variantFreq/test_{chr}.afreq"
     params:
         prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
-        prefix_out_gwas="data/{dataset}/{subdataset}/variantFreq/gwas",
-        prefix_out_test="data/{dataset}/{subdataset}/variantFreq/test"
+        prefix_out_gwas="data/{dataset}/{subdataset}/variantFreq/gwas_{chr}",
+        prefix_out_test="data/{dataset}/{subdataset}/variantFreq/test_{chr}"
     shell:
         """
         plink2 --pfile {params.prefix_in} \
