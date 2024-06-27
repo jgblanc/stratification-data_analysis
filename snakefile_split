@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
 
 rule all:
     input:
-        expand("data/{dataset}/{subdataset}/variantFreq/gwas_{chr}.afreq", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("data/{dataset}/{subdataset}/variants/overlappingSNPs_chr{chr}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 # Sample individuals for panels
 
@@ -61,4 +61,17 @@ rule get_AF:
 	      --threads 8 \
         --memory 38000 \
         --out {params.prefix_out_test}
+        """
+
+# Get overlapping SNPs
+
+rule get_overlapping_snps:
+    input:
+        freq_test="data/{dataset}/{subdataset}/variantFreq/test_{chr}.afreq",
+	      freq_gwas="data/{dataset}/{subdataset}/variantFreq/gwas_{chr}.afreq"
+    output:
+        "data/{dataset}/{subdataset}/variants/overlappingSNPs_chr{chr}.txt"
+    shell:
+        """
+        Rscript code/hgdp/overlapping_snps.R {input.freq_gwas} {input.freq_test} {output}
         """
