@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
 
 rule all:
     input:
-        expand("data/{dataset}/{subdataset}/variants/overlappingSNPs_chr{chr}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("data/{dataset}/{subdataset}/popAF/popAF_{chr}.afreq"", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 # Sample individuals for panels
 
@@ -74,4 +74,27 @@ rule get_overlapping_snps:
     shell:
         """
         Rscript code/hgdp/overlapping_snps.R {input.freq_gwas} {input.freq_test} {output}
+        """
+
+# Get allele freqeuncy contrasts
+
+rule get_popAF:
+    input:
+        test="data/{dataset}/{subdataset}/ids/test.ids",
+        snps="data/{dataset}/{subdataset}/variants/overlappingSNPs_chr{chr}.txt"
+    output:
+        "data/{dataset}/{subdataset}/popAF/popAF_{chr}.afreq"
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out="data/{dataset}/{subdataset}/popAF/popAF_{chr}"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --extract {input.snps}
+        --freq \
+        --keep {input.test} \
+        --within {input.test} \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
         """
