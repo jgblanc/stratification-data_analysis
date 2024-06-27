@@ -68,7 +68,7 @@ rule compute_FGr_block:
         out_prefix = "output/calculate_FGr/{dataset}/{subdataset}/{gwas}/blocks/{contrasts}_{chr}",
     shell:
         """
-        Rscript code/calculate_FGr/calc_FGr_block.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output.FGr} {output.snps}
+        Rscript code/calculate_FGr/calc_FGr_block.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output.FGr} {output.snps} {input.ids}
         """
 
 ## Find block jacknife error in FGr
