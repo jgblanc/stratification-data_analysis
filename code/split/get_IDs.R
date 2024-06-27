@@ -35,14 +35,14 @@ df_african_test <- df_african %>% sample_n(size = 1000)
 df_african_test$POP <- "AFR"
 df_wbs_test <- df_wbs %>% sample_n(size = 1000)
 df_wbs_test$POP <- "WBS"
-df_test <- rbind(df_african_test, df_wbs_test) %>% select("#FID", "IID", african)
+df_test <- rbind(df_african_test, df_wbs_test) %>% select("#FID", "IID", POP)
 
 # Get GWAS
 df_african_gwas <- df_african %>% filter(!IID %in% df_test$IID) %>% sample_n(size = 5000)
 df_african_gwas$POP <- "AFR"
 df_wbs_gwas <- df_wbs %>% filter(!IID %in% df_test$IID) %>% sample_n(size = 5000)
 df_wbs_gwas$POP <- "WBS"
-df_gwas <- rbind(df_african_gwas, df_wbs_gwas) %>% select("#FID", "IID", african)
+df_gwas <- rbind(df_african_gwas, df_wbs_gwas) %>% select("#FID", "IID", POP)
 
 
 ## Select test panel
