@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =["22"]
-#for i in range(1, 23):
-#  CHR.append(str(i))
+CHR =[]
+for i in range(1, 23):
+  CHR.append(str(i))
 DATASET = ["split"]
 SUBDATASET = ["awbs-small"]
 CONTRASTS = ["afr-wbs"]

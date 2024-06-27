@@ -20,7 +20,7 @@ dfWBS <- fread(wbs_file)
 
 # Make new file
 dfOut <- dfAFR %>% select("#CHROM", "ID", "REF", "ALT")
-dfOut$r <- dfAFR$ALT_FREQS - dWBS$ALT_FREQS
+dfOut$r <- dfAFR$ALT_FREQS - dfWBS$ALT_FREQS
 
 ## Save
 fwrite(dfOut, outfile ,row.names=F,quote=F,sep="\t", col.names = T)
