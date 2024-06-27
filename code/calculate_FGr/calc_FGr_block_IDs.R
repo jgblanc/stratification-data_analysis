@@ -119,7 +119,7 @@ for (i in 1:numBlocks) {
   cmd_b <- paste("sh code/calculate_FGr/GWAS_score_ID.sh",
                  gwas_prefix,
                  paste0(out_prefix, "_scoringWeights.txt"),
-                 paste0(out_prefix,".gxt_tmp"), snps_file, gwasIDs, sep = " ")
+                 paste0(out_prefix,".gxt_tmp"), snps_file, gwas_IDs, sep = " ")
   print(cmd_b)
   system(cmd_b)
 
