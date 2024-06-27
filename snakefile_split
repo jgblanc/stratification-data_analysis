@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/{subdataset}/blocks/FGr_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("output/calculate_FGr/{dataset}/{subdataset}/blocks/Var_{contrasts}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 # Sample individuals for panels
 
@@ -143,3 +143,23 @@ rule compute_FGr_block:
         """
         Rscript code/calculate_FGr/calc_FGr_block_IDs.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output.FGr} {output.snps} {input.ids}
         """
+
+# Find block jacknife error in FGr
+
+rule compute_FGr_error:
+    input:
+        FGr = expand("output/calculate_FGr/{{dataset}}/{{subdataset}}/blocks/FGr_{{contrasts}}_{chr}.txt", chr = CHR),
+        SNP_Counts = expand("output/calculate_FGr/{{dataset}}/{{subdataset}}/blocks/{{contrasts}}_{chr}_SNPcount.txt", chr=CHR)
+    output:
+      "output/calculate_FGr/{dataset}/{subdataset}/blocks/Var_{contrasts}.txt"
+    threads: 16
+    resources:
+        mem_mb=100000,
+        time="24:00:00"
+    params:
+      prefix_in = "output/calculate_FGr/{dataset}/{subdataset}/blocks/FGr_{contrasts}",
+      SNP_prefix = "output/calculate_FGr/{dataset}/{subdataset}/blocks/{contrasts}"
+    shell:
+      """
+      Rscript code/calculate_FGr/compute_error_jacknife_blocks.R {params.prefix_in} {output} {params.SNP_prefix}
+      """
