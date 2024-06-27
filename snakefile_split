@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
 
 rule all:
     input:
-        expand("data/{dataset}/{subdataset}/popAF/popAF_{chr}.AFR.afreq", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("data/{dataset}/{subdataset}/r/afr-wbs_chr{chr}.rvec", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 # Sample individuals for panels
 
@@ -48,7 +48,7 @@ rule get_AF:
         prefix_out_test="data/{dataset}/{subdataset}/variantFreq/test_{chr}"
     resources:
         mem_mb=38000,
-        time="00:30:00"	
+        time="00:30:00"
     shell:
         """
         plink2 --pfile {params.prefix_in} \
@@ -93,7 +93,7 @@ rule get_popAF:
         prefix_out="data/{dataset}/{subdataset}/popAF/popAF_{chr}"
     resources:
         mem_mb=38000,
-        time="00:30:00"	
+        time="00:30:00"
     shell:
         """
         plink2 --pfile {params.prefix_in} \
@@ -105,4 +105,17 @@ rule get_popAF:
 	--threads 8 \
         --memory 38000 \
         --out {params.prefix_out}
+        """
+
+# Compute r vectors
+
+rule compute_r:
+    input:
+        afr="data/{dataset}/{subdataset}/popAF/popAF_{chr}.AFR.afreq",
+	      wbs="data/{dataset}/{subdataset}/popAF/popAF_{chr}.WBS.afreq"
+    output:
+        rvec="data/{dataset}/{subdataset}/r/afr-wbs_chr{chr}.rvec"
+    shell:
+        """
+        Rscript code/split/compute_afr-wbs_r.R {input.afr} {input.wbs} {output.rvec}
         """
