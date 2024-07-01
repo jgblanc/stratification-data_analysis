@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
 
 rule all:
     input:
-        expand("output/calculate_FGr/{dataset}/{subdataset}/blocks/Var_{contrasts}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("data/{dataset}/{subdataset}/r/{contrasts}_all_standardized.rvec", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 # Sample individuals for panels
 
@@ -121,6 +121,30 @@ rule compute_r:
         """
 
 # Computer FGr per block
+
+rule standardize_r:
+    input:
+        r=expand("data/{{dataset}}/{{subdataset}}/r/{{contrasts}}_chr{chr}.rvec", chr=CHR),
+        gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen", chr=CHR),
+        overlap_snps=expand("data/{{dataset}}/{{subdataset}}/variants/overlappingSNPs_chr{chr}.txt", chr=CHR),
+        ids = "data/{dataset}/{subdataset}/ids/gwas.ids",
+        ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed"
+    output:
+        r="data/{dataset}/{subdataset}/r/{contrasts}_all_standardized.rvec"
+    threads: 16
+    resources:
+        mem_mb=38000,
+	time="06:00:00"
+    params:
+        gp_prefix = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr",
+        out_prefix = "data/{dataset}/{subdataset}/r/{contrasts}",
+        r_prefix = "data/{dataset}/{subdataset}/r/{contrasts}_chr",
+        snp_prefix = "data/{dataset}/{subdataset}/variants/overlappingSNPs_chr"
+    shell:
+        """
+        Rscript code/calculate_FGr/stardardize_r_IDs.R {params.gp_prefix} {params.out_prefix} {params.r_prefix} {params.snp_prefix} {output.r} {input.ids} {input.ldBlock}
+        """
+
 
 rule compute_FGr_block:
     input:
