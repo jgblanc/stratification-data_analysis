@@ -23,11 +23,11 @@ ALL <- fread("~/Downloads/EthnicBackground_21000.txt")
 df <- ALL %>% filter(!IID %in% WBS$IID) %>% filter(EthnicBackground_21000 %in% c(1, 1001, 1002, 1003))
 dfOut <- df[,1:2]
 
-fwrite(dfOut,"~/Downloads/nonWBS-White.ids", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(dfOut,"~/Downloads/nonWBS-White.ids", row.names = F, col.names = T, quote = F, sep = "\t")
 
 # Get "African" IDs 
 african <- ALL %>% filter(EthnicBackground_21000 %in% c(4, 4001, 4002, 4003))
-fwrite(african,"~/Downloads/african.ids", row.names = F, col.names = T, quote = F, sep = "\t")
+#fwrite(african,"~/Downloads/african.ids", row.names = F, col.names = T, quote = F, sep = "\t")
 ```
 
 

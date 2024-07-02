@@ -1,7 +1,7 @@
 # Snakefile to run full data analysis with any set of constrasts
-CHR =[]
-for i in range(1, 23):
-  CHR.append(str(i))
+CHR =["22"]
+#for i in range(1, 23):
+#  CHR.append(str(i))
 DATASET = ["split"]
 SUBDATASET = ["awbs-small"]
 CONTRASTS = ["afr-wbs"]
@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
 
 rule all:
     input:
-        expand("data/{dataset}/{subdataset}/r/{contrasts}_all_standardized.rvec", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{subdataset}/dosages/dosages_{chr}.traw", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 # Sample individuals for panels
 
@@ -119,6 +119,35 @@ rule compute_r:
         """
         Rscript code/split/compute_afr-wbs_r.R {input.afr} {input.wbs} {output.rvec}
         """
+
+
+# Get sample variance of GWAS panel genotypes
+
+rule get_dosage_file:
+    input:
+        test="data/{dataset}/{subdataset}/ids/gwas.ids",
+        snps="data/{dataset}/{subdataset}/variants/overlappingSNPs_chr{chr}.txt",
+        gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen"
+    output:
+        "/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{subdataset}/dosages/dosages_{chr}.traw"
+    params:
+        prefix_in="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3",
+        prefix_out="/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{subdataset}/dosages/dosages_{chr}"
+    resources:
+        mem_mb=38000,
+        time="00:30:00"
+    shell:
+        """
+        plink2 --pfile {params.prefix_in} \
+        --extract {input.snps} \
+        --keep {input.gwas} \
+        --recode A-transpose \
+	      --threads 8 \
+        --memory 38000 \
+        --out {params.prefix_out}
+        """
+
+
 
 # Computer FGr per block
 
