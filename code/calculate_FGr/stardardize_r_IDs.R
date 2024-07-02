@@ -19,6 +19,7 @@ outfile = args[5]
 gwas_IDs = args[6]
 ldFile = args[7]
 
+num_chr=22
 
 # Read in GWAS individuals
 dfGWAS_IDs <- fread(gwas_IDs)[,1:2]
@@ -28,7 +29,7 @@ print(paste0("m is ", m))
 # Read in and format r for all chromosome
 r_file <- paste0(r_prefix, "1.rvec")
 r <- fread(r_file)
-for (i in 2:22) {
+for (i in 2:num_chr) {
   r_file <- paste0(r_prefix, i, ".rvec")
   tmp <- fread(r_file)
   r <- rbind(r, tmp)
@@ -36,8 +37,8 @@ for (i in 2:22) {
 
 # Read in and format all SNPs
 snp_file <- paste0(snp_prefix, "1.txt")
-dfSnps <- fread(snps_file)
-for (i in 2:22) {
+dfSnps <- fread(snp_file)
+for (i in 2:num_chr) {
   snp_file <- paste0(snp_prefix, i, ".txt")
   tmp <- fread(snp_file)
   dfSnps <- rbind(dfSnps, tmp)
@@ -61,7 +62,6 @@ assign_SNP_to_block <- function(CHR, BP, block = ld) {
 
   # Filter blocks based on snp
   block_chr <- block %>% filter(chr == CHR)
-  print(block_chr)
   first_start <- as.numeric(block_chr[1, "start"])
   block_bp <- block_chr %>% filter( (start < BP & stop >= BP) | BP == first_start)
 
@@ -71,19 +71,20 @@ assign_SNP_to_block <- function(CHR, BP, block = ld) {
 }
 
 # Add block info - takes a while
-r_blocks <- r_blocks %>%
-  mutate(block = apply(., MARGIN = 1, FUN = function(params)assign_SNP_to_block(as.numeric(params[2]), as.numeric(params[3])))) %>%
-  drop_na()
+#r_blocks <- r_blocks %>%
+#  mutate(block = apply(., MARGIN = 1, FUN = function(params)assign_SNP_to_block(as.numeric(params[2]), as.numeric(params[3])))) %>%
+#  drop_na()
+r_blocks$block <- rep(1, nrow(r_blocks))
 print(paste0("Now r blocks has", nrow(r_blocks), " rows"))
 
 
 # Compute GWAS genotype counts of all SNPs by chromosome
 outlist <- list()
-for (i in 1:22) {
+for (i in 1:num_chr) {
 
   # Save snps on chromosome
-  selected_snps <- r_blocks %>% filter(chr == i) %>% select("ID")
-  r_chr <- r_blocks %>% filter(chr == i)
+  selected_snps <- r_blocks %>% filter(CHR == i) %>% select("ID")
+  r_chr <- r_blocks %>% filter(CHR == i)
   snps_file =  paste0(out_prefix, "_chr", i,"_allSNPs.txt")
   fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
 
@@ -95,7 +96,7 @@ for (i in 1:22) {
   system(cmd_count)
 
   # Calculate variance of GWAS panel genotypes from counts
-  count_plink <- fread(paste0(out_prefix, "G_count.gcount"))
+  count_plink <- fread(paste0(outfile_count, ".gcount"))
   nOBS <- (count_plink$HOM_REF_CT + count_plink$HET_REF_ALT_CTS + count_plink$TWO_ALT_GENO_CTS)
   counts <- (count_plink$HOM_REF_CT * 0) + (count_plink$HET_REF_ALT_CTS * 1) + (count_plink$TWO_ALT_GENO_CTS * 2)
   mean_gc <- counts / nOBS
@@ -103,14 +104,20 @@ for (i in 1:22) {
   length_mc_genos <- length_mc_genos * (1/(m-1))
 
   # Store variance
+  print(nrow(r_chr))
+  print(length(length_mc_genos))
   r_chr$geno_var <- length_mc_genos
   outlist[[i]] <- r_chr
+
+  # Remove file
+  cmd_rm <- paste0("rm ",outfile_count, ".gcount")
+  system(cmd_rm)
 }
 
 # Scale all R values
 ## Unpack list
 dfOut <- do.call("rbind", outlist)
-print(dfOut)
+print(nrow(dfOut))
 # Divide r by SD and scale
 dfOut$BETA <- dfOut$BETA * (1/sqrt(dfOut$geno_var))
 dfOut$BETA <- dfOut$BETA - mean(dfOut$BETA)

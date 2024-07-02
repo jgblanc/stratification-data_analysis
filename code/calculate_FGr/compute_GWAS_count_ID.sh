@@ -8,6 +8,8 @@ plink2 \
     --pfile $pfile_path \
     --extract $overlap_snps \
     --geno-counts \
+    --freq \
+    --nonfounders \
     --keep $id \
     --memory 100000 \
     --threads 16 \

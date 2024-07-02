@@ -128,7 +128,7 @@ rule standardize_r:
         gp_genos=expand("/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen", chr=CHR),
         overlap_snps=expand("data/{{dataset}}/{{subdataset}}/variants/overlappingSNPs_chr{chr}.txt", chr=CHR),
         ids = "data/{dataset}/{subdataset}/ids/gwas.ids",
-        ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed"
+        ldBlock="data/LD_blocks/fourier_ls-all_parsed.bed"
     output:
         r="data/{dataset}/{subdataset}/r/{contrasts}_all_standardized.rvec"
     threads: 16
