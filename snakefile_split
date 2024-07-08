@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
 
 rule all:
     input:
-        expand("/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{subdataset}/dosages/dosages_{chr}.traw", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("data/{dataset}/{subdataset}/gwas_variance/variance.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 # Sample individuals for panels
 
@@ -147,6 +147,17 @@ rule get_dosage_file:
         --out {params.prefix_out}
         """
 
+rule calculate_GWAS_variance:
+    input:
+        "/scratch/jgblanc/stratification-data_analysis/data/{dataset}/{subdataset}/dosages/dosages_{chr}.traw"
+    output:
+        "data/{dataset}/{subdataset}/gwas_variance/variance.txt"
+    resources:
+	      time="06:00:00"
+    shell:
+        """
+        Rscript code/calculate_FGr/compute_GWAS_variance.R {input} {output}
+        """
 
 
 # Computer FGr per block
