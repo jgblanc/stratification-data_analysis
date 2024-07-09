@@ -48,5 +48,5 @@ while(TRUE) {
 
 # Save output
 dfOut <- dfOut[3:nrow(dfOut), ]
-fwrite(dfOut, outfile, row.names = F, col.names = T, quote = F, sep = "\t")
+fwrite(dfOut, outFile, row.names = F, col.names = T, quote = F, sep = "\t")
 
