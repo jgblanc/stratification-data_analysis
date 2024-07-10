@@ -13,7 +13,7 @@ suppressWarnings(suppressMessages({
 
 r_prefix = args[1]
 variance_prefix = args[2]
-oufile = args[3]
+outfile = args[3]
 
 num_chr=22
 
