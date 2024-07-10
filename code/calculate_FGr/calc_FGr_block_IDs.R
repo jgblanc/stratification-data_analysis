@@ -19,6 +19,8 @@ ldFile = args[5]
 outfile = args[6]
 outfile_snps = args[7]
 gwas_IDs = args[8]
+chr_num = as.numeric(args[9])
+print(paste0("This Chr num is ", chr_num))
 
 
 # Read in GWAS individuals
@@ -35,7 +37,7 @@ colnames(r) <- c("ID", "A1", "BETA")
 
 
 # Separate ID into CHR and BP
-r_blocks <- r %>% separate("ID", into = c("CHR", "BP"), sep = ":", remove = FALSE)
+r_blocks <- r %>% separate("ID", into = c("CHR", "BP"), sep = ":", remove = FALSE) %>% filter(CHR == chr_num)
 print(paste0("r has", nrow(r), " rows"))
 
 # Read in LD block file
@@ -64,31 +66,6 @@ print(paste0("Now r blocks has", nrow(r_blocks), " rows"))
 r <- r %>% filter(ID %in% r_blocks$ID)
 print(paste0("Now r has", nrow(r), " rows"))
 
-# Compute GWAS genotype counts of all SNPs
-selected_snps <- r %>% select("ID")
-snps_file =  paste0(out_prefix,"_allSNPs.txt")
-fwrite(selected_snps, snps_file, row.names = F, col.names = T, quote = F, sep = "\t")
-outfile_count <- paste0(out_prefix, "G_count")
-cmd_count <- paste("sh code/calculate_FGr/compute_GWAS_count_ID.sh", gwas_prefix, outfile_count, snps_file, gwas_IDs, sep = " ")
-print(cmd_count)
-system(cmd_count)
-
-# Calculate variance of GWAS panel genotypes from counts
-count_plink <- fread(paste0(out_prefix, "G_count.gcount"))
-nOBS <- (count_plink$HOM_REF_CT + count_plink$HET_REF_ALT_CTS + count_plink$TWO_ALT_GENO_CTS)
-counts <- (count_plink$HOM_REF_CT * 0) + (count_plink$HET_REF_ALT_CTS * 1) + (count_plink$TWO_ALT_GENO_CTS * 2)
-mean_gc <- counts / nOBS
-length_mc_genos <- (count_plink$HOM_REF_CT * (-1 * mean_gc)^2) + (count_plink$HET_REF_ALT_CTS * (1 - mean_gc)^2) +  (count_plink$TWO_ALT_GENO_CTS * (2 - mean_gc)^2)
-length_mc_genos <- length_mc_genos * (1/(m-1))
-
-# Divide r by SD and scale
-r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
-r$BETA <- r$BETA - mean(r$BETA)
-r$BETA <- r$BETA / sqrt(sum(r$BETA^2))
-r$BETA <- r$BETA * (1/sqrt(length_mc_genos))
-r[is.na(r)] <- 0
-r[is.infinite(r$BETA),3] <- 0
-
 # Save as scoring weights
 fwrite(r, paste0(out_prefix, "_scoringWeights.txt"), row.names = F, col.names = T, quote = F, sep = "\t")
 
@@ -96,9 +73,7 @@ fwrite(r, paste0(out_prefix, "_scoringWeights.txt"), row.names = F, col.names = 
 numBlocks <- length(unique(r_blocks$block))
 dfSNPs <- as.data.frame(matrix(NA, ncol = 2, nrow = numBlocks))
 colnames(dfSNPs) <- c("Block", "nSNP")
-print(dfSNPs)
 for (i in 1:numBlocks) {
-
 
   # Get block num
   block_num <- unique(r_blocks$block)[i]
@@ -113,7 +88,6 @@ for (i in 1:numBlocks) {
   nsnp_in_block <- nrow(selected_snps)
   dfSNPs[i,1] <- block_num
   dfSNPs[i,2] <- nsnp_in_block
-  print(dfSNPs)
 
   # Compute FGr
   cmd_b <- paste("sh code/calculate_FGr/GWAS_score_ID.sh",
@@ -132,7 +106,7 @@ for (i in 1:numBlocks) {
   dfGWAS_IDs[[col_name]] <- FGr
 
   # Remove tmp files
-  cmd <- paste("rm", paste0(out_prefix,"_SNPs_", block_num, ".txt"),  paste0(out_prefix,".gxt_tmp*" ), paste0(out_prefix,"G_count*" ), sep = " ")
+  cmd <- paste("rm", paste0(out_prefix,"_SNPs_", block_num, ".txt"), sep = " ")
   system(cmd)
 
 }

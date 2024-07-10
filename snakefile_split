@@ -11,7 +11,7 @@ CHRTYPE_TEST = ["test-even", "test-odd", "test-all"]
 
 rule all:
     input:
-        expand("data/{dataset}/{subdataset}/r/{contrasts}_all_standardized.rvec", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
+        expand("output/calculate_FGr/{dataset}/{subdataset}/blocks/FGr_{contrasts}_{chr}.txt", chr=CHR, dataset = DATASET, subdataset=SUBDATASET, contrasts=CONTRASTS, gwas=GWAS, chrtype_gwas=CHRTYPE_GWAS, chrtype_test=CHRTYPE_TEST)
 
 # Sample individuals for panels
 
@@ -174,10 +174,11 @@ rule standardize_r:
         Rscript code/calculate_FGr/stardardize_r_IDs.R {params.r_prefix} {params.variance_prefix} {output}
         """
 
+# Compute FGr per block
 
 rule compute_FGr_block:
     input:
-        r="data/{dataset}/{subdataset}/r/{contrasts}_chr{chr}.rvec",
+        r="data/{dataset}/{subdataset}/r/{contrasts}_all_standardized.rvec",
         gp_genos="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/{dataset}/{subdataset}/variants/overlappingSNPs_chr{chr}.txt",
         ldBlocks="data/LD_blocks/fourier_ls-all_parsed.bed",
@@ -194,7 +195,7 @@ rule compute_FGr_block:
         out_prefix = "output/calculate_FGr/{dataset}/{subdataset}/blocks/{contrasts}_{chr}",
     shell:
         """
-        Rscript code/calculate_FGr/calc_FGr_block_IDs.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output.FGr} {output.snps} {input.ids}
+        Rscript code/calculate_FGr/calc_FGr_block_IDs.R {params.gp_prefix} {params.out_prefix} {input.r} {input.overlap_snps} {input.ldBlocks} {output.FGr} {output.snps} {input.ids} {wildcards.chr}
         """
 
 # Find block jacknife error in FGr
