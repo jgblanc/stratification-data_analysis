@@ -153,7 +153,7 @@ rule calculate_GWAS_variance:
     output:
         "data/{dataset}/{subdataset}/gwas_variance/variance_{chr}.txt"
     resources:
-	      time="06:00:00"
+	      time="10:00:00"
     shell:
         """
         Rscript code/calculate_FGr/compute_GWAS_variance.R {input} {output}
