@@ -224,14 +224,14 @@ rule make_tmp_plink2:
     input:
         gp="/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3.pgen",
         overlap_snps="data/ukbb/ukbb_pc_snps.txt",
-        ids="data/{dataset}/{subdataset}/ids/gwas.ids"
+        ids="data/split/awbs-small/ids/gwas.ids"
     output:
         "/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/tmp_{chr}.pgen",
         "/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/tmp_{chr}.pvar",
         "/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/tmp_{chr}.psam"
     params:
         prefix_out = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/merged/tmp_{chr}",
-        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/{gwas}/ukb_imp_chr{chr}_v3"
+        prefix_plink = "/scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr{chr}_v3"
     threads: 16
     resources:
         mem_mb=38000,
@@ -239,7 +239,7 @@ rule make_tmp_plink2:
     shell:
         """
         plink2 --pfile {params.prefix_plink} \
-        --keep {input.ids}
+        --keep {input.ids} \
         --extract {input.overlap_snps} \
         --make-pgen \
         --out {params.prefix_out}
@@ -267,6 +267,7 @@ rule merge_GWAS_PCA:
         --pca 40 approx \
         --memory 60000 \
         --threads 16 \
+	--extract {input.snp} \
         --out {params.prefix_out}
         rm {params.prefix_out}{wildcards.gwas}-{wildcards.chrtype_gwas}-tmp*
         rm {params.prefix_out}.p*

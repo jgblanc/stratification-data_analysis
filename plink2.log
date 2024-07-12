@@ -1,14 +1,13 @@
 PLINK v2.00a5.8LM AVX2 Intel (21 Nov 2023)
 Options in effect:
-  -- extract data/split/awbs-small/variants/overlappingSNPs_chr2.txt  
-  --freq
-  --pfile /scratch/jgblanc/ukbb/plink2-files/ALL/ukb_imp_chr2_v3
+  --keep data/split/awbs-small/ids/gwas.ids
+  --pfile /scratch/jgblanc/ukbb/plink2-files/afr-wbs-small/ukb_imp_chr18_v3
 
-Hostname: cri22cn019.cri.uchicago.edu
+Hostname: cri22cn205
 Working directory: /gpfs/data/berg-lab/jgblanc/stratification-data_analysis
-Start time: Thu Jun 27 11:21:28 2024
+Start time: Wed Jul 10 15:45:25 2024
 
-Error: Unrecognized flag ('--').
-For more info, try "plink2 --help <flag name>" or "plink2 --help | more".
+Warning: No output requested.  (Did you forget --make-bed/--make-[b]pgen?)
+Exiting.
 
-End time: Thu Jun 27 11:21:28 2024
+End time: Wed Jul 10 15:45:25 2024
